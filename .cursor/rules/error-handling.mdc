@@ -1,0 +1,69 @@
+---
+description: NestJS error handling rules for the Jamarket API
+globs: jamarket-api/src/**/*.ts
+alwaysApply: false
+---
+
+# NestJS Error Handling — Jamarket API
+
+## Principle
+Every error must return a structured JSON response. Never allow an uncaught exception to trigger a 500.
+
+## Error response format (handled by HttpExceptionFilter)
+```json
+{
+  "statusCode": 400,
+  "error": "Bad Request",
+  "message": "The password must contain at least 8 characters",
+  "path": "/auth/register",
+  "timestamp": "2026-05-17T14:00:00.000Z"
+}
+```
+
+## HTTP exceptions to use (never `throw new Error()`)
+
+| Situation                | NestJS Exception              |
+|--------------------------|------------------------------|
+| Resource not found       | `NotFoundException`          |
+| Not authenticated        | `UnauthorizedException`      |
+| Access denied            | `ForbiddenException`         |
+| Invalid data             | `BadRequestException`        |
+| Duplicate (email, etc.)  | `ConflictException`          |
+| Uncategorized business error | `UnprocessableEntityException` |
+
+```typescript
+// ❌ Forbidden
+throw new Error('Email already used');
+
+// ✅ Correct
+throw new ConflictException('This email is already used');
+```
+
+## DTO Validation
+All DTOs must use `class-validator`. The global `ValidationPipe` automatically returns a 400 with error messages in French.
+
+```typescript
+// ✅ Valid DTO
+export class RegisterDto {
+  @IsEmail({}, { message: "L'adresse email est invalide" })
+  email: string;
+
+  @MinLength(8, { message: 'Le mot de passe doit contenir au moins 8 caractères' })
+  password: string;
+}
+```
+
+## Global ValidationPipe Properties
+- `whitelist: true` — removes fields not declared on the DTO
+- `forbidNonWhitelisted: true` — returns 400 if an unknown field is sent
+- `transform: true` — automatically transforms primitive types
+
+## Logging
+- 4xx errors → `Logger.warn()` (warn level)
+- 5xx errors → `Logger.error()` with stack trace (error level)
+- Never use `console.log()` in production
+
+## Forbidden
+- Empty `try/catch` blocks without re-throwing
+- Returning `null` instead of throwing an exception
+- Error messages that expose internal details (stack, SQL query)

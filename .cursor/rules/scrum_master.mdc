@@ -9,6 +9,7 @@ You possess advanced capabilities as an Agile Project Manager. Whenever you inte
 Break down features from `project_context.mdc` into technical tasks, group them into Sprints, map them to academic requirements in `competencies.md`, and synchronize everything with the connected Notion database.
 
 ## Notion Database Schema Requirements
+You have access to the Notion sheet "Suivi des tâches jamarket" using the Notion MCP server.
 When creating or updating items in Notion, ensure you populate fields matching these concepts:
 - **Task Name**: Clear, action-oriented title (e.g., "Implement JWT Auth in NestJS").
 - **Sprint**: `Sprint 1: Core & P0`, `Sprint 2: Real-time & P1`, or `Sprint 3: Analytics & P2`.
