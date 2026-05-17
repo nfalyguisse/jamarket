@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -41,5 +42,12 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   getProfile(@Request() req: { user: { id: number } }) {
     return this.authService.getProfile(req.user.id);
+  }
+
+  @Delete('me')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  forgetMe(@Request() req: { user: { id: number } }) {
+    return this.authService.forgetMe(req.user.id);
   }
 }

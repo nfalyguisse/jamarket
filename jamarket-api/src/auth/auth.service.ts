@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -96,6 +97,37 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  async forgetMe(userId: number): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+
+    if (!user || user.deletedAt) {
+      throw new NotFoundException('Utilisateur introuvable');
+    }
+
+    const anonymizedEmail = `deleted_${userId}@supprime.jamarket`;
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.favorite.deleteMany({ where: { userId } });
+
+      await tx.ad.updateMany({
+        where: { sellerId: userId, deletedAt: null },
+        data: { deletedAt: new Date(), isActive: false },
+      });
+
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          name: 'Utilisateur',
+          lastName: 'Supprimé',
+          email: anonymizedEmail,
+          password: '',
+          isActive: false,
+          deletedAt: new Date(),
+        },
+      });
+    });
   }
 
   private buildTokens(user: { id: number; email: string }) {
