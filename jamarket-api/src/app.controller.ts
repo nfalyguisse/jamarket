@@ -1,12 +1,26 @@
 import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import { PrismaService } from './prisma/prisma.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @Get('health')
+  async health() {
+    let database: 'ok' | 'unreachable' = 'unreachable';
+
+    try {
+      await this.prisma.ping();
+      database = 'ok';
+    } catch {
+      database = 'unreachable';
+    }
+
+    return {
+      status: database === 'ok' ? 'ok' : 'degraded',
+      timestamp: new Date().toISOString(),
+      uptime: Math.floor(process.uptime()),
+      services: { database },
+    };
   }
 }
