@@ -60,6 +60,7 @@ model User {
   customerConversations Conversation[] @relation("CustomerConversations")
   adminConversations    Conversation[] @relation("AdminConversations")
   sentMessages          Message[]
+  ads                   Ad[]           @relation("SellerAds")
 
   @@map("user")
 }
@@ -130,6 +131,7 @@ model Ad {
   description String
   price       Float
   vehiculeId  Int       @unique @map("vehicule_id")
+  sellerId    Int?      @map("seller_id")
   isActive    Boolean   @default(true) @map("is_active")
   isSold      Boolean   @default(false) @map("is_sold")
   createdAt   DateTime  @default(now()) @map("created_at")
@@ -137,6 +139,7 @@ model Ad {
   deletedAt   DateTime? @map("deleted_at")
 
   vehicule      Vehicule       @relation(fields: [vehiculeId], references: [id])
+  seller        User?          @relation("SellerAds", fields: [sellerId], references: [id])
   favorites     Favorite[]
   conversations Conversation[]
   stats         Stat[]
