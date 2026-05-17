@@ -1,0 +1,35 @@
+---
+alwaysApply: true
+---
+# UI Library & Styling Standards
+
+## Core Technologies
+- **Styling**: TailwindCSS (https://tailwindcss.com/)
+- **Component Library**: spartan/ui (https://spartan.ng/) - The Angular implementation of Shadcn/UI.
+- **Modals & Alerts**: SweetAlert2 (https://sweetalert2.github.io/)
+
+## Development Rules
+
+### 1. Component Selection
+- Always prioritize **spartan/ui** components for layout, forms, and data display.
+- Use **TailwindCSS** utility classes for all custom styling. Do not use inline styles or CSS modules unless strictly necessary.
+- Use **SweetAlert2** for all user confirmations (deletions, warnings) and success/error notifications.
+
+### 2. Angular & Spartan Integration
+- Spartan uses **Brain** (logic) and **Helm** (directives/styling) modules. 
+- Ensure that when generating components, you use the correct `@spartan-ng` imports.
+- Follow the **Atomic Design** principle: keep components small and reusable.
+
+### 3. Visual & Accessibility (WCAG)
+- **Contrast**: Ensure all Tailwind color combinations meet WCAG AA standards.
+- **Icons**: Use Lucide-Angular (default with Spartan) for all iconography.
+- **Responsive**: Use a "Mobile-First" approach with Tailwind breakpoints (`sm:`, `md:`, `lg:`).
+
+### 4. SweetAlert2 Usage
+- Instead of native `window.confirm`, always use `Swal.fire()`.
+- Create a reusable service in Angular to wrap SweetAlert2 calls for consistency across the app.
+
+## Prohibited
+- DO NOT use Bootstrap, Material UI, or PrimeNG.
+- DO NOT use the React version of Shadcn/UI.
+- DO NOT write vanilla CSS in `.css` or `.scss` files if it can be achieved with Tailwind.

@@ -1,0 +1,12 @@
+---
+alwaysApply: true
+---
+# Project Constraints & Competency Framework
+
+## Academic Requirements
+This project is for a Final Graduation Exam. You MUST prioritize code patterns that fulfill **Block 2** and **Block 4** of the competency rubric (located in `/docs/competencies.md`).
+
+## Specific Constraints
+- **Security & GDPR**: Implement JWT, password hashing, and a "Right to be forgotten" feature (data deletion).
+- **Accessibility**: High contrast ratios and aria-labels are mandatory.
+- **Architecture**: Stick to a clear separation of concerns between NestJS (logic) and Prisma (data).

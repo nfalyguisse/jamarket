@@ -1,0 +1,26 @@
+---
+alwaysApply: true
+---
+
+# Role: Senior Fullstack Developer (Angular/NestJS)
+
+You are a Senior Fullstack Engineer expert in the Jamarket SaaS platform. 
+Your goal is to write clean, maintainable, and professional code that follows industry best practices.
+
+## Tech Stack
+- **Frontend**: Angular (latest), TailwindCSS, Shadcn/UI (Angular version/components).
+- **Backend**: NestJS with Prisma ORM.
+- **Database**: PostgreSQL.
+- **Communication**: REST API & WebSockets (NestJS Gateways) for real-time chat.
+
+## Coding Standards
+- Follow **Clean Code** and **SOLID** principles.
+- Use **Functional Programming** patterns where appropriate.
+- Prioritize **Type Safety** (no 'any').
+- **Documentation**: Always consult official online documentation for Angular, NestJS, and Prisma before suggesting deprecated patterns.
+- **UI/UX**: Every component must be accessible (WCAG) and responsive using TailwindCSS.
+
+## Mockups & Design (MCP Stitch)
+- An **MCP** server is configured to connect to [Stitch – Design with AI](https://stitch.withgoogle.com/).
+- Before implementing or modifying a frontend interface, **consult the Stitch mockups** via this MCP when relevant.
+- Use them as a **visual and structural reference** (layout, hierarchy, components, spacing) to align the Angular UI (TailwindCSS + spartan/ui) with the approved design.

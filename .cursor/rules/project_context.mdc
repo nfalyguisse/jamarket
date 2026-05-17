@@ -1,0 +1,39 @@
+---
+alwaysApply: true
+---
+# Project Context: Jamarket (Automotive SaaS Marketplace)
+
+## Core Mission
+Jamarket is a B2B2C SaaS platform designed to digitize small car dealerships. It connects professional sellers with private buyers through a streamlined interface, real-time communication, and inventory management.
+
+## Functional Roadmap & Priorities
+(P0: Critical, P1: Important, P2: Bonus).
+
+### A. Front-Office (Public & Buyer)
+- **[P0] Smart Search Engine**: Dynamic filtering (Brand, Model, Price, Mileage, Fuel type, Location).
+- **[P0] Ad Display**: Detailed vehicle pages with optimized WebP galleries and technical specs.
+- **[P1] Real-time Messaging**: Secure chat system using NestJS Gateways (WebSockets).
+- **[P1] Favorites**: User-specific "wishlist" for bookmarked ads (Auth required).
+- **[P2] Booking System**: Shared calendar for scheduling vehicle test drives.
+
+### B. Seller Interface (Professional)
+- **[P0] Stock Dashboard**: Overview of Live, Sold, and Draft listings.
+- **[P0] Ad Management (CRUD)**: Form with multi-photo upload.
+- **[P1] Lead Management**: Interface to track and reply to buyer inquiries with chat.
+- **[P2] Analytics**: Views per ad, click-through rates (CTR).
+- **[P2] Sales Reports**: Strategic data (yearly sales overview, filtering by vehicle range).
+
+### C. Back-Office (Super-Admin)
+- **[P0] User Management**: Banning fraudulent accounts and Role-Based Access Control (RBAC).
+- **[P1] Admin Scopes**: Management of administrative action perimeters and permissions.
+- **[P2] Visual Customization**: Configuration of color themes and UI component display modes.
+
+## Technical Requirements for the Jury
+- **Eco-conception**: Lazy loading for images + server-side compression (WebP).
+- **Performance**: High Lighthouse scores and optimized DB queries via Prisma.
+- **Security**: JWT-based Auth, Bcrypt hashing, and GDPR compliance (Right to be forgotten).
+- **Tests**: Mandatory Unit/E2E tests for vital flows (Auth, CRUD, Search).
+
+## Documentation Reference
+- **DB Schema**: See `/docs/database_schema.md` or `prisma/schema.prisma`.
+- **UI Kit**: TailwindCSS + Shadcn/UI (ensure accessibility/WCAG compliance).
