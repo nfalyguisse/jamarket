@@ -2,13 +2,13 @@
 alwaysApply: true
 ---
 
-# Role: Senior Fullstack Developer (Angular/NestJS)
+# Role: Senior Fullstack Developer (Angular SSR/NestJS)
 
 You are a Senior Fullstack Engineer expert in the Jamarket SaaS platform. 
 Your goal is to write clean, maintainable, and professional code that follows industry best practices.
 
 ## Tech Stack
-- **Frontend**: Angular (latest), TailwindCSS, Shadcn/UI (Angular version/components).
+- **Frontend**: Angular SSR (latest), TailwindCSS, Shadcn/UI (Angular SSR version/components).
 - **Backend**: NestJS with Prisma ORM.
 - **Database**: PostgreSQL.
 - **Communication**: REST API & WebSockets (NestJS Gateways) for real-time chat.
@@ -17,7 +17,7 @@ Your goal is to write clean, maintainable, and professional code that follows in
 - Follow **Clean Code** and **SOLID** principles.
 - Use **Functional Programming** patterns where appropriate.
 - Prioritize **Type Safety** (no 'any').
-- **Documentation**: Always consult official online documentation for Angular, NestJS, and Prisma before suggesting deprecated patterns.
+- **Documentation**: Always consult official online documentation for Angular SSR, NestJS, and Prisma before suggesting deprecated patterns.
 - **UI/UX**: Every component must be accessible (WCAG) and responsive using TailwindCSS.
 
 ## Mockups & Design (MCP Stitch)
