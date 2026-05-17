@@ -1,0 +1,218 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+enum FuelType {
+  essence
+  diesel
+  electrique
+  hybride
+}
+
+enum RightEnum {
+  CREATE_AD
+  DELETE_AD
+  MANAGE_USER
+  CUSTOMER
+  ADMIN
+}
+
+// ─────────────────────────────────────────────
+// MODELS
+// ─────────────────────────────────────────────
+
+model Role {
+  id        Int         @id @default(autoincrement())
+  label     String
+  rights    RightEnum[]
+  deletedAt DateTime?   @map("deleted_at")
+
+  users User[]
+
+  @@map("role")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String
+  lastName  String    @map("last_name")
+  email     String    @unique
+  password  String
+  isActive  Boolean   @default(true) @map("is_active")
+  roleId    Int       @map("role_id")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  role                  Role           @relation(fields: [roleId], references: [id])
+  favorites             Favorite[]
+  customerConversations Conversation[] @relation("CustomerConversations")
+  adminConversations    Conversation[] @relation("AdminConversations")
+  sentMessages          Message[]
+
+  @@map("user")
+}
+
+model Brand {
+  id    Int    @id @default(autoincrement())
+  label String
+
+  models Model[]
+
+  @@map("brand")
+}
+
+model Model {
+  id      Int    @id @default(autoincrement())
+  label   String
+  brandId Int    @map("brand_id")
+
+  brand    Brand      @relation(fields: [brandId], references: [id])
+  vehicles Vehicule[]
+
+  @@map("model")
+}
+
+model VehiculeType {
+  id    Int    @id @default(autoincrement())
+  label String
+
+  vehicles Vehicule[]
+
+  @@map("vehicule_type")
+}
+
+model Vehicule {
+  id             Int       @id @default(autoincrement())
+  modelId        Int       @map("model_id")
+  kilometer      Int
+  year           Int
+  doorsNumber    Int       @map("doors_number")
+  power          String
+  fuel           FuelType
+  color          String
+  vehiculeYear   Int       @map("vehicule_year")
+  vehiculeTypeId Int       @map("vehicule_type_id")
+  deletedAt      DateTime? @map("deleted_at")
+
+  model        Model        @relation(fields: [modelId], references: [id])
+  vehiculeType VehiculeType @relation(fields: [vehiculeTypeId], references: [id])
+  images       Image[]
+  ad           Ad?
+
+  @@map("vehicule")
+}
+
+model Image {
+  id         Int    @id @default(autoincrement())
+  url        String
+  vehiculeId Int    @map("vehicule_id")
+
+  vehicule Vehicule @relation(fields: [vehiculeId], references: [id])
+
+  @@map("image")
+}
+
+model Ad {
+  id          Int       @id @default(autoincrement())
+  label       String
+  description String
+  price       Float
+  vehiculeId  Int       @unique @map("vehicule_id")
+  isActive    Boolean   @default(true) @map("is_active")
+  isSold      Boolean   @default(false) @map("is_sold")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  vehicule      Vehicule       @relation(fields: [vehiculeId], references: [id])
+  favorites     Favorite[]
+  conversations Conversation[]
+  stats         Stat[]
+
+  @@map("ad")
+}
+
+model Favorite {
+  id     Int @id @default(autoincrement())
+  userId Int @map("user_id")
+  adId   Int @map("ad_id")
+
+  user User @relation(fields: [userId], references: [id])
+  ad   Ad   @relation(fields: [adId], references: [id])
+
+  @@unique([userId, adId])
+  @@map("favorite")
+}
+
+model Conversation {
+  id         Int      @id @default(autoincrement())
+  adId       Int      @map("ad_id")
+  customerId Int      @map("customer_id")
+  adminId    Int      @map("admin_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  ad       Ad        @relation(fields: [adId], references: [id])
+  customer User      @relation("CustomerConversations", fields: [customerId], references: [id])
+  admin    User      @relation("AdminConversations", fields: [adminId], references: [id])
+  messages Message[]
+
+  @@map("conversation")
+}
+
+model Message {
+  id             Int      @id @default(autoincrement())
+  text           String
+  conversationId Int      @map("conversation_id")
+  senderId       Int      @map("sender_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  sender       User         @relation(fields: [senderId], references: [id])
+
+  @@map("message")
+}
+
+model Stat {
+  id    Int    @id @default(autoincrement())
+  adId  Int    @map("ad_id")
+  label String
+  count Int    @default(0)
+
+  ad Ad @relation(fields: [adId], references: [id])
+
+  @@map("stat")
+}
+
+model DisplayMode {
+  id          Int    @id @default(autoincrement())
+  displayName String @map("display_name")
+
+  themes Theme[]
+
+  @@map("display_mode")
+}
+
+model Theme {
+  id             Int    @id @default(autoincrement())
+  primaryColor   String @map("primary_color")
+  secondaryColor String @map("secondary_color")
+  mainLogo       String @map("main_logo")
+  secondaryLogo  String @map("secondary_logo")
+  displayModeId  Int    @map("display_mode_id")
+
+  displayMode DisplayMode @relation(fields: [displayModeId], references: [id])
+
+  @@map("theme")
+}

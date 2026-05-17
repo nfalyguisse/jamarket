@@ -10,6 +10,13 @@
 .env.*
 !.env.example
 
+# Fichiers d'environnement Angular
+jamarket-client/src/environments/*.ts
+
+# Fichier d'environnement NestJS
+jamarket-api/.env
+
+
 # ------------------------------------------------------------
 # DÉPENDANCES
 # ------------------------------------------------------------
