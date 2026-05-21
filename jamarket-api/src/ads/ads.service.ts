@@ -7,7 +7,6 @@ import {
 import { RightEnum } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAdDto } from './dto/create-ad.dto';
-import { FilterAdDto } from './dto/filter-ad.dto';
 import { UpdateAdDto } from './dto/update-ad.dto';
 
 const AD_INCLUDE = {
@@ -26,50 +25,6 @@ const AD_INCLUDE = {
 @Injectable()
 export class AdsService {
   constructor(private readonly prisma: PrismaService) { }
-
-  async findAll(filters: FilterAdDto) {
-    const { brandId, modelId, priceMin, priceMax, kmMax, fuel, color, vehiculeTypeId, page = 1, limit = 12 } = filters;
-
-    const skip = (page - 1) * limit;
-
-    const where = {
-      isActive: true,
-      deletedAt: null,
-      price: {
-        ...(priceMin !== undefined && { gte: priceMin }),
-        ...(priceMax !== undefined && { lte: priceMax }),
-      },
-      vehicule: {
-        ...(fuel && { fuel }),
-        ...(color && { color }),
-        ...(vehiculeTypeId && { vehiculeTypeId }),
-        ...(kmMax !== undefined && { kilometer: { lte: kmMax } }),
-        ...(modelId && { modelId }),
-        ...(brandId && { model: { brandId } }),
-      },
-    };
-
-    const [data, total] = await Promise.all([
-      this.prisma.ad.findMany({
-        where,
-        include: AD_INCLUDE,
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: limit,
-      }),
-      this.prisma.ad.count({ where }),
-    ]);
-
-    return {
-      data,
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
-    };
-  }
 
   async findOne(id: number) {
     const ad = await this.prisma.ad.findFirst({

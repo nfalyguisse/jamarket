@@ -16,9 +16,10 @@ import {
 import { RightEnum } from '../../generated/prisma/client';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RequireRights, RightsGuard } from '../common/guards/rights.guard';
+import { SearchAdDto } from '../search/dto/search-ad.dto';
+import { SearchService } from '../search/search.service';
 import { AdsService } from './ads.service';
 import { CreateAdDto } from './dto/create-ad.dto';
-import { FilterAdDto } from './dto/filter-ad.dto';
 import { UpdateAdDto } from './dto/update-ad.dto';
 
 interface AuthRequest {
@@ -30,13 +31,16 @@ interface AuthRequest {
 
 @Controller('ads')
 export class AdsController {
-  constructor(private readonly adsService: AdsService) {}
+  constructor(
+    private readonly adsService: AdsService,
+    private readonly searchService: SearchService,
+  ) {}
 
   // ─── Routes publiques ────────────────────────────────────────────────────
 
   @Get()
-  findAll(@Query() filters: FilterAdDto) {
-    return this.adsService.findAll(filters);
+  findAll(@Query() filters: SearchAdDto) {
+    return this.searchService.search(filters);
   }
 
   @Get(':id')
