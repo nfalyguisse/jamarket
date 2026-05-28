@@ -1,1 +1,145 @@
-/* You can add global styles to this file, and also import other style files */
+@import './styles/theme.css';
+@import 'tailwindcss';
+
+@theme inline {
+  --color-primary: var(--jm-color-primary);
+  --color-on-primary: var(--jm-color-on-primary);
+  --color-primary-container: var(--jm-color-primary-container);
+  --color-on-primary-container: var(--jm-color-on-primary-container);
+  --color-primary-fixed: var(--jm-color-primary-fixed);
+  --color-primary-fixed-dim: var(--jm-color-primary-fixed-dim);
+  --color-on-primary-fixed: var(--jm-color-on-primary-fixed);
+  --color-on-primary-fixed-variant: var(--jm-color-on-primary-fixed-variant);
+
+  --color-secondary: var(--jm-color-secondary);
+  --color-on-secondary: var(--jm-color-on-secondary);
+  --color-secondary-container: var(--jm-color-secondary-container);
+  --color-on-secondary-container: var(--jm-color-on-secondary-container);
+  --color-secondary-fixed: var(--jm-color-secondary-fixed);
+  --color-secondary-fixed-dim: var(--jm-color-secondary-fixed-dim);
+  --color-on-secondary-fixed: var(--jm-color-on-secondary-fixed);
+  --color-on-secondary-fixed-variant: var(--jm-color-on-secondary-fixed-variant);
+
+  --color-tertiary: var(--jm-color-tertiary);
+  --color-on-tertiary: var(--jm-color-on-tertiary);
+  --color-tertiary-container: var(--jm-color-tertiary-container);
+  --color-on-tertiary-container: var(--jm-color-on-tertiary-container);
+  --color-tertiary-fixed: var(--jm-color-tertiary-fixed);
+  --color-tertiary-fixed-dim: var(--jm-color-tertiary-fixed-dim);
+  --color-on-tertiary-fixed: var(--jm-color-on-tertiary-fixed);
+  --color-on-tertiary-fixed-variant: var(--jm-color-on-tertiary-fixed-variant);
+
+  --color-background: var(--jm-color-background);
+  --color-on-background: var(--jm-color-on-background);
+  --color-surface: var(--jm-color-surface);
+  --color-on-surface: var(--jm-color-on-surface);
+  --color-surface-variant: var(--jm-color-surface-variant);
+  --color-on-surface-variant: var(--jm-color-on-surface-variant);
+  --color-surface-dim: var(--jm-color-surface-dim);
+  --color-surface-bright: var(--jm-color-surface-bright);
+  --color-surface-tint: var(--jm-color-surface-tint);
+  --color-surface-container: var(--jm-color-surface-container);
+  --color-surface-container-low: var(--jm-color-surface-container-low);
+  --color-surface-container-lowest: var(--jm-color-surface-container-lowest);
+  --color-surface-container-high: var(--jm-color-surface-container-high);
+  --color-surface-container-highest: var(--jm-color-surface-container-highest);
+
+  --color-outline: var(--jm-color-outline);
+  --color-outline-variant: var(--jm-color-outline-variant);
+  --color-error: var(--jm-color-error);
+  --color-on-error: var(--jm-color-on-error);
+  --color-error-container: var(--jm-color-error-container);
+  --color-on-error-container: var(--jm-color-on-error-container);
+
+  --color-inverse-surface: var(--jm-color-inverse-surface);
+  --color-inverse-on-surface: var(--jm-color-inverse-on-surface);
+  --color-inverse-primary: var(--jm-color-inverse-primary);
+
+  --font-headline: var(--jm-font-headline);
+  --font-body: var(--jm-font-body);
+  --font-mono: var(--jm-font-mono);
+
+  --radius-jm-sm: var(--jm-radius-sm);
+  --radius-jm-md: var(--jm-radius-md);
+  --radius-jm-lg: var(--jm-radius-lg);
+  --radius-jm-xl: var(--jm-radius-xl);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-on-background antialiased;
+    font-family: var(--jm-font-body);
+    font-size: var(--jm-text-body-md);
+    line-height: var(--jm-text-body-md-lh);
+  }
+}
+
+@layer utilities {
+  .font-headline-xl {
+    font-family: var(--jm-font-headline);
+    font-size: var(--jm-text-headline-xl);
+    line-height: var(--jm-text-headline-xl-lh);
+    letter-spacing: var(--jm-text-headline-xl-tracking);
+    font-weight: 700;
+  }
+
+  .font-headline-lg {
+    font-family: var(--jm-font-headline);
+    font-size: var(--jm-text-headline-lg);
+    line-height: var(--jm-text-headline-lg-lh);
+    font-weight: 600;
+  }
+
+  .font-headline-md {
+    font-family: var(--jm-font-headline);
+    font-size: var(--jm-text-headline-md);
+    line-height: var(--jm-text-headline-md-lh);
+    font-weight: 600;
+  }
+
+  .text-body-lg {
+    font-size: var(--jm-text-body-lg);
+    line-height: var(--jm-text-body-lg-lh);
+  }
+
+  .text-body-md {
+    font-size: var(--jm-text-body-md);
+    line-height: var(--jm-text-body-md-lh);
+  }
+
+  .text-label-md {
+    font-size: var(--jm-text-label-md);
+    line-height: 1;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+
+  .text-label-sm {
+    font-size: var(--jm-text-label-sm);
+    line-height: 1;
+    font-weight: 500;
+  }
+
+  .glass-card {
+    background: rgb(255 255 255 / 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgb(255 255 255 / 0.3);
+  }
+
+  .bento-item {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .bento-item:hover {
+    transform: translateY(-4px);
+  }
+
+  .container-jm {
+    max-width: var(--jm-max-width);
+    @apply mx-auto w-full px-4 sm:px-6 lg:px-12;
+  }
+}

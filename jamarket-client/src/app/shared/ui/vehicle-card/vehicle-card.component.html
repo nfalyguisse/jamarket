@@ -1,0 +1,51 @@
+<article
+  class="group overflow-hidden rounded-3xl border border-outline/5 bg-surface-container-lowest shadow-sm transition-all hover:shadow-xl"
+>
+  <div class="relative h-64 overflow-hidden">
+    <img
+      [src]="vehicle().imageUrl"
+      [alt]="vehicle().imageAlt"
+      class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+      loading="lazy"
+      width="640"
+      height="256"
+    />
+    @if (vehicle().badge) {
+      <span
+        class="absolute left-4 top-4 rounded-full bg-primary px-3 py-1 text-label-sm font-bold uppercase text-on-primary"
+      >
+        {{ vehicle().badge }}
+      </span>
+    }
+  </div>
+  <div class="p-6">
+    <h3 class="mb-2 font-headline-md">{{ vehicle().title }}</h3>
+    <div class="mb-4 flex flex-wrap gap-4 text-label-sm text-on-surface-variant">
+      <span class="inline-flex items-center gap-1">
+        <svg lucideGauge class="size-4" aria-hidden="true" />
+        {{ vehicle().mileageKm | number }} km
+      </span>
+      <span class="inline-flex items-center gap-1">
+        <svg lucideCalendar class="size-4" aria-hidden="true" />
+        {{ vehicle().year }}
+      </span>
+      <span class="inline-flex items-center gap-1">
+        <svg lucideSettings class="size-4" aria-hidden="true" />
+        {{ vehicle().transmission }}
+      </span>
+    </div>
+    <div class="flex items-center justify-between border-t border-outline/10 pt-4">
+      <span class="text-2xl font-bold text-on-background">
+        {{ vehicle().price | currency: 'EUR' : 'symbol' : '1.0-0' : 'fr' }}
+      </span>
+      <button
+        type="button"
+        class="rounded-full bg-secondary-container/10 p-3 text-secondary-container transition-colors hover:bg-secondary-container hover:text-on-secondary"
+        [attr.aria-label]="'Ajouter ' + vehicle().title + ' aux favoris'"
+        (click)="onFavoriteClick()"
+      >
+        <svg lucideHeart class="size-5" aria-hidden="true" />
+      </button>
+    </div>
+  </div>
+</article>
