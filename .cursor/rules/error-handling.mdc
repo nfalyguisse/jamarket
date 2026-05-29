@@ -14,7 +14,7 @@ Every error must return a structured JSON response. Never allow an uncaught exce
 {
   "statusCode": 400,
   "error": "Bad Request",
-  "message": "The password must contain at least 8 characters",
+  "message": "Le mot de passe doit contenir au moins 8 caractères",
   "path": "/auth/register",
   "timestamp": "2026-05-17T14:00:00.000Z"
 }
@@ -33,10 +33,10 @@ Every error must return a structured JSON response. Never allow an uncaught exce
 
 ```typescript
 // ❌ Forbidden
-throw new Error('Email already used');
+throw new Error('Email déjà utilisé');
 
 // ✅ Correct
-throw new ConflictException('This email is already used');
+throw new ConflictException('Email déjà utilisé');
 ```
 
 ## DTO Validation

@@ -8,6 +8,20 @@ export const routes: Routes = [
     title: 'Jamarket Auto | Véhicules d\'occasion',
   },
   {
+    path: 'connexion',
+    loadComponent: () =>
+      import('./features/auth/pages/login-page/login-page.component').then((m) => m.LoginPageComponent),
+    title: 'Connexion | Jamarket Auto',
+  },
+  {
+    path: 'inscription',
+    loadComponent: () =>
+      import('./features/auth/pages/register-page/register-page.component').then(
+        (m) => m.RegisterPageComponent,
+      ),
+    title: 'Inscription | Jamarket Auto',
+  },
+  {
     path: '**',
     redirectTo: '',
   },

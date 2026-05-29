@@ -1,0 +1,220 @@
+<div class="flex min-h-screen">
+
+  <!-- ═══════════════════════════════════════════
+       PANNEAU GAUCHE — Branding & véhicule vedette
+       ═══════════════════════════════════════════ -->
+  <div class="relative hidden flex-col justify-between overflow-hidden bg-on-background lg:flex lg:w-[48%]">
+
+    <!-- Image de fond -->
+    <img
+      src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYaLcXSRTNY6IWyMj8-6rXcHeusAzXfzaCuvkXw-X79OJ1o7MY99cFIWYhYmRky1ounXSLbTdqHWyB8z1TKJgGSOdlSVrrqUcupqqhLU3_1KhY9OupUIq4UmC4-ck6HB6HbRD0aidxfm2o2jW_nNChPNyo85iUCMAF5cRNrRuCQ0guwxrSn9AZ58xXaqqxBZOQZuBIQxh2d4XP8RYPNe6VOsyBvVg-NpLEfHVTCFruvKiZHTR4JOLTUrdWrfLz49ZDDEC5gYe0tNo"
+      alt=""
+      aria-hidden="true"
+      class="absolute inset-0 h-full w-full object-cover opacity-20"
+    />
+    <!-- Dégradé pour lisibilité -->
+    <div class="absolute inset-0 bg-gradient-to-br from-on-background via-on-background/90 to-on-background/70"></div>
+
+    <!-- Logo -->
+    <div class="relative z-10 p-10">
+      <a routerLink="/" class="inline-block">
+        <span class="font-headline-md text-lg font-black uppercase tracking-[0.15em] text-primary-container">
+          Jamarket Auto
+        </span>
+      </a>
+    </div>
+
+    <!-- Contenu central -->
+    <div class="relative z-10 px-10 pb-4 space-y-4">
+      <p class="text-label-sm uppercase tracking-[0.2em] text-primary-container/70">Garage de proximité</p>
+      <h2 class="font-headline-lg text-white leading-tight">
+        Votre espace garage <br />de confiance <br />en ligne.
+      </h2>
+      <p class="text-body-md text-white/60 max-w-xs">
+        Parcourez notre stock, échangez avec nos équipes et retrouvez chaque détail de votre véhicule.
+      </p>
+    </div>
+
+    <!-- Carte véhicule vedette -->
+    <div class="relative z-10 m-10 mt-8">
+      <div class="overflow-hidden rounded-2xl bg-white/5 backdrop-blur border border-white/10">
+        <img
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvH5VhH2TTSKKbowuEqw-045rn6uh7J8ZMHx5SnHGXTTqBm-b75MUZaSKRWrREM9dkrutGQfqRWAAOcasIaoqckF07QYUJfU0REzQIUZQabjNLcnLoICLkE8eBllM9J7xyEN2rBI9XAIeoUV8dhDeO1uClvdbxdx3cuhat81wYDAQmtBBpT9CfS4vMmd5Fgxgy7wdLHA_BAbM-cm5LR32WlH8efe5hgo6yHLZ-Bub_s6TjtgLKAvSUsJQDAQIctt09aErtBfFGhhc"
+          alt="Citroën C3, véhicule en vedette"
+          class="h-32 w-full object-cover opacity-80"
+        />
+        <div class="px-4 py-3">
+          <p class="text-label-sm uppercase tracking-[0.18em] text-primary-container/60">Véhicule en vedette</p>
+          <p class="mt-0.5 font-headline-md text-sm font-bold text-white">Citroën C3 // Blanche</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PANNEAU DROIT — Formulaire de connexion
+       ═══════════════════════════════════════════ -->
+  <div class="flex flex-1 flex-col items-center justify-center bg-surface-container-low px-6 py-12">
+
+    <!-- Titre (au-dessus de la carte) -->
+    <div class="mb-8 text-center">
+      <h1 class="font-headline-md text-xl font-black uppercase tracking-[0.18em] text-primary">
+        Jamarket Auto
+      </h1>
+      <p class="mt-1 text-body-md text-on-surface-variant">
+        The ultimate showroom management system.
+      </p>
+    </div>
+
+    <!-- Carte formulaire -->
+    <div class="w-full max-w-[420px] rounded-2xl bg-surface-container-lowest p-8 shadow-xl ring-1 ring-outline/10">
+
+      <!-- Tab switcher -->
+      <div class="mb-7 flex rounded-full bg-surface-container p-1" role="tablist">
+        <span
+          class="flex-1 rounded-full bg-surface-container-lowest py-2 text-center text-label-md font-semibold text-on-background shadow-sm"
+          role="tab"
+          aria-selected="true"
+        >
+          Connexion
+        </span>
+        <a
+          routerLink="/inscription"
+          class="flex-1 rounded-full py-2 text-center text-label-md font-semibold text-on-surface-variant transition-colors hover:text-on-background"
+          role="tab"
+          aria-selected="false"
+        >
+          Créer un compte
+        </a>
+      </div>
+
+      <!-- Formulaire -->
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="space-y-5">
+
+        <!-- Email -->
+        <div class="space-y-1.5">
+          <label for="email" class="block text-label-sm font-semibold uppercase tracking-[0.12em] text-on-surface-variant">
+            Adresse email
+          </label>
+          <input
+            id="email"
+            type="email"
+            autocomplete="email"
+            formControlName="email"
+            placeholder="nom@jamarket-auto.fr"
+            class="w-full rounded-lg border border-outline/30 bg-surface px-4 py-2.5 text-body-md text-on-background outline-none transition-all placeholder:text-on-surface-variant/40 focus:border-primary focus:ring-2 focus:ring-primary/15"
+            [class.!border-error]="form.controls.email.touched && form.controls.email.invalid"
+          />
+          @if (form.controls.email.touched && form.controls.email.hasError('required')) {
+            <p class="text-xs text-error">L'adresse email est obligatoire.</p>
+          } @else if (form.controls.email.touched && form.controls.email.hasError('email')) {
+            <p class="text-xs text-error">Veuillez saisir une adresse email valide.</p>
+          }
+        </div>
+
+        <!-- Mot de passe -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label for="password" class="block text-label-sm font-semibold uppercase tracking-[0.12em] text-on-surface-variant">
+              Mot de passe
+            </label>
+            <a href="#" class="text-label-sm font-semibold uppercase tracking-wider text-primary hover:underline">
+              Mot de passe oublié ?
+            </a>
+          </div>
+          <input
+            id="password"
+            type="password"
+            autocomplete="current-password"
+            formControlName="password"
+            placeholder="••••••••"
+            class="w-full rounded-lg border border-outline/30 bg-surface px-4 py-2.5 text-body-md text-on-background outline-none transition-all placeholder:text-on-surface-variant/40 focus:border-primary focus:ring-2 focus:ring-primary/15"
+            [class.!border-error]="form.controls.password.touched && form.controls.password.invalid"
+          />
+          @if (form.controls.password.touched && form.controls.password.invalid) {
+            <p class="text-xs text-error">Le mot de passe est obligatoire.</p>
+          }
+        </div>
+
+        <!-- Se souvenir de moi -->
+        <label class="flex cursor-pointer items-center gap-2.5">
+          <input
+            type="checkbox"
+            formControlName="rememberMe"
+            class="size-4 rounded border-outline/40 accent-primary"
+          />
+          <span class="text-body-md text-on-surface-variant">
+            Me garder connecté pendant <strong class="text-primary font-semibold">30 jours</strong>
+          </span>
+        </label>
+
+        <!-- Erreur serveur -->
+        @if (serverError()) {
+          <div class="flex items-start gap-2 rounded-lg border border-error/25 bg-error-container px-4 py-3 text-sm text-on-error-container" role="alert">
+            <svg xmlns="http://www.w3.org/2000/svg" class="mt-0.5 size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            {{ serverError() }}
+          </div>
+        }
+
+        <!-- CTA -->
+        <button
+          type="submit"
+          [disabled]="isSubmitting()"
+          class="w-full rounded-xl bg-primary py-3 font-headline-md text-base font-semibold text-on-primary transition-all duration-200 hover:bg-on-primary-fixed-variant active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          @if (isSubmitting()) {
+            <span class="flex items-center justify-center gap-2">
+              <svg class="size-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+              Connexion…
+            </span>
+          } @else {
+            Accéder à mon espace
+          }
+        </button>
+      </form>
+
+      <!-- Séparateur -->
+      <div class="my-6 flex items-center gap-3">
+        <div class="h-px flex-1 bg-outline/20"></div>
+        <span class="text-label-sm uppercase tracking-[0.15em] text-on-surface-variant/60">ou s'identifier avec</span>
+        <div class="h-px flex-1 bg-outline/20"></div>
+      </div>
+
+      <!-- Boutons sociaux -->
+      <div class="grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          class="flex items-center justify-center gap-2 rounded-lg border border-outline/25 bg-surface px-4 py-2.5 text-label-md font-semibold text-on-background transition hover:bg-surface-container"
+        >
+          <svg class="size-4" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          Google
+        </button>
+        <button
+          type="button"
+          class="flex items-center justify-center gap-2 rounded-lg border border-outline/25 bg-surface px-4 py-2.5 text-label-md font-semibold text-on-background transition hover:bg-surface-container"
+        >
+          <svg class="size-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          Apple
+        </button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-8 flex flex-col items-center gap-2 text-center">
+      <div class="flex gap-4 text-label-sm font-semibold uppercase tracking-wider text-on-surface-variant/60">
+        <a routerLink="/confidentialite" class="hover:text-primary hover:underline">Politique de confidentialité</a>
+        <span aria-hidden="true">·</span>
+        <a routerLink="/conditions" class="hover:text-primary hover:underline">Conditions d'utilisation</a>
+      </div>
+      <p class="text-label-sm text-on-surface-variant/40 tracking-widest">
+        VER_01.0.0 // CONNEXION_SÉCURISÉE
+      </p>
+    </div>
+  </div>
+
+</div>

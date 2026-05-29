@@ -9,6 +9,9 @@ import { join } from 'node:path';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
+// Autoriser localhost pour le rendu SSR en développement
+process.env['ALLOWED_HTTP_HOSTS'] ??= 'localhost:4000,localhost:4200,localhost';
+
 const app = express();
 const angularApp = new AngularNodeAppEngine();
 

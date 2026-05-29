@@ -4,10 +4,13 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:staging": "ng serve --configuration staging",
     "build": "ng build",
+    "build:staging": "ng build --configuration staging",
+    "build:production": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:jamarket-client": "node dist/jamarket-client/server/server.mjs"
+    "serve:ssr": "node dist/jamarket-client/server/server.mjs"
   },
   "prettier": {
     "printWidth": 100,

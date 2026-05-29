@@ -34,6 +34,24 @@ Jamarket is a B2B2C SaaS platform designed to digitize small car dealerships. It
 - **Security**: JWT-based Auth, Bcrypt hashing, and GDPR compliance (Right to be forgotten).
 - **Tests**: Mandatory Unit/E2E tests for vital flows (Auth, CRUD, Search).
 
+## Persona & Content Writing
+
+When creating or modifying **user-oriented textual content**, the AI must **always consult `docs/persona.md` before writing**, ensuring that tone, vocabulary, and messaging are aligned with this document.
+
+### When to apply this rule
+- Homepage (hero section, taglines, introductions, trust arguments).
+- Marketing or institutional copy (about page, footer, banners).
+- Narrative labels (subtitles, section descriptions, explanatory empty states).
+- Engaging microcopy (CTAs, welcome messages, onboarding text).
+- Any content where **brand positioning** matters—not neutral technical labels (e.g., "Save", "Delete").
+
+### Writing requirements
+- **Language**: French, as in `docs/persona.md`.
+- **Target audience**: Reflect Jamarket Auto—small local garage, used vehicles, repair, desire to increase visibility and simplify interactions with clients (online listings, messaging).
+- **Tone**: Professional, accessible, reassuring; avoid corporate jargon or a generic startup tone.
+- **Consistency**: Never contradict the persona; if in doubt, reread `docs/persona.md` rather than inventing a new positioning.
+
 ## Documentation Reference
+- **Persona (content & tone)**: `docs/persona.md` — mandatory for all user-facing textual content.
 - **DB Schema**: See `/docs/database_schema.md` or `prisma/schema.prisma`.
 - **UI Kit**: TailwindCSS + Shadcn/UI (ensure accessibility/WCAG compliance).
