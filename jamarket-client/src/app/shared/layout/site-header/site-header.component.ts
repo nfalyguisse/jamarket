@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { LucideCircleUser } from '@lucide/angular';
+import { AuthStateService } from '../../../core/services/auth-state.service';
 
 @Component({
   selector: 'app-site-header',
@@ -9,6 +10,8 @@ import { LucideCircleUser } from '@lucide/angular';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SiteHeaderComponent {
+  protected readonly authState = inject(AuthStateService);
+
   protected readonly navLinks = [
     { label: 'Catalogue', path: '/catalogue' },
     { label: 'Favoris', path: '/favoris' },

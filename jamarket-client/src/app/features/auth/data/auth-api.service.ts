@@ -4,11 +4,13 @@ import { isPlatformBrowser } from '@angular/common';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { AuthTokens, LoginPayload, RegisterPayload } from '../../../core/models/auth.model';
+import { AuthStateService } from '../../../core/services/auth-state.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthApiService {
   private readonly http = inject(HttpClient);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly authState = inject(AuthStateService);
   private readonly authUrl = `${environment.apiUrl}/auth`;
 
   login(payload: LoginPayload): Observable<AuthTokens> {
@@ -30,5 +32,6 @@ export class AuthApiService {
 
     localStorage.setItem('jamarket_access_token', tokens.accessToken);
     localStorage.setItem('jamarket_refresh_token', tokens.refreshToken);
+    this.authState.setToken(tokens.accessToken);
   }
 }

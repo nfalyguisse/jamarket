@@ -30,9 +30,9 @@
 
     <div class="flex items-center gap-4 md:gap-6">
       <a
-        routerLink="/connexion"
+        [routerLink]="authState.profileRoute()"
         class="rounded-full p-1 transition-opacity hover:opacity-80"
-        aria-label="Mon compte"
+        [attr.aria-label]="authState.isLoggedIn() ? 'Mon profil' : 'Se connecter'"
       >
         <svg lucideCircleUser class="size-7" style="color: var(--jm-color-nav-text)" aria-hidden="true" />
       </a>

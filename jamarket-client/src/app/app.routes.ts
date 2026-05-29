@@ -22,6 +22,22 @@ export const routes: Routes = [
     title: 'Inscription | Jamarket Auto',
   },
   {
+    path: 'profil',
+    loadComponent: () =>
+      import('./features/profile/pages/profile-page/profile-page.component').then(
+        (m) => m.ProfilePageComponent,
+      ),
+    title: 'Mon profil | Jamarket Auto',
+  },
+  {
+    path: 'profil/modifier',
+    loadComponent: () =>
+      import('./features/profile/pages/edit-profile-page/edit-profile-page.component').then(
+        (m) => m.EditProfilePageComponent,
+      ),
+    title: 'Modifier mon profil | Jamarket Auto',
+  },
+  {
     path: '**',
     redirectTo: '',
   },

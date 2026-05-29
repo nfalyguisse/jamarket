@@ -9,6 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { JwtPayload } from './strategies/jwt.strategy';
 
 const BCRYPT_ROUNDS = 10;
@@ -97,6 +98,31 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  async updateProfile(userId: number, dto: UpdateProfileDto) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+
+    if (!user || user.deletedAt) {
+      throw new NotFoundException('Utilisateur introuvable');
+    }
+
+    const data: { name?: string; lastName?: string; password?: string } = {};
+
+    if (dto.name !== undefined) data.name = dto.name;
+    if (dto.lastName !== undefined) data.lastName = dto.lastName;
+    if (dto.password !== undefined) {
+      data.password = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
+    }
+
+    const updated = await this.prisma.user.update({
+      where: { id: userId },
+      data,
+      include: { role: true },
+      omit: { password: true },
+    });
+
+    return updated;
   }
 
   async forgetMe(userId: number): Promise<void> {
