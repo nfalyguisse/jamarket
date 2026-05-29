@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import type { UserProfile } from '../../../core/models/user-profile.model';
+import type { UserProfile } from '@core/models/user-profile.model';
 
 export interface UpdateProfilePayload {
   name?: string;

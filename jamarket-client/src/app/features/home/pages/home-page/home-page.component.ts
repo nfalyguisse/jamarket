@@ -13,9 +13,9 @@ import {
   LucideShieldCheck,
   LucideWrench,
 } from '@lucide/angular';
-import { SiteFooterComponent } from '../../../../shared/layout/site-footer/site-footer.component';
-import { SiteHeaderComponent } from '../../../../shared/layout/site-header/site-header.component';
-import { VehicleCardComponent } from '../../../../shared/ui/vehicle-card/vehicle-card.component';
+import { SiteFooterComponent } from '../../../../../shared/layout/site-footer/site-footer.component';
+import { SiteHeaderComponent } from '../../../../../shared/layout/site-header/site-header.component';
+import { VehicleCardComponent } from '../../../../../shared/ui/vehicle-card/vehicle-card.component';
 import {
   BENTO_WORKSHOP_IMAGE,
   BRAND_OPTIONS,

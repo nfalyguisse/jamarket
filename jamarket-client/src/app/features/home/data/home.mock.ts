@@ -1,4 +1,4 @@
-import type { VehicleCard } from '../../../core/models/vehicle-card.model';
+import type { VehicleCard } from '@core/models/vehicle-card.model';
 
 export const HOME_HERO_IMAGE =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuDYaLcXSRTNY6IWyMj8-6rXcHeusAzXfzaCuvkQw-X79OJ1o7MY99cFIWYhYmRky1ounXSLbTdqHWyB8z1TKJgGSOdlSVrrqUcupqqhLU3_1KhY9OupUIq4UmC4-ck6HB6HbRD0aidxfm2o2jW_nNChPNyo85iUCMAF5cRNrRuCQ0guwxrSn9AZ58xXaqqxBZOQZuBIQxh2d4XP8RYPNe6VOsyBvVg-NpLEfHVTCFruvKiZHTR4JOLTUrdWrfLz49ZDDEC5gYe0tNo';

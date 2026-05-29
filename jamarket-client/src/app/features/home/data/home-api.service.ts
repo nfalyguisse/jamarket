@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { map, Observable } from 'rxjs';
-import type { VehicleCard } from '../../../core/models/vehicle-card.model';
+import type { VehicleCard } from '@core/models/vehicle-card.model';
 import { environment } from '../../../../environments/environment';
 
 interface ApiAd {

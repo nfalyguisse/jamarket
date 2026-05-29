@@ -1,13 +1,15 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { ChangeDetectionStrategy, Component, OnInit, PLATFORM_ID, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { EMPTY, catchError, finalize } from 'rxjs';
 import Swal from 'sweetalert2';
 import { LucideArrowLeft, LucideLock, LucideUser } from '@lucide/angular';
-import { SiteFooterComponent } from '../../../../shared/layout/site-footer/site-footer.component';
-import { SiteHeaderComponent } from '../../../../shared/layout/site-header/site-header.component';
-import type { UserProfile } from '../../../../core/models/user-profile.model';
+import type { UserProfile } from '@core/models/user-profile.model';
 import { ProfileApiService } from '../../data/profile-api.service';
+import { SiteHeaderComponent } from '../../../../../shared/layout/site-header/site-header.component';
+import { SiteFooterComponent } from '../../../../../shared/layout/site-footer/site-footer.component';
+
 
 @Component({
   selector: 'app-edit-profile-page',
@@ -27,6 +29,7 @@ export class EditProfilePageComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly profileApiService = inject(ProfileApiService);
   private readonly router = inject(Router);
+  private readonly platformId = inject(PLATFORM_ID);
 
   protected readonly profile = signal<UserProfile | null>(null);
   protected readonly isLoading = signal(true);
@@ -41,6 +44,10 @@ export class EditProfilePageComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     this.profileApiService
       .getProfile()
       .pipe(
@@ -83,15 +90,17 @@ export class EditProfilePageComponent implements OnInit {
       .pipe(finalize(() => this.isSubmitting.set(false)))
       .subscribe({
         next: () => {
-          void Swal.fire({
-            icon: 'success',
-            title: 'Profil mis à jour',
-            text: 'Vos informations ont bien été enregistrées.',
-            confirmButtonColor: '#006b5e',
-            confirmButtonText: 'Parfait',
-            timer: 3000,
-            timerProgressBar: true,
-          });
+          if (isPlatformBrowser(this.platformId)) {
+            void Swal.fire({
+              icon: 'success',
+              title: 'Profil mis à jour',
+              text: 'Vos informations ont bien été enregistrées.',
+              confirmButtonColor: '#006b5e',
+              confirmButtonText: 'Parfait',
+              timer: 3000,
+              timerProgressBar: true,
+            });
+          }
           void this.router.navigateByUrl('/profil');
         },
         error: (error: { error?: { message?: string } }) => {

@@ -1,7 +1,7 @@
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { LucideCalendar, LucideGauge, LucideHeart, LucideSettings } from '@lucide/angular';
-import type { VehicleCard } from '../../../core/models/vehicle-card.model';
+import type { VehicleCard } from '@core/models/vehicle-card.model';
 
 @Component({
   selector: 'app-vehicle-card',

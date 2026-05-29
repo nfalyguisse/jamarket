@@ -1,5 +1,6 @@
 
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { ChangeDetectionStrategy, Component, OnInit, PLATFORM_ID, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { EMPTY, catchError } from 'rxjs';
 import {
@@ -10,11 +11,11 @@ import {
   LucidePencil,
   LucideMessageSquare,
 } from '@lucide/angular';
-import { SiteFooterComponent } from '../../../../shared/layout/site-footer/site-footer.component';
-import { SiteHeaderComponent } from '../../../../shared/layout/site-header/site-header.component';
-import { VehicleCardComponent } from '../../../../shared/ui/vehicle-card/vehicle-card.component';
-import type { UserProfile } from '../../../../core/models/user-profile.model';
-import type { VehicleCard } from '../../../../core/models/vehicle-card.model';
+import { SiteFooterComponent } from '../../../../../shared/layout/site-footer/site-footer.component';
+import { SiteHeaderComponent } from '../../../../../shared/layout/site-header/site-header.component';
+import { VehicleCardComponent } from '../../../../../shared/ui/vehicle-card/vehicle-card.component';
+import type { UserProfile } from '../../../../../core/models/user-profile.model';
+import type { VehicleCard } from '../../../../../core/models/vehicle-card.model';
 import { ProfileApiService } from '../../data/profile-api.service';
 
 interface MessagePreview {
@@ -108,6 +109,7 @@ const MESSAGES_MOCK: MessagePreview[] = [
 export class ProfilePageComponent implements OnInit {
   private readonly profileApiService = inject(ProfileApiService);
   private readonly router = inject(Router);
+  private readonly platformId = inject(PLATFORM_ID);
 
   protected readonly profile = signal<UserProfile | null>(null);
   protected readonly isLoading = signal(true);
@@ -118,6 +120,10 @@ export class ProfilePageComponent implements OnInit {
   );
 
   ngOnInit(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     this.profileApiService
       .getProfile()
       .pipe(

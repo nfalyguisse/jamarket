@@ -3,8 +3,8 @@ import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { AuthTokens, LoginPayload, RegisterPayload } from '../../../core/models/auth.model';
-import { AuthStateService } from '../../../core/services/auth-state.service';
+import { AuthTokens, LoginPayload, RegisterPayload } from '@core/models/auth.model';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthApiService {
