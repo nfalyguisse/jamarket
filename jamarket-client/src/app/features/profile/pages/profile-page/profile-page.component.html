@@ -55,9 +55,6 @@
                   <h1 id="profile-heading" class="font-headline-lg text-on-background">
                     {{ p.name }} {{ p.lastName }}
                   </h1>
-                  <p class="mt-1 text-label-sm font-bold uppercase tracking-[0.15em] text-primary">
-                    {{ p.role.label }}
-                  </p>
                 </div>
 
                 <ul class="space-y-2">
@@ -77,8 +74,17 @@
                     class="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-label-md font-semibold text-white transition hover:opacity-90 active:scale-[0.99]"
                   >
                     <svg lucidePencil class="size-4" aria-hidden="true" />
-                    Edit Profile
+                    Modifier mon profil
                   </a>
+                  <button
+                    type="button"
+                    (click)="logout()"
+                    class="inline-flex items-center gap-2 rounded-lg border border-outline/25 bg-surface px-5 py-2.5 text-label-md font-semibold text-on-surface-variant transition hover:bg-surface-container active:scale-[0.99]"
+                    aria-label="Se déconnecter"
+                  >
+                    <svg lucideLogOut class="size-4" aria-hidden="true" />
+                    Déconnexion
+                  </button>
                 </div>
               </div>
             </div>
@@ -137,25 +143,7 @@
           <div class="mb-6 flex items-center justify-between">
             <h2 id="favorites-heading" class="font-headline-md text-on-background">
               Vos favoris
-            </h2>
-            <div class="flex items-center gap-1" role="group" aria-label="Mode d'affichage">
-              <button
-                type="button"
-                class="rounded-lg bg-primary p-2 text-white"
-                aria-label="Affichage grille"
-                aria-pressed="true"
-              >
-                <svg lucideGrid2x2 class="size-4" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                class="rounded-lg p-2 text-on-surface-variant transition hover:bg-surface-container"
-                aria-label="Affichage liste"
-                aria-pressed="false"
-              >
-                <svg lucideList class="size-4" aria-hidden="true" />
-              </button>
-            </div>
+            </h2>          
           </div>
 
           @if (favorites().length > 0) {

@@ -8,14 +8,17 @@ import {
   LucideList,
   LucideMail,
   LucideMapPin,
+  LucideLogOut,
   LucidePencil,
   LucideMessageSquare,
 } from '@lucide/angular';
+import { AuthStateService } from '@core/services/auth-state.service';
 import { SiteFooterComponent } from '../../../../../shared/layout/site-footer/site-footer.component';
 import { SiteHeaderComponent } from '../../../../../shared/layout/site-header/site-header.component';
 import { VehicleCardComponent } from '../../../../../shared/ui/vehicle-card/vehicle-card.component';
 import type { UserProfile } from '../../../../../core/models/user-profile.model';
 import type { VehicleCard } from '../../../../../core/models/vehicle-card.model';
+import { logHttpError } from '@core/utils/http-error.util';
 import { ProfileApiService } from '../../data/profile-api.service';
 
 interface MessagePreview {
@@ -98,6 +101,7 @@ const MESSAGES_MOCK: MessagePreview[] = [
     VehicleCardComponent,
     LucideMail,
     LucideMapPin,
+    LucideLogOut,
     LucidePencil,
     LucideMessageSquare,
     LucideGrid2x2,
@@ -108,6 +112,7 @@ const MESSAGES_MOCK: MessagePreview[] = [
 })
 export class ProfilePageComponent implements OnInit {
   private readonly profileApiService = inject(ProfileApiService);
+  private readonly authState = inject(AuthStateService);
   private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
 
@@ -127,7 +132,8 @@ export class ProfilePageComponent implements OnInit {
     this.profileApiService
       .getProfile()
       .pipe(
-        catchError(() => {
+        catchError((error: unknown) => {
+          logHttpError(error, '[profile] chargement du profil');
           void this.router.navigateByUrl('/connexion');
           return EMPTY;
         }),
@@ -142,5 +148,10 @@ export class ProfilePageComponent implements OnInit {
     const p = this.profile();
     if (!p) return '?';
     return `${p.name[0]}${p.lastName[0]}`.toUpperCase();
+  }
+
+  logout(): void {
+    this.authState.clearTokens();
+    void this.router.navigateByUrl('/');
   }
 }

@@ -6,6 +6,7 @@ import { EMPTY, catchError, finalize } from 'rxjs';
 import Swal from 'sweetalert2';
 import { LucideArrowLeft, LucideLock, LucideUser } from '@lucide/angular';
 import type { UserProfile } from '@core/models/user-profile.model';
+import { logHttpError, resolveUserFacingError } from '@core/utils/http-error.util';
 import { ProfileApiService } from '../../data/profile-api.service';
 import { SiteHeaderComponent } from '../../../../../shared/layout/site-header/site-header.component';
 import { SiteFooterComponent } from '../../../../../shared/layout/site-footer/site-footer.component';
@@ -51,7 +52,8 @@ export class EditProfilePageComponent implements OnInit {
     this.profileApiService
       .getProfile()
       .pipe(
-        catchError(() => {
+        catchError((error: unknown) => {
+          logHttpError(error, '[profile-edit] chargement du profil');
           void this.router.navigateByUrl('/connexion');
           return EMPTY;
         }),
@@ -103,10 +105,8 @@ export class EditProfilePageComponent implements OnInit {
           }
           void this.router.navigateByUrl('/profil');
         },
-        error: (error: { error?: { message?: string } }) => {
-          this.serverError.set(
-            error.error?.message ?? 'Une erreur est survenue. Veuillez réessayer.',
-          );
+        error: (error: unknown) => {
+          this.serverError.set(resolveUserFacingError(error, 'profile-update'));
         },
       });
   }

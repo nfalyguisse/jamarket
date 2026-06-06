@@ -14,6 +14,10 @@ import { JwtPayload } from './strategies/jwt.strategy';
 
 const BCRYPT_ROUNDS = 10;
 const DEFAULT_CUSTOMER_ROLE_LABEL = 'Customer';
+/** Rôle Customer en base (seed) — seuls ces comptes peuvent utiliser l’app cliente. */
+const CUSTOMER_ROLE_ID = 3;
+const INVALID_CREDENTIALS_MESSAGE =
+  "L'email ou le mot de passe est incorrect.";
 
 @Injectable()
 export class AuthService {
@@ -62,13 +66,15 @@ export class AuthService {
     });
 
     if (!user || user.deletedAt || !user.isActive) {
-      throw new UnauthorizedException('Identifiants invalides');
+      throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
     }
 
     const passwordMatch = await bcrypt.compare(dto.password, user.password);
     if (!passwordMatch) {
-      throw new UnauthorizedException('Identifiants invalides');
+      throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
     }
+
+    this.assertClientCustomer(user);
 
     return this.buildTokens(user);
   }
@@ -80,8 +86,10 @@ export class AuthService {
     });
 
     if (!user || user.deletedAt || !user.isActive) {
-      throw new UnauthorizedException('Utilisateur introuvable');
+      throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
     }
+
+    this.assertClientCustomer(user);
 
     return this.buildTokens(user);
   }
@@ -93,19 +101,26 @@ export class AuthService {
       omit: { password: true },
     });
 
-    if (!user) {
-      throw new UnauthorizedException('Utilisateur introuvable');
+    if (!user || user.deletedAt || !user.isActive) {
+      throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
     }
+
+    this.assertClientCustomer(user);
 
     return user;
   }
 
   async updateProfile(userId: number, dto: UpdateProfileDto) {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { role: true },
+    });
 
     if (!user || user.deletedAt) {
       throw new NotFoundException('Utilisateur introuvable');
     }
+
+    this.assertClientCustomer(user);
 
     const data: { name?: string; lastName?: string; password?: string } = {};
 
@@ -126,11 +141,16 @@ export class AuthService {
   }
 
   async forgetMe(userId: number): Promise<void> {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { role: true },
+    });
 
     if (!user || user.deletedAt) {
       throw new NotFoundException('Utilisateur introuvable');
     }
+
+    this.assertClientCustomer(user);
 
     const anonymizedEmail = `deleted_${userId}@supprime.jamarket`;
 
@@ -154,6 +174,12 @@ export class AuthService {
         },
       });
     });
+  }
+
+  private assertClientCustomer(user: { roleId: number }): void {
+    if (user.roleId !== CUSTOMER_ROLE_ID) {
+      throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
+    }
   }
 
   private buildTokens(user: { id: number; email: string }) {

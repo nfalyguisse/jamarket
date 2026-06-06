@@ -22,6 +22,7 @@ import {
   HOME_HERO_IMAGE,
   LATEST_VEHICLES,
 } from '../../data/home.mock';
+import { logHttpError } from '@core/utils/http-error.util';
 import { HomeApiService } from '../../data/home-api.service';
 
 @Component({
@@ -60,8 +61,8 @@ export class HomePageComponent implements OnInit {
     this.homeApiService
       .getLatestVehicles()
       .pipe(
-        catchError(() => {
-          // En cas d'API locale indisponible, on conserve les données mock.
+        catchError((error: unknown) => {
+          logHttpError(error, '[home] chargement des véhicules');
           return EMPTY;
         }),
       )

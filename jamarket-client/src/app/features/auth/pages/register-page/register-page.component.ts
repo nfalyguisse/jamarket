@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
+import { resolveUserFacingError } from '@core/utils/http-error.util';
 import { AuthApiService } from '../../data/auth-api.service';
 
 @Component({
@@ -41,8 +42,8 @@ export class RegisterPageComponent {
         next: () => {
           void this.router.navigateByUrl('/');
         },
-        error: (error: { error?: { message?: string } }) => {
-          this.serverError.set(error.error?.message ?? "Impossible de créer le compte pour le moment.");
+        error: (error: unknown) => {
+          this.serverError.set(resolveUserFacingError(error, 'register'));
         },
       });
   }
