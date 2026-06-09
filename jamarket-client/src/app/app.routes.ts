@@ -38,6 +38,14 @@ export const routes: Routes = [
     title: 'Modifier mon profil | Jamarket Auto',
   },
   {
+    path: 'catalogue',
+    loadComponent: () =>
+      import('./features/catalogue/pages/catalogue-page/catalogue-page.component').then(
+        (m) => m.CataloguePageComponent,
+      ),
+    title: 'Catalogue | Jamarket Auto',
+  },
+  {
     path: '**',
     redirectTo: '',
   },

@@ -5,6 +5,7 @@ export interface VehicleCard {
   mileageKm: number;
   year: number;
   transmission: string;
+  fuelType?: string;
   imageUrl: string;
   imageAlt: string;
   badge?: string;
