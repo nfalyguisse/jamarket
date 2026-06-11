@@ -23,7 +23,7 @@
         </span>
       }
     </div>
-    <div class="p-6 pr-16">
+    <div class="p-6">
       <h3 class="mb-2 truncate font-headline-md" [title]="vehicle().title">
         {{ vehicle().title }}
       </h3>
@@ -50,10 +50,10 @@
   </a>
   <button
     type="button"
-    class="absolute bottom-6 right-6 z-10 rounded-full bg-secondary-container/10 p-3 text-secondary-container transition-colors hover:bg-secondary-container hover:text-on-secondary"
+    class="absolute right-3 top-3 z-10 flex size-9 items-center justify-center rounded-full bg-white/90 text-on-surface-variant shadow-sm transition hover:bg-white hover:text-primary"
     [attr.aria-label]="'Ajouter ' + vehicle().title + ' aux favoris'"
     (click)="onFavoriteClick($event)"
   >
-    <svg lucideHeart class="size-5" aria-hidden="true" />
+    <svg lucideHeart class="size-4" aria-hidden="true" />
   </button>
 </article>

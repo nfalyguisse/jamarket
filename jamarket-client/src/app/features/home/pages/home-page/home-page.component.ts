@@ -1,5 +1,5 @@
-import { DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { DecimalPipe, isPlatformBrowser } from '@angular/common';
+import { ChangeDetectionStrategy, Component, OnInit, PLATFORM_ID, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { EMPTY, catchError } from 'rxjs';
 import {
@@ -48,6 +48,7 @@ import { HomeApiService } from '../../data/home-api.service';
 })
 export class HomePageComponent implements OnInit {
   private readonly homeApiService = inject(HomeApiService);
+  private readonly platformId = inject(PLATFORM_ID);
 
   protected readonly heroImage = HOME_HERO_IMAGE;
   protected readonly bentoImage = BENTO_WORKSHOP_IMAGE;
@@ -58,6 +59,10 @@ export class HomePageComponent implements OnInit {
   protected readonly maxPrice = signal(80000);
 
   ngOnInit(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     this.homeApiService
       .getLatestVehicles()
       .pipe(

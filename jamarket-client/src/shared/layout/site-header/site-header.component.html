@@ -10,6 +10,7 @@
       routerLink="/"
       class="font-headline-md text-lg font-black uppercase tracking-tighter"
       style="color: var(--jm-color-nav-text)"
+      (click)="closeMobileMenu()"
     >
       Jamarket Auto
     </a>
@@ -28,20 +29,80 @@
       }
     </div>
 
-    <div class="flex items-center gap-4 md:gap-6">
+    <div class="flex items-center gap-3 md:gap-6">
+      <button
+        type="button"
+        class="rounded-full p-1 transition-opacity hover:opacity-80 md:hidden"
+        [attr.aria-expanded]="mobileMenuOpen()"
+        aria-controls="mobile-nav-menu"
+        [attr.aria-label]="mobileMenuOpen() ? 'Fermer le menu' : 'Ouvrir le menu'"
+        (click)="toggleMobileMenu()"
+      >
+        @if (mobileMenuOpen()) {
+          <svg lucideX class="size-7" style="color: var(--jm-color-nav-text)" aria-hidden="true" />
+        } @else {
+          <svg lucideMenu class="size-7" style="color: var(--jm-color-nav-text)" aria-hidden="true" />
+        }
+      </button>
+
       <a
         [routerLink]="authState.profileRoute()"
         class="rounded-full p-1 transition-opacity hover:opacity-80"
         [attr.aria-label]="authState.isLoggedIn() ? 'Mon profil' : 'Se connecter'"
+        (click)="closeMobileMenu()"
       >
         <svg lucideCircleUser class="size-7" style="color: var(--jm-color-nav-text)" aria-hidden="true" />
       </a>
+
       <a
         routerLink="/contact"
-        class="rounded-full bg-primary-container px-5 py-2 text-label-md font-bold uppercase text-on-primary-container transition-all hover:opacity-90 active:scale-95 md:px-6"
+        class="hidden rounded-full bg-primary-container px-5 py-2 text-label-md font-bold uppercase text-on-primary-container transition-all hover:opacity-90 active:scale-95 sm:inline-flex md:px-6"
+        (click)="closeMobileMenu()"
       >
         Nous contacter
       </a>
     </div>
   </nav>
+
+  @if (mobileMenuOpen()) {
+    <button
+      type="button"
+      class="fixed inset-0 top-16 z-40 bg-black/30 backdrop-blur-[2px] md:hidden"
+      aria-label="Fermer le menu"
+      (click)="closeMobileMenu()"
+    ></button>
+
+    <nav
+      id="mobile-nav-menu"
+      class="relative z-50 border-t border-outline/5 px-6 py-5 shadow-lg md:hidden"
+      style="background-color: var(--jm-color-nav-bg)"
+      aria-label="Menu mobile"
+    >
+      <ul class="flex flex-col gap-1">
+        @for (link of navLinks; track link.path) {
+          <li>
+            <a
+              [routerLink]="link.path"
+              routerLinkActive="bg-primary-container/10 font-bold !text-[var(--jm-color-nav-text)]"
+              [routerLinkActiveOptions]="{ exact: false }"
+              class="block rounded-lg px-3 py-3 text-label-md uppercase tracking-tight transition-colors"
+              style="color: var(--jm-color-nav-muted)"
+              (click)="closeMobileMenu()"
+            >
+              {{ link.label }}
+            </a>
+          </li>
+        }
+        <li class="mt-2 border-t border-outline/10 pt-3">
+          <a
+            routerLink="/contact"
+            class="inline-flex w-full items-center justify-center rounded-full bg-primary-container px-5 py-3 text-label-md font-bold uppercase text-on-primary-container transition-all hover:opacity-90 active:scale-95"
+            (click)="closeMobileMenu()"
+          >
+            Nous contacter
+          </a>
+        </li>
+      </ul>
+    </nav>
+  }
 </header>

@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { ChangeDetectionStrategy, Component, OnInit, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { EMPTY, catchError } from 'rxjs';
 import { LucideChevronDown, LucideChevronLeft, LucideChevronRight } from '@lucide/angular';
@@ -31,6 +32,7 @@ import {
 })
 export class CataloguePageComponent implements OnInit {
   private readonly catalogueApi = inject(CatalogueApiService);
+  private readonly platformId = inject(PLATFORM_ID);
 
   protected readonly sortOptions = CATALOGUE_SORT_OPTIONS;
   protected readonly pageSize = CATALOGUE_PAGE_SIZE;
@@ -70,6 +72,10 @@ export class CataloguePageComponent implements OnInit {
   );
 
   ngOnInit(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     this.catalogueApi
       .getVehicles()
       .pipe(
