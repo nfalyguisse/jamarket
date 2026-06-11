@@ -1,0 +1,208 @@
+<div class="flex min-h-screen flex-col bg-surface-container-low">
+  <app-site-header />
+
+  <main class="flex-1 pt-24 pb-16">
+    <div class="container-jm">
+      @if (isLoading()) {
+        <div class="animate-pulse space-y-8">
+          <div class="h-4 w-48 rounded bg-outline/10"></div>
+          <div class="h-10 w-2/3 max-w-xl rounded-lg bg-outline/10"></div>
+          <div class="aspect-[16/10] rounded-2xl bg-outline/10"></div>
+        </div>
+      }
+
+      @if (hasError()) {
+        <div class="flex flex-col items-center py-20 text-center">
+          <p class="font-headline-md text-on-surface-variant">Annonce introuvable</p>
+          <p class="mt-2 text-body-md text-on-surface-variant/70">
+            Ce véhicule n'est plus disponible ou le lien est incorrect.
+          </p>
+          <a
+            routerLink="/catalogue"
+            class="mt-6 inline-flex rounded-xl bg-primary px-6 py-3 text-label-md font-semibold text-on-primary transition hover:opacity-90"
+          >
+            Retour au catalogue
+          </a>
+        </div>
+      }
+
+      @if (!isLoading() && !hasError() && ad(); as detail) {
+        <!-- Fil d'Ariane -->
+        <nav aria-label="Fil d'Ariane" class="mb-8">
+          <ol class="flex flex-wrap items-center gap-2 text-label-md text-on-surface-variant">
+            <li><a routerLink="/" class="transition hover:text-primary">Accueil</a></li>
+            <li aria-hidden="true">/</li>
+            <li><a routerLink="/catalogue" class="transition hover:text-primary">Catalogue</a></li>
+            <li aria-hidden="true">/</li>
+            <li>
+              <span class="font-semibold text-on-background line-clamp-1" aria-current="page">
+                {{ detail.label }}
+              </span>
+            </li>
+          </ol>
+        </nav>
+
+        <!-- En-tête -->
+        <header class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div class="space-y-3">
+            <div class="flex flex-wrap items-center gap-3">
+              <span
+                class="rounded-full px-3 py-1 text-label-sm font-bold uppercase tracking-wide"
+                [class.bg-primary/10]="isAvailable()"
+                [class.text-primary]="isAvailable()"
+                [class.bg-outline/10]="!isAvailable()"
+                [class.text-on-surface-variant]="!isAvailable()"
+              >
+                {{ statusLabel() }}
+              </span>
+              <span class="text-label-sm uppercase tracking-wide text-on-surface-variant">
+                Réf. #{{ detail.id }}
+              </span>
+            </div>
+
+            <h1 class="font-headline-xl text-on-background">
+              {{ detail.label }}
+            </h1>
+
+            @if (subtitle()) {
+              <p class="text-body-lg italic text-on-surface-variant">
+                {{ subtitle() }}
+              </p>
+            }
+          </div>
+
+          <div class="shrink-0 text-left lg:text-right">
+            <p class="text-3xl font-bold text-primary md:text-4xl">
+              {{ detail.price | currency: 'EUR' : 'symbol' : '1.0-0' : 'fr' }}
+            </p>
+            <p class="mt-1 text-label-sm text-on-surface-variant">
+              Publié le {{ detail.createdAt | date: 'd MMMM y' : '' : 'fr' }}
+            </p>
+          </div>
+        </header>
+
+        <!-- Galerie + actions -->
+        <div class="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:items-start">
+          <div class="lg:col-span-2">
+            <app-ad-image-gallery
+              [images]="detail.vehicule.images"
+              [altPrefix]="detail.label"
+            />
+          </div>
+
+          <aside
+            class="rounded-2xl border border-outline/10 bg-surface-container-lowest p-6 shadow-sm lg:sticky lg:top-28"
+            aria-label="Actions et contact"
+          >
+            <p class="text-label-sm font-bold uppercase tracking-[0.12em] text-primary">
+              Disponibilité
+            </p>
+            <p class="mt-2 font-headline-md text-on-background">
+              @if (isAvailable()) {
+                Véhicule disponible en stock
+              } @else if (detail.isSold) {
+                Ce véhicule a été vendu
+              } @else {
+                Ce véhicule n'est plus disponible
+              }
+            </p>
+
+            @if (detail.seller; as seller) {
+              <div class="mt-6 flex items-center gap-3 rounded-xl bg-surface-container-low p-4">
+                <div
+                  class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"
+                  aria-hidden="true"
+                >
+                  <svg lucideUser class="size-5" />
+                </div>
+                <div class="min-w-0">
+                  <p class="text-label-md font-semibold text-on-background">
+                    {{ seller.name }} {{ seller.lastName }}
+                  </p>
+                  <a
+                    [href]="'mailto:' + seller.email"
+                    class="truncate text-label-sm text-primary hover:underline"
+                  >
+                    {{ seller.email }}
+                  </a>
+                </div>
+              </div>
+            }
+
+            <div class="mt-6 space-y-3">
+              <a
+                routerLink="/contact"
+                class="flex w-full items-center justify-center rounded-xl bg-primary py-3.5 text-label-md font-bold uppercase tracking-wide text-on-primary transition hover:opacity-90 active:scale-[0.99]"
+              >
+                Prendre rendez-vous
+              </a>
+              <a
+                routerLink="/contact"
+                class="flex w-full items-center justify-center gap-2 rounded-xl border border-outline/25 bg-surface py-3.5 text-label-md font-semibold text-on-background transition hover:bg-surface-container"
+              >
+                <svg lucideMessageSquare class="size-4" aria-hidden="true" />
+                Nous contacter
+              </a>
+            </div>
+
+            <p class="mt-6 flex items-start gap-2 text-label-sm text-on-surface-variant">
+              <svg lucideMail class="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+              Notre équipe vous répond rapidement pour organiser une visite ou un essai.
+            </p>
+          </aside>
+        </div>
+
+        <!-- Spécifications (champs présents en base uniquement) -->
+        @if (specs().length > 0) {
+          <section class="mt-12" aria-labelledby="specs-heading">
+            <h2
+              id="specs-heading"
+              class="mb-6 font-headline-md text-sm font-bold uppercase tracking-[0.15em] text-on-background"
+            >
+              Caractéristiques
+            </h2>
+            <dl class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+              @for (spec of specs(); track spec.key) {
+                <div class="rounded-xl border border-outline/10 bg-surface-container-lowest p-4">
+                  <dt class="flex items-center gap-2 text-label-sm uppercase tracking-wide text-on-surface-variant">
+                    @switch (spec.key) {
+                      @case ('year') { <svg lucideCalendar class="size-4 text-primary" aria-hidden="true" /> }
+                      @case ('kilometer') { <svg lucideGauge class="size-4 text-primary" aria-hidden="true" /> }
+                      @case ('fuel') { <svg lucideFuel class="size-4 text-primary" aria-hidden="true" /> }
+                      @case ('power') { <svg lucideZap class="size-4 text-primary" aria-hidden="true" /> }
+                      @case ('color') { <svg lucidePalette class="size-4 text-primary" aria-hidden="true" /> }
+                      @default { <svg lucideCar class="size-4 text-primary" aria-hidden="true" /> }
+                    }
+                    {{ spec.label }}
+                  </dt>
+                  <dd class="mt-2 text-label-md font-bold text-on-background">
+                    {{ spec.value }}
+                  </dd>
+                </div>
+              }
+            </dl>
+          </section>
+        }
+
+        <!-- Description -->
+        @if (detail.description.trim()) {
+          <section class="mt-12" aria-labelledby="description-heading">
+            <h2
+              id="description-heading"
+              class="mb-4 font-headline-md text-sm font-bold uppercase tracking-[0.15em] text-on-background"
+            >
+              Description
+            </h2>
+            <div class="rounded-2xl border border-outline/10 bg-surface-container-low p-6 md:p-8">
+              <p class="whitespace-pre-line text-body-lg leading-relaxed text-on-surface-variant">
+                {{ detail.description }}
+              </p>
+            </div>
+          </section>
+        }
+      }
+    </div>
+  </main>
+
+  <app-site-footer />
+</div>

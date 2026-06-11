@@ -9,12 +9,15 @@ import type { VehicleCard } from '@core/models/vehicle-card.model';
   imports: [RouterLink, CurrencyPipe, DecimalPipe, LucideGauge, LucideCalendar, LucideFuel, LucideHeart],
   templateUrl: './catalogue-vehicle-card.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'block h-full' },
 })
 export class CatalogueVehicleCardComponent {
   readonly vehicle = input.required<VehicleCard>();
   readonly favoriteToggle = output<string>();
 
-  onFavoriteClick(): void {
+  onFavoriteClick(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
     this.favoriteToggle.emit(this.vehicle().id);
   }
 }

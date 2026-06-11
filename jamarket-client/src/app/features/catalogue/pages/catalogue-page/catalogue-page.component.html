@@ -72,7 +72,7 @@
               role="list"
             >
               @for (vehicle of paginatedVehicles(); track vehicle.id) {
-                <li>
+                <li class="h-full">
                   <app-catalogue-vehicle-card
                     [vehicle]="vehicle"
                     (favoriteToggle)="onFavoriteToggle($event)"

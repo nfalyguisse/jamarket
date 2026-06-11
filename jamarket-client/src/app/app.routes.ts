@@ -46,6 +46,14 @@ export const routes: Routes = [
     title: 'Catalogue | Jamarket Auto',
   },
   {
+    path: 'annonces/:id',
+    loadComponent: () =>
+      import('./features/ads/pages/ad-detail-page/ad-detail-page.component').then(
+        (m) => m.AdDetailPageComponent,
+      ),
+    title: 'Détail annonce | Jamarket Auto',
+  },
+  {
     path: '**',
     redirectTo: '',
   },
