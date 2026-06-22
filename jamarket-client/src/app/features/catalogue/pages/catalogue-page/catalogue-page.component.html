@@ -17,22 +17,18 @@
       </nav>
 
       <div class="flex flex-col gap-8 lg:flex-row lg:items-start">
-        <!-- Emplacement réservé aux filtres (tâche séparée) -->
-        <aside
-          class="hidden w-full shrink-0 lg:block lg:w-72 xl:w-80"
-          aria-label="Zone filtres"
-        >
-          <div
-            class="sticky top-28 rounded-2xl border border-dashed border-outline/20 bg-surface-container-lowest p-6"
-          >
-            <p class="text-label-sm font-bold uppercase tracking-[0.12em] text-on-surface-variant">
-              Filtres
-            </p>
-            <p class="mt-3 text-body-md text-on-surface-variant/80">
-              Les filtres de recherche seront disponibles prochainement pour affiner votre sélection.
-            </p>
-          </div>
-        </aside>
+        <div class="w-full shrink-0 lg:w-72 xl:w-80">
+          <app-catalogue-filters
+            [filters]="filters()"
+            [brandOptions]="brandOptions()"
+            [modelOptions]="modelOptions()"
+            [priceBounds]="priceBounds()"
+            [mobileOpen]="filtersMobileOpen()"
+            (filtersChange)="onFiltersChange($event)"
+            (clearAll)="onClearFilters()"
+            (mobileOpenChange)="onFiltersMobileOpenChange($event)"
+          />
+        </div>
 
         <!-- Contenu principal -->
         <section class="min-w-0 flex-1" aria-labelledby="catalogue-heading">
@@ -42,7 +38,11 @@
                 Catalogue
               </h1>
               <p class="mt-2 text-body-lg text-on-surface-variant">
-                Découvrez {{ vehicles().length }} véhicules d'occasion disponibles en stock.
+                @if (filteredVehicles().length === vehicles().length) {
+                  Découvrez {{ vehicles().length }} véhicules d'occasion disponibles en stock.
+                } @else {
+                  {{ filteredVehicles().length }} véhicule{{ filteredVehicles().length > 1 ? 's' : '' }} correspond{{ filteredVehicles().length > 1 ? 'ent' : '' }} à votre recherche sur {{ vehicles().length }} en stock.
+                }
               </p>
             </div>
 
@@ -130,10 +130,29 @@
             <div
               class="flex flex-col items-center justify-center rounded-2xl border border-outline/10 bg-surface-container-lowest py-20 text-center"
             >
-              <p class="font-headline-md text-on-surface-variant">Aucun véhicule disponible</p>
-              <p class="mt-2 max-w-md text-body-md text-on-surface-variant/70">
-                Revenez bientôt : notre garage met régulièrement de nouvelles annonces en ligne.
+              <p class="font-headline-md text-on-surface-variant">
+                @if (vehicles().length > 0) {
+                  Aucun véhicule ne correspond à vos critères
+                } @else {
+                  Aucun véhicule disponible
+                }
               </p>
+              <p class="mt-2 max-w-md text-body-md text-on-surface-variant/70">
+                @if (vehicles().length > 0) {
+                  Essayez d'élargir vos filtres ou de réinitialiser la recherche pour voir tout le stock du garage.
+                } @else {
+                  Revenez bientôt : notre garage met régulièrement de nouvelles annonces en ligne.
+                }
+              </p>
+              @if (vehicles().length > 0) {
+                <button
+                  type="button"
+                  class="mt-6 inline-flex items-center rounded-xl border border-primary px-6 py-3 text-label-md font-semibold text-primary transition hover:bg-primary/10"
+                  (click)="onClearFilters()"
+                >
+                  Réinitialiser les filtres
+                </button>
+              }
               <a
                 routerLink="/"
                 class="mt-6 inline-flex items-center rounded-xl bg-primary px-6 py-3 text-label-md font-semibold text-on-primary transition hover:opacity-90"

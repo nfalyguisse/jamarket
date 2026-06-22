@@ -1,6 +1,24 @@
 import type { VehicleCard } from '@core/models/vehicle-card.model';
 
-export const CATALOGUE_VEHICLES: VehicleCard[] = [
+function enrichVehicleCard(vehicle: VehicleCard): VehicleCard {
+  if (vehicle.brandLabel && vehicle.modelLabel) {
+    return vehicle;
+  }
+
+  const titlePart = vehicle.title.split('—')[0]?.trim() ?? vehicle.title;
+  const spaceIndex = titlePart.indexOf(' ');
+  if (spaceIndex === -1) {
+    return vehicle;
+  }
+
+  return {
+    ...vehicle,
+    brandLabel: titlePart.slice(0, spaceIndex),
+    modelLabel: titlePart.slice(spaceIndex + 1).trim(),
+  };
+}
+
+const RAW_CATALOGUE_VEHICLES: VehicleCard[] = [
   {
     id: '1',
     title: 'Renault Clio V — Zen',
@@ -146,6 +164,9 @@ export const CATALOGUE_VEHICLES: VehicleCard[] = [
     imageAlt: 'Nissan Leaf électrique bleue',
   },
 ];
+
+export const CATALOGUE_VEHICLES: VehicleCard[] =
+  RAW_CATALOGUE_VEHICLES.map(enrichVehicleCard);
 
 export const CATALOGUE_SORT_OPTIONS = [
   { value: 'latest', label: 'Dernières arrivées' },

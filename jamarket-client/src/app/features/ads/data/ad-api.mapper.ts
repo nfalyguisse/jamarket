@@ -77,6 +77,8 @@ export function mapAdToVehicleCard(ad: ApiAdResponse): VehicleCard {
   return {
     id: String(ad.id),
     title,
+    brandLabel: brand || undefined,
+    modelLabel: model || undefined,
     price: Number(ad.price ?? 0),
     mileageKm: Number(vehicule?.kilometer ?? 0),
     year: Number(vehicule?.year ?? new Date().getFullYear()),

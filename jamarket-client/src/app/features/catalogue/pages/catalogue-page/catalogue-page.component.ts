@@ -7,8 +7,19 @@ import { SiteFooterComponent } from '@shared/layout/site-footer/site-footer.comp
 import { SiteHeaderComponent } from '@shared/layout/site-header/site-header.component';
 import { logHttpError } from '@core/utils/http-error.util';
 import type { VehicleCard } from '@core/models/vehicle-card.model';
+import { CatalogueFiltersComponent } from '../../components/catalogue-filters/catalogue-filters.component';
 import { CatalogueVehicleCardComponent } from '../../components/catalogue-vehicle-card/catalogue-vehicle-card.component';
 import { CatalogueApiService } from '../../data/catalogue-api.service';
+import {
+  DEFAULT_CATALOGUE_FILTERS,
+  type CatalogueFiltersState,
+} from '../../data/catalogue-filters.model';
+import {
+  applyCatalogueFilters,
+  extractBrandOptions,
+  extractModelOptions,
+  getPriceBounds,
+} from '../../data/catalogue-filters.util';
 import {
   CATALOGUE_PAGE_SIZE,
   CATALOGUE_SORT_OPTIONS,
@@ -23,6 +34,7 @@ import {
     SiteHeaderComponent,
     SiteFooterComponent,
     CatalogueVehicleCardComponent,
+    CatalogueFiltersComponent,
     LucideChevronDown,
     LucideChevronLeft,
     LucideChevronRight,
@@ -38,11 +50,27 @@ export class CataloguePageComponent implements OnInit {
   protected readonly pageSize = CATALOGUE_PAGE_SIZE;
 
   protected readonly vehicles = signal<VehicleCard[]>(CATALOGUE_VEHICLES);
+  protected readonly filters = signal<CatalogueFiltersState>({ ...DEFAULT_CATALOGUE_FILTERS });
+  protected readonly filtersMobileOpen = signal(false);
   protected readonly selectedSort = signal<CatalogueSortValue>('latest');
   protected readonly currentPage = signal(1);
 
+  protected readonly priceBounds = computed(() => getPriceBounds(this.vehicles()));
+
+  protected readonly brandOptions = computed(() =>
+    extractBrandOptions(this.vehicles()),
+  );
+
+  protected readonly modelOptions = computed(() =>
+    extractModelOptions(this.vehicles(), this.filters().brand),
+  );
+
+  protected readonly filteredVehicles = computed(() =>
+    applyCatalogueFilters(this.vehicles(), this.filters()),
+  );
+
   protected readonly sortedVehicles = computed(() => {
-    const items = [...this.vehicles()];
+    const items = [...this.filteredVehicles()];
     const sort = this.selectedSort();
 
     switch (sort) {
@@ -89,6 +117,20 @@ export class CataloguePageComponent implements OnInit {
           this.vehicles.set(vehicles);
         }
       });
+  }
+
+  protected onFiltersChange(partial: Partial<CatalogueFiltersState>): void {
+    this.filters.update((current) => ({ ...current, ...partial }));
+    this.currentPage.set(1);
+  }
+
+  protected onClearFilters(): void {
+    this.filters.set({ ...DEFAULT_CATALOGUE_FILTERS });
+    this.currentPage.set(1);
+  }
+
+  protected onFiltersMobileOpenChange(open: boolean): void {
+    this.filtersMobileOpen.set(open);
   }
 
   protected onSortChange(event: Event): void {
