@@ -3,19 +3,19 @@
   style="background-color: var(--jm-color-nav-bg)"
 >
   <nav
-    class="container-jm flex items-center justify-between py-4 md:py-6"
+    class="container-jm flex items-center gap-3 py-4 md:gap-4 md:py-6 lg:gap-6"
     aria-label="Navigation principale"
   >
     <a
       routerLink="/"
-      class="font-headline-md text-lg font-black uppercase tracking-tighter"
+      class="shrink-0 font-headline-md text-lg font-black uppercase tracking-tighter"
       style="color: var(--jm-color-nav-text)"
       (click)="closeMobileMenu()"
     >
       Jamarket Auto
     </a>
 
-    <div class="hidden items-center gap-8 md:flex">
+    <div class="hidden flex-1 items-center justify-center gap-8 lg:flex">
       @for (link of navLinks; track link.path) {
         <a
           [routerLink]="link.path"
@@ -29,7 +29,32 @@
       }
     </div>
 
-    <div class="flex items-center gap-3 md:gap-6">
+    <form
+      class="relative hidden min-w-0 flex-1 md:block lg:max-w-xs xl:max-w-sm"
+      role="search"
+      (submit)="onSearchSubmit($event)"
+    >
+      <label for="header-search" class="sr-only">Rechercher un véhicule</label>
+      <svg
+        lucideSearch
+        class="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2"
+        style="color: var(--jm-color-nav-muted)"
+        aria-hidden="true"
+      />
+      <input
+        id="header-search"
+        type="search"
+        name="q"
+        class="w-full rounded-full border border-outline/10 py-2.5 pl-11 pr-4 text-body-md transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+        style="background-color: color-mix(in srgb, var(--jm-color-nav-text) 6%, transparent); color: var(--jm-color-nav-text)"
+        placeholder="Rechercher…"
+        autocomplete="off"
+        [value]="searchQuery()"
+        (input)="onSearchInput($event)"
+      />
+    </form>
+
+    <div class="ml-auto flex shrink-0 items-center gap-3 md:gap-6">
       <button
         type="button"
         class="rounded-full p-1 transition-opacity hover:opacity-80 md:hidden"
@@ -78,6 +103,27 @@
       style="background-color: var(--jm-color-nav-bg)"
       aria-label="Menu mobile"
     >
+      <form class="relative mb-4" role="search" (submit)="onSearchSubmit($event)">
+        <label for="header-search-mobile" class="sr-only">Rechercher un véhicule</label>
+        <svg
+          lucideSearch
+          class="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2"
+          style="color: var(--jm-color-nav-muted)"
+          aria-hidden="true"
+        />
+        <input
+          id="header-search-mobile"
+          type="search"
+          name="q"
+          class="w-full rounded-full border border-outline/10 py-3 pl-11 pr-4 text-body-md transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+          style="background-color: color-mix(in srgb, var(--jm-color-nav-text) 6%, transparent); color: var(--jm-color-nav-text)"
+          placeholder="Rechercher…"
+          autocomplete="off"
+          [value]="searchQuery()"
+          (input)="onSearchInput($event)"
+        />
+      </form>
+
       <ul class="flex flex-col gap-1">
         @for (link of navLinks; track link.path) {
           <li>

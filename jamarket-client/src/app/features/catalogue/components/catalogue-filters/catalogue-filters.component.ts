@@ -4,17 +4,19 @@ import {
   Component,
   computed,
   input,
+  signal,
   output,
 } from '@angular/core';
 import { LucideChevronDown, LucideSlidersHorizontal } from '@lucide/angular';
 import {
-  CATALOGUE_FUEL_FILTER_OPTIONS,
   CATALOGUE_YEAR_RANGE_OPTIONS,
+  FUEL_DISPLAY_LABELS,
   type CatalogueFiltersState,
   type CataloguePriceBounds,
   type CatalogueYearRange,
 } from '../../data/catalogue-filters.model';
 import { hasActiveFilters } from '../../data/catalogue-filters.util';
+import type { ApiFilterBrand, ApiFilterModel } from '../../data/catalogue-search.model';
 
 @Component({
   selector: 'app-catalogue-filters',
@@ -24,17 +26,21 @@ import { hasActiveFilters } from '../../data/catalogue-filters.util';
 })
 export class CatalogueFiltersComponent {
   protected readonly yearRangeOptions = CATALOGUE_YEAR_RANGE_OPTIONS;
-  protected readonly fuelOptions = CATALOGUE_FUEL_FILTER_OPTIONS;
+  protected readonly fuelDisplayLabels = FUEL_DISPLAY_LABELS;
 
   readonly filters = input.required<CatalogueFiltersState>();
-  readonly brandOptions = input.required<string[]>();
-  readonly modelOptions = input.required<string[]>();
+  readonly brandOptions = input.required<ApiFilterBrand[]>();
+  readonly modelOptions = input.required<ApiFilterModel[]>();
+  readonly fuelOptions = input.required<string[]>();
   readonly priceBounds = input.required<CataloguePriceBounds>();
   readonly mobileOpen = input(false);
 
   readonly filtersChange = output<Partial<CatalogueFiltersState>>();
   readonly clearAll = output<void>();
   readonly mobileOpenChange = output<boolean>();
+
+  /** Valeur locale du slider pour retour visuel immédiat avant navigation */
+  protected readonly localPriceMax = signal<number | null>(null);
 
   protected readonly hasActiveFilters = computed(() =>
     hasActiveFilters(this.filters()),
@@ -43,35 +49,45 @@ export class CatalogueFiltersComponent {
   protected readonly sliderMin = computed(() => this.priceBounds().min);
   protected readonly sliderMax = computed(() => this.priceBounds().max);
 
-  protected readonly effectivePriceMax = computed(() => {
-    const filters = this.filters();
-    return filters.priceMax ?? this.priceBounds().max;
-  });
+  protected readonly displayPriceMax = computed(
+    () =>
+      this.localPriceMax() ??
+      this.filters().priceMax ??
+      this.priceBounds().max,
+  );
 
   protected onBrandChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    this.filtersChange.emit({ brand: value, model: '' });
+    const raw = (event.target as HTMLSelectElement).value;
+    const brandId = raw === '' ? null : Number(raw);
+    this.filtersChange.emit({ brandId, modelId: null });
   }
 
   protected onModelChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    this.filtersChange.emit({ model: value });
+    const raw = (event.target as HTMLSelectElement).value;
+    const modelId = raw === '' ? null : Number(raw);
+    this.filtersChange.emit({ modelId });
   }
 
-  protected onPriceMinInput(event: Event): void {
+  protected onPriceMinChange(event: Event): void {
     const raw = (event.target as HTMLInputElement).value;
     const parsed = raw === '' ? null : Number(raw);
-    this.filtersChange.emit({ priceMin: Number.isFinite(parsed) ? parsed : null });
+    this.filtersChange.emit({ priceMin: Number.isFinite(parsed) ? (parsed as number) : null });
   }
 
-  protected onPriceMaxInput(event: Event): void {
+  protected onPriceMaxChange(event: Event): void {
     const raw = (event.target as HTMLInputElement).value;
     const parsed = raw === '' ? null : Number(raw);
-    this.filtersChange.emit({ priceMax: Number.isFinite(parsed) ? parsed : null });
+    this.filtersChange.emit({ priceMax: Number.isFinite(parsed) ? (parsed as number) : null });
   }
 
   protected onPriceSliderInput(event: Event): void {
     const value = Number((event.target as HTMLInputElement).value);
+    this.localPriceMax.set(value);
+  }
+
+  protected onPriceSliderChange(event: Event): void {
+    const value = Number((event.target as HTMLInputElement).value);
+    this.localPriceMax.set(null);
     this.filtersChange.emit({ priceMax: value });
   }
 
@@ -80,19 +96,13 @@ export class CatalogueFiltersComponent {
     this.filtersChange.emit({ yearRange: current === range ? null : range });
   }
 
-  protected onFuelToggle(fuel: string, checked: boolean): void {
-    const current = this.filters().fuelTypes;
-    const next = checked
-      ? [...current, fuel]
-      : current.filter((item) => item !== fuel);
-    this.filtersChange.emit({ fuelTypes: next });
-  }
-
-  protected isFuelChecked(fuel: string): boolean {
-    return this.filters().fuelTypes.includes(fuel);
+  protected onFuelChange(event: Event): void {
+    const raw = (event.target as HTMLSelectElement).value;
+    this.filtersChange.emit({ fuel: raw || null });
   }
 
   protected onClearAll(): void {
+    this.localPriceMax.set(null);
     this.clearAll.emit();
   }
 

@@ -1,25 +1,19 @@
 export type CatalogueYearRange = '2020+' | '2015-2019' | '2010-2014' | 'classic';
 
 export interface CatalogueFiltersState {
-  brand: string;
-  model: string;
+  query: string;
+  brandId: number | null;
+  modelId: number | null;
   priceMin: number | null;
   priceMax: number | null;
   yearRange: CatalogueYearRange | null;
-  fuelTypes: string[];
+  fuel: string | null;
 }
 
 export interface CataloguePriceBounds {
   min: number;
   max: number;
 }
-
-export const CATALOGUE_FUEL_FILTER_OPTIONS = [
-  { value: 'Électrique', label: 'Électrique' },
-  { value: 'Hybride', label: 'Hybride' },
-  { value: 'Essence', label: 'Essence' },
-  { value: 'Diesel', label: 'Diesel' },
-] as const;
 
 export const CATALOGUE_YEAR_RANGE_OPTIONS: ReadonlyArray<{
   value: CatalogueYearRange;
@@ -31,11 +25,19 @@ export const CATALOGUE_YEAR_RANGE_OPTIONS: ReadonlyArray<{
   { value: 'classic', label: 'Anciennes' },
 ];
 
+export const FUEL_DISPLAY_LABELS: Record<string, string> = {
+  essence: 'Essence',
+  diesel: 'Diesel',
+  electrique: 'Électrique',
+  hybride: 'Hybride',
+};
+
 export const DEFAULT_CATALOGUE_FILTERS: CatalogueFiltersState = {
-  brand: '',
-  model: '',
+  query: '',
+  brandId: null,
+  modelId: null,
   priceMin: null,
   priceMax: null,
   yearRange: null,
-  fuelTypes: [],
+  fuel: null,
 };

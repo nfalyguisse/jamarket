@@ -1,0 +1,1 @@
+export const CATALOGUE_SEARCH_QUERY_PARAM = 'q';

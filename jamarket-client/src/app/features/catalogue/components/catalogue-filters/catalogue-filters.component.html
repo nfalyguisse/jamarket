@@ -43,19 +43,22 @@
     <div class="space-y-6">
       <!-- Marque -->
       <div class="space-y-2">
-        <label for="catalogue-brand-filter" class="text-label-sm font-bold uppercase tracking-[0.1em] text-on-surface-variant">
+        <label
+          for="catalogue-brand-filter"
+          class="text-label-sm font-bold uppercase tracking-[0.1em] text-on-surface-variant"
+        >
           Marque
         </label>
         <div class="relative">
           <select
             id="catalogue-brand-filter"
             class="w-full appearance-none rounded-xl border border-outline/20 bg-surface-container-low px-4 py-3 text-body-md text-on-background transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-            [value]="filters().brand"
+            [value]="filters().brandId ?? ''"
             (change)="onBrandChange($event)"
           >
             <option value="">Toutes les marques</option>
-            @for (brand of brandOptions(); track brand) {
-              <option [value]="brand">{{ brand }}</option>
+            @for (brand of brandOptions(); track brand.id) {
+              <option [value]="brand.id">{{ brand.label }}</option>
             }
           </select>
           <svg
@@ -68,20 +71,23 @@
 
       <!-- Modèle -->
       <div class="space-y-2">
-        <label for="catalogue-model-filter" class="text-label-sm font-bold uppercase tracking-[0.1em] text-on-surface-variant">
+        <label
+          for="catalogue-model-filter"
+          class="text-label-sm font-bold uppercase tracking-[0.1em] text-on-surface-variant"
+        >
           Modèle
         </label>
         <div class="relative">
           <select
             id="catalogue-model-filter"
             class="w-full appearance-none rounded-xl border border-outline/20 bg-surface-container-low px-4 py-3 text-body-md text-on-background transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50"
-            [value]="filters().model"
+            [value]="filters().modelId ?? ''"
             [disabled]="modelOptions().length === 0"
             (change)="onModelChange($event)"
           >
             <option value="">Tous les modèles</option>
-            @for (model of modelOptions(); track model) {
-              <option [value]="model">{{ model }}</option>
+            @for (model of modelOptions(); track model.id) {
+              <option [value]="model.id">{{ model.label }}</option>
             }
           </select>
           <svg
@@ -106,10 +112,10 @@
               inputmode="numeric"
               min="0"
               step="500"
-              placeholder="Min"
+              placeholder="Min €"
               class="w-full rounded-xl border border-outline/20 bg-surface-container-low px-3 py-2.5 text-body-md text-on-background transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               [value]="filters().priceMin ?? ''"
-              (input)="onPriceMinInput($event)"
+              (change)="onPriceMinChange($event)"
             />
           </div>
           <div>
@@ -120,10 +126,10 @@
               inputmode="numeric"
               min="0"
               step="500"
-              placeholder="Max"
+              placeholder="Max €"
               class="w-full rounded-xl border border-outline/20 bg-surface-container-low px-3 py-2.5 text-body-md text-on-background transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               [value]="filters().priceMax ?? ''"
-              (input)="onPriceMaxInput($event)"
+              (change)="onPriceMaxChange($event)"
             />
           </div>
         </div>
@@ -133,16 +139,22 @@
           [min]="sliderMin()"
           [max]="sliderMax()"
           step="500"
-          [value]="effectivePriceMax()"
+          [value]="displayPriceMax()"
           [attr.aria-valuemin]="sliderMin()"
           [attr.aria-valuemax]="sliderMax()"
-          [attr.aria-valuenow]="effectivePriceMax()"
+          [attr.aria-valuenow]="displayPriceMax()"
           aria-label="Ajuster le prix maximum"
           (input)="onPriceSliderInput($event)"
+          (change)="onPriceSliderChange($event)"
         />
         <div class="flex justify-between text-label-sm text-on-surface-variant">
           <span>{{ sliderMin() | number: '1.0-0' : 'fr' }} €</span>
-          <span>{{ sliderMax() | number: '1.0-0' : 'fr' }} €</span>
+          <span
+            class="font-semibold"
+            [class.text-primary]="filters().priceMax !== null || localPriceMax() !== null"
+          >
+            {{ displayPriceMax() | number: '1.0-0' : 'fr' }} €
+          </span>
         </div>
       </fieldset>
 
@@ -162,7 +174,6 @@
               [class.border-outline/20]="filters().yearRange !== option.value"
               [class.bg-surface-container-low]="filters().yearRange !== option.value"
               [class.text-on-background]="filters().yearRange !== option.value"
-              [class.hover:border-primary]="filters().yearRange !== option.value"
               [attr.aria-pressed]="filters().yearRange === option.value"
               (click)="onYearRangeSelect(option.value)"
             >
@@ -173,28 +184,34 @@
       </fieldset>
 
       <!-- Type de carburant -->
-      <fieldset class="space-y-3">
-        <legend class="text-label-sm font-bold uppercase tracking-[0.1em] text-on-surface-variant">
-          Type de carburant
-        </legend>
-        <ul class="space-y-2" role="list">
-          @for (fuel of fuelOptions; track fuel.value) {
-            <li>
-              <label
-                class="flex cursor-pointer items-center gap-3 rounded-lg px-1 py-1.5 text-body-md text-on-background transition hover:text-primary"
-              >
-                <input
-                  type="checkbox"
-                  class="size-4 rounded border-outline/30 accent-primary"
-                  [checked]="isFuelChecked(fuel.value)"
-                  (change)="onFuelToggle(fuel.value, $any($event.target).checked)"
-                />
-                {{ fuel.label }}
-              </label>
-            </li>
-          }
-        </ul>
-      </fieldset>
+      @if (fuelOptions().length > 0) {
+        <div class="space-y-2">
+          <label
+            for="catalogue-fuel-filter"
+            class="text-label-sm font-bold uppercase tracking-[0.1em] text-on-surface-variant"
+          >
+            Carburant
+          </label>
+          <div class="relative">
+            <select
+              id="catalogue-fuel-filter"
+              class="w-full appearance-none rounded-xl border border-outline/20 bg-surface-container-low px-4 py-3 text-body-md text-on-background transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              [value]="filters().fuel ?? ''"
+              (change)="onFuelChange($event)"
+            >
+              <option value="">Tous les carburants</option>
+              @for (fuel of fuelOptions(); track fuel) {
+                <option [value]="fuel">{{ fuelDisplayLabels[fuel] || fuel }}</option>
+              }
+            </select>
+            <svg
+              lucideChevronDown
+              class="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-on-surface-variant"
+              aria-hidden="true"
+            />
+          </div>
+        </div>
+      }
     </div>
   </aside>
 </div>

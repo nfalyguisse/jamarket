@@ -1,118 +1,97 @@
-import type { VehicleCard } from '@core/models/vehicle-card.model';
-import type {
-  CatalogueFiltersState,
-  CataloguePriceBounds,
-  CatalogueYearRange,
+import type { ParamMap } from '@angular/router';
+import {
+  DEFAULT_CATALOGUE_FILTERS,
+  type CatalogueFiltersState,
+  type CatalogueYearRange,
 } from './catalogue-filters.model';
 
-const DEFAULT_PRICE_BOUNDS: CataloguePriceBounds = { min: 0, max: 100_000 };
+const VALID_YEAR_RANGES: ReadonlyArray<CatalogueYearRange> = [
+  '2020+',
+  '2015-2019',
+  '2010-2014',
+  'classic',
+];
 
-function vehicleBrand(vehicle: VehicleCard): string {
-  return vehicle.brandLabel?.trim() ?? '';
-}
-
-function vehicleModel(vehicle: VehicleCard): string {
-  return vehicle.modelLabel?.trim() ?? '';
-}
-
-function matchesYearRange(year: number, range: CatalogueYearRange): boolean {
-  switch (range) {
-    case '2020+':
-      return year >= 2020;
-    case '2015-2019':
-      return year >= 2015 && year <= 2019;
-    case '2010-2014':
-      return year >= 2010 && year <= 2014;
-    case 'classic':
-      return year < 2010;
-    default:
-      return true;
+function parseIntOrNull(value: string | null): number | null {
+  if (!value) {
+    return null;
   }
+  const parsed = parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : null;
 }
 
-export function getPriceBounds(vehicles: VehicleCard[]): CataloguePriceBounds {
-  if (vehicles.length === 0) {
-    return DEFAULT_PRICE_BOUNDS;
+function parseNumberOrNull(value: string | null): number | null {
+  if (!value) {
+    return null;
   }
+  const parsed = parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
 
-  const prices = vehicles.map((v) => v.price);
+export function parseFiltersFromParams(params: ParamMap): CatalogueFiltersState {
+  const yearRaw = params.get('year');
+  const yearRange =
+    yearRaw && (VALID_YEAR_RANGES as string[]).includes(yearRaw)
+      ? (yearRaw as CatalogueYearRange)
+      : null;
+
   return {
-    min: Math.min(...prices),
-    max: Math.max(...prices),
+    query: params.get('q') ?? '',
+    brandId: parseIntOrNull(params.get('brand')),
+    modelId: parseIntOrNull(params.get('model')),
+    priceMin: parseNumberOrNull(params.get('priceMin')),
+    priceMax: parseNumberOrNull(params.get('priceMax')),
+    yearRange,
+    fuel: params.get('fuel') ?? null,
   };
 }
 
-export function extractBrandOptions(vehicles: VehicleCard[]): string[] {
-  const brands = new Set<string>();
-  for (const vehicle of vehicles) {
-    const brand = vehicleBrand(vehicle);
-    if (brand) {
-      brands.add(brand);
-    }
-  }
-  return [...brands].sort((a, b) => a.localeCompare(b, 'fr'));
-}
-
-export function extractModelOptions(
-  vehicles: VehicleCard[],
-  brand: string,
-): string[] {
-  const models = new Set<string>();
-  for (const vehicle of vehicles) {
-    if (brand && vehicleBrand(vehicle) !== brand) {
-      continue;
-    }
-    const model = vehicleModel(vehicle);
-    if (model) {
-      models.add(model);
-    }
-  }
-  return [...models].sort((a, b) => a.localeCompare(b, 'fr'));
-}
-
-export function applyCatalogueFilters(
-  vehicles: VehicleCard[],
+export function filtersToQueryParams(
   filters: CatalogueFiltersState,
-): VehicleCard[] {
-  return vehicles.filter((vehicle) => {
-    if (filters.brand && vehicleBrand(vehicle) !== filters.brand) {
-      return false;
-    }
-
-    if (filters.model && vehicleModel(vehicle) !== filters.model) {
-      return false;
-    }
-
-    if (filters.priceMin !== null && vehicle.price < filters.priceMin) {
-      return false;
-    }
-
-    if (filters.priceMax !== null && vehicle.price > filters.priceMax) {
-      return false;
-    }
-
-    if (filters.yearRange && !matchesYearRange(vehicle.year, filters.yearRange)) {
-      return false;
-    }
-
-    if (filters.fuelTypes.length > 0) {
-      const fuel = vehicle.fuelType?.trim() ?? '';
-      if (!filters.fuelTypes.includes(fuel)) {
-        return false;
-      }
-    }
-
-    return true;
-  });
+  sort: string,
+  page: number,
+  defaultSort: string,
+): Record<string, string | null> {
+  return {
+    q: filters.query.trim() || null,
+    brand: filters.brandId !== null ? String(filters.brandId) : null,
+    model: filters.modelId !== null ? String(filters.modelId) : null,
+    priceMin: filters.priceMin !== null ? String(filters.priceMin) : null,
+    priceMax: filters.priceMax !== null ? String(filters.priceMax) : null,
+    year: filters.yearRange ?? null,
+    fuel: filters.fuel ?? null,
+    sort: sort !== defaultSort ? sort : null,
+    page: page > 1 ? String(page) : null,
+  };
 }
 
 export function hasActiveFilters(filters: CatalogueFiltersState): boolean {
   return (
-    filters.brand !== '' ||
-    filters.model !== '' ||
+    filters.query.trim() !== '' ||
+    filters.brandId !== null ||
+    filters.modelId !== null ||
     filters.priceMin !== null ||
     filters.priceMax !== null ||
     filters.yearRange !== null ||
-    filters.fuelTypes.length > 0
+    filters.fuel !== null
   );
+}
+
+export function filtersEqual(
+  a: CatalogueFiltersState,
+  b: CatalogueFiltersState,
+): boolean {
+  return (
+    a.query === b.query &&
+    a.brandId === b.brandId &&
+    a.modelId === b.modelId &&
+    a.priceMin === b.priceMin &&
+    a.priceMax === b.priceMax &&
+    a.yearRange === b.yearRange &&
+    a.fuel === b.fuel
+  );
+}
+
+export function resetFilters(): CatalogueFiltersState {
+  return { ...DEFAULT_CATALOGUE_FILTERS };
 }
