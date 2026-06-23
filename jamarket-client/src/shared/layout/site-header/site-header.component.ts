@@ -33,8 +33,8 @@ export class SiteHeaderComponent implements OnInit {
   protected readonly searchQuery = signal('');
 
   protected readonly navLinks = [
+    { label: 'Accueil', path: '/' },
     { label: 'Catalogue', path: '/catalogue' },
-    { label: 'Services', path: '/services' },
   ] as const;
 
   ngOnInit(): void {
