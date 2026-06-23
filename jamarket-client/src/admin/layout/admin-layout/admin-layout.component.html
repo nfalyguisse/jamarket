@@ -1,0 +1,172 @@
+<div class="flex h-screen overflow-hidden bg-gray-50">
+
+  <!-- Overlay mobile -->
+  @if (sidebarOpen()) {
+    <div
+      class="fixed inset-0 z-20 bg-black/50 lg:hidden"
+      (click)="closeSidebar()"
+      aria-hidden="true"
+    ></div>
+  }
+
+  <!-- Sidebar -->
+  <aside
+    class="fixed inset-y-0 left-0 z-30 flex w-64 flex-col bg-[#1a2332] text-white transition-transform duration-300 lg:static lg:translate-x-0"
+    [class.-translate-x-full]="!sidebarOpen()"
+    [class.translate-x-0]="sidebarOpen()"
+    aria-label="Navigation principale du back office"
+  >
+    <!-- Logo -->
+    <div class="flex h-16 items-center border-b border-white/10 px-6">
+      <div class="flex items-center gap-2">
+        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500">
+          <span class="text-xs font-bold text-white">J</span>
+        </div>
+        <span class="text-sm font-semibold tracking-wide">Jamarket Back office</span>
+      </div>
+    </div>
+
+    <!-- Navigation principale -->
+    <nav class="flex-1 overflow-y-auto px-4 py-6" aria-label="Menu admin">
+      <ul class="space-y-1" role="list">
+
+        <li>
+          <a
+            routerLink="/admin/dashboard"
+            routerLinkActive="bg-white/10 !text-white"
+            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+            (click)="closeSidebar()"
+          >
+            <svg lucideLayoutDashboard class="h-[18px] w-[18px] flex-shrink-0" aria-hidden="true"></svg>
+            Dashboard
+          </a>
+        </li>
+
+        <li>
+          <a
+            routerLink="/admin/annonces"
+            routerLinkActive="bg-white/10 !text-white"
+            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+            (click)="closeSidebar()"
+          >
+            <svg lucideMegaphone class="h-[18px] w-[18px] flex-shrink-0" aria-hidden="true"></svg>
+            Annonces
+          </a>
+        </li>
+
+        <li>
+          <a
+            routerLink="/admin/messages"
+            routerLinkActive="bg-white/10 !text-white"
+            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+            (click)="closeSidebar()"
+          >
+            <svg lucideMessageSquare class="h-[18px] w-[18px] flex-shrink-0" aria-hidden="true"></svg>
+            Messages
+          </a>
+        </li>
+
+        <li>
+          <a
+            routerLink="/admin/utilisateurs"
+            routerLinkActive="bg-white/10 !text-white"
+            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+            (click)="closeSidebar()"
+          >
+            <svg lucideUsers class="h-[18px] w-[18px] flex-shrink-0" aria-hidden="true"></svg>
+            Utilisateurs
+          </a>
+        </li>
+
+      </ul>
+    </nav>
+
+    <!-- Paramètres en bas -->
+    <div class="border-t border-white/10 px-4 py-4">
+      <a
+        routerLink="/admin/parametres"
+        routerLinkActive="bg-white/10 !text-white"
+        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+        (click)="closeSidebar()"
+      >
+        <svg lucideSettings class="h-[18px] w-[18px] flex-shrink-0" aria-hidden="true"></svg>
+        Paramètres
+      </a>
+    </div>
+  </aside>
+
+  <!-- Zone principale -->
+  <div class="flex flex-1 flex-col overflow-hidden">
+
+    <!-- Header top -->
+    <header class="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:px-6">
+
+      <!-- Bouton burger (mobile) -->
+      <button
+        type="button"
+        class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden"
+        (click)="toggleSidebar()"
+        [attr.aria-label]="sidebarOpen() ? 'Fermer le menu' : 'Ouvrir le menu'"
+      >
+        @if (sidebarOpen()) {
+          <svg lucideX class="h-5 w-5" aria-hidden="true"></svg>
+        } @else {
+          <svg lucideMenu class="h-5 w-5" aria-hidden="true"></svg>
+        }
+      </button>
+
+      <div class="hidden lg:block" aria-hidden="true"></div>
+
+      <!-- Actions header droite -->
+      <div class="flex items-center gap-3">
+
+        <!-- Notification -->
+        <button
+          type="button"
+          class="relative rounded-lg p-2 text-gray-500 hover:bg-gray-100"
+          aria-label="Notifications"
+        >
+          <svg lucideBell class="h-5 w-5" aria-hidden="true"></svg>
+          <span
+            class="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-emerald-500"
+            aria-label="Nouvelles notifications"
+          ></span>
+        </button>
+
+        <!-- Aide -->
+        <button
+          type="button"
+          class="rounded-lg p-2 text-gray-500 hover:bg-gray-100"
+          aria-label="Aide"
+        >
+          <svg lucideCircleHelp class="h-5 w-5" aria-hidden="true"></svg>
+        </button>
+
+        <!-- Bouton Nouveau -->
+        <button
+          type="button"
+          class="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+        >
+          <svg lucidePlus class="h-4 w-4" aria-hidden="true"></svg>
+          Nouveau
+        </button>
+
+        <!-- Avatar -->
+        <button
+          type="button"
+          class="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-600 text-sm font-semibold text-white"
+          aria-label="Mon compte"
+        >
+          A
+        </button>
+
+      </div>
+    </header>
+
+    <!-- Contenu de la page -->
+    <main class="flex-1 overflow-y-auto">
+      <router-outlet />
+    </main>
+
+  </div>
+</div>
