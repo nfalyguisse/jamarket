@@ -17,11 +17,16 @@
     aria-label="Navigation principale du back office"
   >
     <!-- Logo -->
-    <div class="flex h-16 items-center border-b border-white/10 px-6">
+    <div class="flex gap-5 h-16 items-center border-b border-white/10 px-6">
+        <!-- Avatar -->
+        <button
+          type="button"
+          class="flex h-9 w-9 items-center justify-center rounded-md bg-emerald-600 text-sm font-semibold text-white"
+          aria-label="Mon compte"
+        >
+          A
+        </button>
       <div class="flex items-center gap-2">
-        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500">
-          <span class="text-xs font-bold text-white">J</span>
-        </div>
         <span class="text-sm font-semibold tracking-wide">Jamarket Back office</span>
       </div>
     </div>
@@ -133,15 +138,6 @@
           ></span>
         </button>
 
-        <!-- Aide -->
-        <button
-          type="button"
-          class="rounded-lg p-2 text-gray-500 hover:bg-gray-100"
-          aria-label="Aide"
-        >
-          <svg lucideCircleHelp class="h-5 w-5" aria-hidden="true"></svg>
-        </button>
-
         <!-- Bouton Nouveau -->
         <button
           type="button"
@@ -149,15 +145,6 @@
         >
           <svg lucidePlus class="h-4 w-4" aria-hidden="true"></svg>
           Nouveau
-        </button>
-
-        <!-- Avatar -->
-        <button
-          type="button"
-          class="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-600 text-sm font-semibold text-white"
-          aria-label="Mon compte"
-        >
-          A
         </button>
 
       </div>
