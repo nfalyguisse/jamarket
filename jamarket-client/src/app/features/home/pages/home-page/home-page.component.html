@@ -51,7 +51,7 @@
           <div class="glass-card absolute bottom-8 -left-2 z-20 max-w-xs rounded-2xl p-6 shadow-xl md:-left-6">
             <div class="flex items-center gap-4">
               <div class="flex size-12 items-center justify-center rounded-full bg-primary text-on-primary">
-                <svg lucideBadgeCheck class="size-6" aria-hidden="true"/>
+                <svg lucideBadgeCheck class="size-6" aria-hidden="true"></svg>
               </div>
               <div>
                 <p class="text-label-md text-on-surface-variant">Véhicules révisés</p>
@@ -69,6 +69,7 @@
         <div class="rounded-[2.5rem] border border-outline/10 bg-on-background p-6 shadow-2xl md:p-8">
           <h2 id="search-title" class="sr-only">Recherche rapide de véhicules</h2>
           <div class="grid grid-cols-1 items-end gap-6 md:grid-cols-4">
+            <!-- Marque -->
             <div class="space-y-2">
               <label for="brand-filter" class="pl-2 text-label-sm uppercase tracking-widest text-on-surface-variant">
                 Marque
@@ -76,66 +77,80 @@
               <select
                 id="brand-filter"
                 class="w-full rounded-full border border-outline/20 bg-surface-container/10 px-6 py-3 text-white focus:border-primary focus:ring-primary"
-                [value]="selectedBrand()"
+                [value]="selectedBrandId() ?? ''"
                 (change)="onBrandChange($event)"
               >
-                @for (brand of brandOptions; track brand) {
-                  <option [value]="brand">{{ brand }}</option>
+                <option value="" class="text-black">Toutes les marques</option>
+                @for (brand of brands(); track brand.id) {
+                  <option [value]="brand.id" class="text-black">{{ brand.label }}</option>
                 }
               </select>
             </div>
+
+            <!-- Modèle -->
             <div class="space-y-2">
               <label for="model-filter" class="pl-2 text-label-sm uppercase tracking-widest text-on-surface-variant">
                 Modèle
               </label>
               <select
                 id="model-filter"
-                class="w-full rounded-full border border-outline/20 bg-surface-container/10 px-6 py-3 text-white focus:border-primary focus:ring-primary"
+                class="w-full rounded-full border border-outline/20 bg-surface-container/10 px-6 py-3 text-white focus:border-primary focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
+                [value]="selectedModelId() ?? ''"
+                [disabled]="modelsDisabled()"
+                (change)="onModelChange($event)"
               >
-                <option>Tous les modèles</option>
+                <option value="" class="text-black">Tous les modèles</option>
+                @for (model of filteredModels(); track model.id) {
+                  <option [value]="model.id" class="text-black">{{ model.label }}</option>
+                }
               </select>
             </div>
+
+            <!-- Budget -->
             <div class="space-y-2">
               <label for="price-filter" class="pl-2 text-label-sm uppercase tracking-widest text-on-surface-variant">
-                Budget max : {{ maxPrice() | number }} €
+                Budget max : {{ maxPrice() | number: '1.0-0' : 'fr' }} €
               </label>
               <input
                 id="price-filter"
                 type="range"
                 min="5000"
-                max="50000"
+                [max]="priceSliderMax"
                 step="500"
                 class="h-2 w-full cursor-pointer appearance-none rounded-lg accent-primary-container bg-surface-container/20"
                 [value]="maxPrice()"
                 (input)="onPriceChange($event)"
                 aria-valuemin="5000"
-                aria-valuemax="50000"
+                [attr.aria-valuemax]="priceSliderMax"
                 [attr.aria-valuenow]="maxPrice()"
               />
               <div class="mt-1 flex justify-between text-label-sm text-surface-dim">
                 <span>5 000 €</span>
-                <span>50 000 €</span>
+                <span>{{ priceSliderMax | number: '1.0-0' : 'fr' }} €</span>
               </div>
             </div>
-            <a
-              routerLink="/catalogue"
-              class="flex h-[50px] w-full items-center justify-center gap-2 rounded-full bg-primary-container font-headline-md text-on-primary-container transition-colors hover:bg-primary-fixed-dim"
+
+            <!-- Bouton rechercher -->
+            <button
+              type="button"
+              class="flex h-[50px] w-full items-center justify-center gap-2 rounded-full bg-primary-container font-headline-md text-on-primary-container transition-colors hover:bg-primary-fixed-dim active:scale-[0.98]"
+              (click)="onSearch()"
             >
-              <svg lucideSearch class="size-5" aria-hidden="true" />
+              <svg lucideSearch class="size-5" aria-hidden="true"></svg>
               Rechercher
-            </a>
+            </button>
           </div>
           <ul class="mt-6 flex flex-wrap justify-center gap-6 text-label-sm text-surface-dim md:gap-8">
             <li class="flex items-center gap-2">
-              <svg lucideCheckCircle class="size-4 text-primary-container" aria-hidden="true" />
+              <svg lucideCheckCircle class="size-4 text-primary-container" aria-hidden="true"></svg>
               Stock mis à jour régulièrement
             </li>
             <li class="flex items-center gap-2">
-              <svg lucideShield class="size-4 text-primary-container" aria-hidden="true" />
+              <svg lucideShield class="size-4 text-primary-container" aria-hidden="true"></svg>
               Garage local de confiance
             </li>
             <li class="flex items-center gap-2">
-              <svg lucideHeadphones class="size-4 text-primary-container" aria-hidden="true" />
+              <svg lucideHeadphones class="size-4 text-primary-container" aria-hidden="true"></svg>
               Messagerie directe avec l'équipe
             </li>
           </ul>
@@ -156,7 +171,7 @@
             class="group inline-flex items-center gap-2 font-headline-md text-primary"
           >
             Voir tout le stock
-            <svg lucideArrowRight class="size-5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+            <svg lucideArrowRight class="size-5 transition-transform group-hover:translate-x-1" aria-hidden="true"></svg>
           </a>
         </div>
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
