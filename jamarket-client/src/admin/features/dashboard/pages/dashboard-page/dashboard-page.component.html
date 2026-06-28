@@ -1,34 +1,28 @@
 <div class="space-y-6 p-6 md:p-8">
-
   <!-- En-tête page -->
   <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
     <div>
       <h1 class="text-2xl font-bold text-gray-900">Tableau de bord</h1>
-      <p class="mt-0.5 text-sm text-gray-500">Bienvenue, voici un aperçu de vos activités aujourd'hui.</p>
-    </div>
-    <div class="flex items-center gap-1.5 text-xs text-emerald-600">
-      <svg class="h-3.5 w-3.5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-      </svg>
-      <span>Mis à jour il y a 5 min</span>
     </div>
   </div>
 
   <!-- Cartes statistiques -->
   <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-
     <!-- Annonces -->
     <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
       <div class="flex items-start justify-between">
         <div class="flex flex-col gap-1">
-          <span class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-600">
+          <span
+            class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-600"
+          >
             +12%
           </span>
           <p class="text-sm text-gray-500">Total Annonces</p>
           <p class="text-2xl font-bold text-gray-900">1 284</p>
         </div>
-        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 text-gray-500">
+        <div
+          class="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 text-gray-500"
+        >
           <svg lucideMegaphone class="h-5 w-5" aria-hidden="true"></svg>
         </div>
       </div>
@@ -38,15 +32,30 @@
     <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
       <div class="flex items-start justify-between">
         <div class="flex flex-col gap-1">
-          <span class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-600">
+          <span
+            class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-600"
+          >
             +8.4%
           </span>
           <p class="text-sm text-gray-500">Ventes du mois</p>
           <p class="text-2xl font-bold text-gray-900">42 850 €</p>
         </div>
-        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 text-gray-500">
-          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+        <div
+          class="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 text-gray-500"
+        >
+          <svg
+            class="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+            />
           </svg>
         </div>
       </div>
@@ -56,25 +65,27 @@
     <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
       <div class="flex items-start justify-between">
         <div class="flex flex-col gap-1">
-          <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-600">
+          <span
+            class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-600"
+          >
             24 nouveaux
           </span>
           <p class="text-sm text-gray-500">Nouveaux messages</p>
           <p class="text-2xl font-bold text-gray-900">156</p>
         </div>
-        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 text-gray-500">
+        <div
+          class="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 text-gray-500"
+        >
           <svg lucideMessageSquare class="h-5 w-5" aria-hidden="true"></svg>
         </div>
       </div>
     </div>
-
   </div>
 
   <!-- Graphique + Activités récentes -->
-  <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-
+  <div class="grid grid-cols-1 gap-4 lg:grid-cols-4">
     <!-- Graphique performances -->
-    <div class="col-span-1 rounded-xl border border-gray-200 bg-white p-5 shadow-sm lg:col-span-2">
+    <div class="col-span-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
       <div class="mb-4 flex items-center justify-between">
         <h2 class="text-base font-semibold text-gray-900">Performances des annonces</h2>
         <button
@@ -93,88 +104,57 @@
         aria-label="Graphique des performances des annonces sur les 7 derniers jours"
       >
         @for (bar of barChartData; track bar.day) {
-          <div class="flex flex-1 flex-col items-center gap-1">
-            <div
-              class="w-full rounded-t-md bg-emerald-500 transition-all hover:bg-emerald-600"
-              [style.height]="getBarHeight(bar.value)"
-              [attr.aria-label]="bar.day + ' : ' + bar.value + ' vues'"
-            ></div>
-            <span class="text-[10px] text-gray-400">{{ bar.day }}</span>
-          </div>
+        <div class="flex flex-1 flex-col items-center gap-1">
+          <div
+            class="w-full rounded-t-md bg-emerald-500 transition-all hover:bg-emerald-600"
+            [style.height]="getBarHeight(bar.value)"
+            [attr.aria-label]="bar.day + ' : ' + bar.value + ' vues'"
+          ></div>
+          <span class="text-[10px] text-gray-400">{{ bar.day }}</span>
+        </div>
         }
       </div>
     </div>
-
-    <!-- Activités récentes -->
-    <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-      <div class="mb-4 flex items-center justify-between">
-        <h2 class="text-base font-semibold text-gray-900">Activités récentes</h2>
-        <button type="button" class="text-xs text-emerald-600 hover:underline">Voir tout</button>
+    <!-- Annonces à valider -->
+    <div class="rounded-xl border border-gray-200 bg-white shadow-sm col-span-4">
+      <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+        <h2 class="text-base font-semibold text-gray-900">Annonces à valider</h2>
+        <button
+          type="button"
+          (click)="approveAll()"
+          class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+        >
+          Tout approuver
+        </button>
       </div>
 
-      <ul class="space-y-4" role="list">
-
-        @for (activity of recentActivities; track activity.time) {
-          <li class="flex items-start gap-3">
-
-            <!-- Icône selon type -->
-            @if (activity.type === 'ad') {
-              <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600" aria-hidden="true">
-                <svg lucideMegaphone class="h-4 w-4" aria-hidden="true"></svg>
-              </div>
-            } @else if (activity.type === 'user') {
-              <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600" aria-hidden="true">
-                <svg lucideUser class="h-4 w-4" aria-hidden="true"></svg>
-              </div>
-            } @else {
-              <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-orange-100 text-orange-600" aria-hidden="true">
-                <svg lucideMessageSquare class="h-4 w-4" aria-hidden="true"></svg>
-              </div>
-            }
-
-            <div class="min-w-0 flex-1">
-              <p class="text-sm font-medium leading-tight text-gray-900">{{ activity.title }}</p>
-              <p class="mt-0.5 truncate text-xs text-emerald-600">{{ activity.subtitle }}</p>
-              <p class="mt-0.5 text-[11px] text-gray-400">{{ activity.time }}</p>
-            </div>
-
-          </li>
-        }
-
-      </ul>
-    </div>
-
-  </div>
-
-  <!-- Annonces à valider -->
-  <div class="rounded-xl border border-gray-200 bg-white shadow-sm">
-    <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4">
-      <h2 class="text-base font-semibold text-gray-900">Annonces à valider</h2>
-      <button
-        type="button"
-        (click)="approveAll()"
-        class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-      >
-        Tout approuver
-      </button>
-    </div>
-
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm" aria-label="Liste des annonces en attente de validation">
-        <thead>
-          <tr class="border-b border-gray-100 text-left">
-            <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">Véhicule</th>
-            <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">Vendeur</th>
-            <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">Prix</th>
-            <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">Date</th>
-            <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">Statut</th>
-            <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-50">
-          @for (ad of pendingAds; track ad.id) {
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm" aria-label="Liste des annonces en attente de validation">
+          <thead>
+            <tr class="border-b border-gray-100 text-left">
+              <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">
+                Véhicule
+              </th>
+              <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">
+                Vendeur
+              </th>
+              <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">
+                Prix
+              </th>
+              <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">
+                Date
+              </th>
+              <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">
+                Statut
+              </th>
+              <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-50">
+            @for (ad of pendingAds; track ad.id) {
             <tr class="transition-colors hover:bg-gray-50/50">
-
               <!-- Véhicule -->
               <td class="px-5 py-4">
                 <div class="flex items-center gap-3">
@@ -196,7 +176,7 @@
 
               <!-- Prix -->
               <td class="px-5 py-4 font-medium text-gray-900">
-                {{ ad.price | currency: 'EUR' : 'symbol' : '1.0-0' : 'fr' }}
+                {{ ad.price | currency: 'EUR':'symbol':'1.0-0':'fr' }}
               </td>
 
               <!-- Date -->
@@ -204,7 +184,9 @@
 
               <!-- Statut -->
               <td class="px-5 py-4">
-                <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20">
+                <span
+                  class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20"
+                >
                   En attente
                 </span>
               </td>
@@ -230,19 +212,18 @@
                   </button>
                 </div>
               </td>
-
             </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+            }
+          </tbody>
+        </table>
+      </div>
 
-    @if (pendingAds.length === 0) {
+      @if (pendingAds.length === 0) {
       <div class="flex flex-col items-center justify-center py-12 text-gray-400">
         <svg lucideCheck class="h-10 w-10" aria-hidden="true"></svg>
         <p class="mt-3 text-sm">Aucune annonce en attente</p>
       </div>
-    }
+      }
+    </div>
   </div>
-
 </div>

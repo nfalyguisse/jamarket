@@ -27,6 +27,7 @@ enum RightEnum {
   MANAGE_USER
   CUSTOMER
   ADMIN
+  SUPER_ADMIN
 }
 
 // ─────────────────────────────────────────────

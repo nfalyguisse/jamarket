@@ -33,6 +33,25 @@ export class AuthController {
     return this.authService.login(dto);
   }
 
+  @Post('admin/login')
+  @HttpCode(HttpStatus.OK)
+  adminLogin(@Body() dto: LoginDto) {
+    return this.authService.adminLogin(dto);
+  }
+
+  @Get('admin/me')
+  @UseGuards(JwtAuthGuard)
+  getAdminProfile(@Request() req: { user: { id: number } }) {
+    return this.authService.getAdminProfile(req.user.id);
+  }
+
+  @Post('admin/refresh')
+  @UseGuards(JwtRefreshGuard)
+  @HttpCode(HttpStatus.OK)
+  adminRefresh(@Request() req: { user: { id: number } }) {
+    return this.authService.adminRefresh(req.user.id);
+  }
+
   @Post('refresh')
   @UseGuards(JwtRefreshGuard)
   @HttpCode(HttpStatus.OK)

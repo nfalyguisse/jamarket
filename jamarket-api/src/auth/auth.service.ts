@@ -1,16 +1,18 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { JwtPayload } from './strategies/jwt.strategy';
+import { RightEnum } from 'generated/prisma/enums';
 
 const BCRYPT_ROUNDS = 10;
 const DEFAULT_CUSTOMER_ROLE_LABEL = 'Customer';
@@ -18,13 +20,15 @@ const DEFAULT_CUSTOMER_ROLE_LABEL = 'Customer';
 const CUSTOMER_ROLE_ID = 3;
 const INVALID_CREDENTIALS_MESSAGE =
   "L'email ou le mot de passe est incorrect.";
+const JWT_EXPIRES_IN = (process.env.JWT_EXPIRES_IN ?? '15m') as JwtSignOptions['expiresIn'];
+const JWT_REFRESH_EXPIRES_IN = (process.env.JWT_REFRESH_EXPIRES_IN ?? '7d') as JwtSignOptions['expiresIn'];
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
-  ) {}
+  ) { }
 
   async register(dto: RegisterDto) {
     const existing = await this.prisma.user.findUnique({
@@ -77,6 +81,52 @@ export class AuthService {
     this.assertClientCustomer(user);
 
     return this.buildTokens(user);
+  }
+
+  async adminLogin(dto: LoginDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+      include: { role: true },
+    });
+
+    if (!user || user.deletedAt || !user.isActive) {
+      throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
+    }
+
+    const passwordMatch = await bcrypt.compare(dto.password, user.password);
+    if (!passwordMatch) {
+      throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
+    }
+
+    const hasAdminRight = user.role.rights.includes(RightEnum.ADMIN);
+    if (!hasAdminRight) {
+      throw new ForbiddenException(
+        "Vous n'avez pas les droits d'accès au back office.",
+      );
+    }
+
+    return this.buildTokens(user);
+  }
+
+  async getAdminProfile(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { role: true },
+      omit: { password: true },
+    });
+
+    if (!user || user.deletedAt || !user.isActive) {
+      throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
+    }
+
+    const hasAdminRight = user.role.rights.includes(RightEnum.ADMIN);
+    if (!hasAdminRight) {
+      throw new ForbiddenException(
+        "Vous n'avez pas les droits d'accès au back office.",
+      );
+    }
+
+    return user;
   }
 
   async refresh(userId: number) {
@@ -182,17 +232,37 @@ export class AuthService {
     }
   }
 
+  async adminRefresh(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { role: true },
+    });
+
+    if (!user || user.deletedAt || !user.isActive) {
+      throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
+    }
+
+    const hasAdminRight = user.role.rights.includes(RightEnum.ADMIN);
+    if (!hasAdminRight) {
+      throw new ForbiddenException(
+        "Vous n'avez pas les droits d'accès au back office.",
+      );
+    }
+
+    return this.buildTokens(user);
+  }
+
   private buildTokens(user: { id: number; email: string }) {
     const payload: JwtPayload = { sub: user.id, email: user.email };
 
     return {
       accessToken: this.jwtService.sign(payload, {
         secret: process.env.JWT_SECRET,
-        expiresIn: '15m',
+        expiresIn: JWT_EXPIRES_IN,
       }),
       refreshToken: this.jwtService.sign(payload, {
         secret: process.env.JWT_REFRESH_SECRET,
-        expiresIn: '7d',
+        expiresIn: JWT_REFRESH_EXPIRES_IN,
       }),
     };
   }

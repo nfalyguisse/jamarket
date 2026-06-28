@@ -1,8 +1,18 @@
 import { Routes } from '@angular/router';
+import { adminGuard } from './guards/admin.guard';
 
 export const adminRoutes: Routes = [
   {
+    path: 'connexion',
+    loadComponent: () =>
+      import('./features/auth/pages/admin-login-page/admin-login-page.component').then(
+        (m) => m.AdminLoginPageComponent,
+      ),
+    title: 'Connexion | Jamarket Back Office',
+  },
+  {
     path: '',
+    canActivate: [adminGuard],
     loadComponent: () =>
       import('./layout/admin-layout/admin-layout.component').then((m) => m.AdminLayoutComponent),
     children: [
