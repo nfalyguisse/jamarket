@@ -13,14 +13,14 @@ export class SiteFooterComponent {
 
   protected readonly usefulLinks = [
     { label: 'Catalogue', path: '/catalogue' },
-    { label: 'Services', path: '/services' },
-    { label: 'À propos', path: '/a-propos' },
+    // { label: 'Services', path: '/services' },
+    // { label: 'À propos', path: '/a-propos' },
     { label: 'Contact', path: '/contact' },
   ] as const;
 
   protected readonly legalLinks = [
     { label: 'Mentions légales', path: '/mentions-legales' },
     { label: 'Confidentialité', path: '/confidentialite' },
-    { label: 'Notre garage', path: '/a-propos' },
+    // { label: 'Notre garage', path: '/a-propos' },
   ] as const;
 }

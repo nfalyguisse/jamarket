@@ -12,3 +12,14 @@ export const SKIP_AUTH_REFRESH = new HttpContextToken<boolean>(() => false);
 export function hasAdminRight(profile: { role: { rights: string[] } }): boolean {
   return profile.role.rights.includes('ADMIN');
 }
+
+export function hasBackOfficeAccess(profile: { role: { rights: string[] } }): boolean {
+  return (
+    profile.role.rights.includes('ADMIN') ||
+    profile.role.rights.includes('CREATE_AD')
+  );
+}
+
+export function hasCreateAdRight(profile: { role: { rights: string[] } }): boolean {
+  return profile.role.rights.includes('CREATE_AD');
+}

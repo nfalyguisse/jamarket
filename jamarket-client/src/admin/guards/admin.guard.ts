@@ -5,7 +5,7 @@ import { catchError, defer, map, of } from 'rxjs';
 import {
   AUTH_ACCESS_TOKEN_KEY,
   AUTH_SCOPE_KEY,
-  hasAdminRight,
+  hasBackOfficeAccess,
 } from '@core/constants/auth.constants';
 import { AuthStateService } from '@core/services/auth-state.service';
 import { AdminAuthApiService } from '@admin/data/admin-auth-api.service';
@@ -23,7 +23,7 @@ export const adminGuard: CanActivateFn = () => {
   const adminAuthApi = inject(AdminAuthApiService);
   const platformId = inject(PLATFORM_ID);
 
-  const loginUrl = router.createUrlTree(['/admin/connexion']);
+  const loginUrl = router.createUrlTree(['/admin/connexi)on']);
 
   if (!isPlatformBrowser(platformId)) {
     return true;
@@ -38,12 +38,12 @@ export const adminGuard: CanActivateFn = () => {
     }
 
     const cachedProfile = authState.adminProfile();
-    if (cachedProfile && hasAdminRight(cachedProfile)) {
+    if (cachedProfile && hasBackOfficeAccess(cachedProfile)) {
       return of(true);
     }
 
     return adminAuthApi.fetchAndStoreAdminProfile().pipe(
-      map((profile) => (hasAdminRight(profile) ? true : loginUrl)),
+      map((profile) => (hasBackOfficeAccess(profile) ? true : loginUrl)),
       catchError(() => of(loginUrl)),
     );
   });

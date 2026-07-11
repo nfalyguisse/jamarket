@@ -177,6 +177,31 @@ export class SearchService {
     };
   }
 
+  async getFormReferences(brandId?: number) {
+    const [brands, models, vehiculeTypes] = await Promise.all([
+      this.prisma.brand.findMany({
+        select: { id: true, label: true },
+        orderBy: { label: 'asc' },
+      }),
+      this.prisma.model.findMany({
+        where: brandId ? { brandId } : {},
+        select: { id: true, label: true, brandId: true },
+        orderBy: { label: 'asc' },
+      }),
+      this.prisma.vehiculeType.findMany({
+        select: { id: true, label: true },
+        orderBy: { label: 'asc' },
+      }),
+    ]);
+
+    return {
+      brands,
+      models,
+      vehiculeTypes,
+      fuelTypes: ['essence', 'diesel', 'electrique', 'hybride'],
+    };
+  }
+
   private buildWhere(params: {
     brandId?: number;
     modelId?: number;

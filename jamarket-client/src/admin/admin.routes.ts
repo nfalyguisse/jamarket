@@ -38,6 +38,22 @@ export const adminRoutes: Routes = [
         title: 'Annonces | Jamarket Back Office',
       },
       {
+        path: 'annonces/nouvelle',
+        loadComponent: () =>
+          import('./features/ads/pages/ad-form-page/ad-form-page.component').then(
+            (m) => m.AdFormPageComponent,
+          ),
+        title: 'Nouvelle annonce | Jamarket Back Office',
+      },
+      {
+        path: 'annonces/:id/modifier',
+        loadComponent: () =>
+          import('./features/ads/pages/ad-form-page/ad-form-page.component').then(
+            (m) => m.AdFormPageComponent,
+          ),
+        title: 'Modifier annonce | Jamarket Back Office',
+      },
+      {
         path: 'utilisateurs',
         loadComponent: () =>
           import('./features/users/pages/users-list-page/users-list-page.component').then(

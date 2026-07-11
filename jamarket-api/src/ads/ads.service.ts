@@ -39,6 +39,19 @@ export class AdsService {
     return ad;
   }
 
+  async findMine(requestUser: { id: number; role: { rights: RightEnum[] } }) {
+    const isAdmin = requestUser.role.rights.includes(RightEnum.ADMIN);
+
+    return this.prisma.ad.findMany({
+      where: {
+        deletedAt: null,
+        ...(isAdmin ? {} : { sellerId: requestUser.id }),
+      },
+      include: AD_INCLUDE,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async create(dto: CreateAdDto, sellerId: number) {
     const vehicule = await this.prisma.vehicule.findUnique({
       where: { id: dto.vehiculeId },

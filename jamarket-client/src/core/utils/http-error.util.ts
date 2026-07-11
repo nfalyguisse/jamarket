@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 
 /** Contexte d’affichage pour choisir un message utilisateur adapté. */
-export type FormErrorContext = 'login' | 'register' | 'profile-update' | 'generic';
+export type FormErrorContext = 'login' | 'register' | 'profile-update' | 'ad-form' | 'generic';
 
 const USER_MESSAGES: Record<FormErrorContext, string> = {
   login: "L'email ou le mot de passe est incorrect.",
@@ -9,6 +9,8 @@ const USER_MESSAGES: Record<FormErrorContext, string> = {
     'Impossible de créer le compte. Vérifiez vos informations et réessayez.',
   'profile-update':
     'Impossible d’enregistrer vos modifications. Réessayez dans un instant.',
+  'ad-form':
+    'Impossible d’enregistrer l’annonce. Vérifiez les champs et réessayez.',
   generic: 'Une erreur est survenue. Réessayez dans un instant.',
 };
 
@@ -16,6 +18,8 @@ const NETWORK_MESSAGES: Record<FormErrorContext, string> = {
   login: 'Connexion impossible pour le moment. Réessayez plus tard.',
   register: 'Inscription impossible pour le moment. Réessayez plus tard.',
   'profile-update':
+    'Enregistrement impossible pour le moment. Réessayez plus tard.',
+  'ad-form':
     'Enregistrement impossible pour le moment. Réessayez plus tard.',
   generic: 'Service indisponible pour le moment. Réessayez plus tard.',
 };

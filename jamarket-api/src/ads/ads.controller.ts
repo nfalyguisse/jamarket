@@ -43,6 +43,13 @@ export class AdsController {
     return this.searchService.search(filters);
   }
 
+  @Get('mine')
+  @UseGuards(JwtAuthGuard, RightsGuard)
+  @RequireRights(RightEnum.CREATE_AD)
+  findMine(@Request() req: AuthRequest) {
+    return this.adsService.findMine(req.user);
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.adsService.findOne(id);

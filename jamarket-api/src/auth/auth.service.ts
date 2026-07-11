@@ -98,12 +98,7 @@ export class AuthService {
       throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
     }
 
-    const hasAdminRight = user.role.rights.includes(RightEnum.ADMIN);
-    if (!hasAdminRight) {
-      throw new ForbiddenException(
-        "Vous n'avez pas les droits d'accès au back office.",
-      );
-    }
+    this.assertBackOfficeAccess(user);
 
     return this.buildTokens(user);
   }
@@ -119,12 +114,7 @@ export class AuthService {
       throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
     }
 
-    const hasAdminRight = user.role.rights.includes(RightEnum.ADMIN);
-    if (!hasAdminRight) {
-      throw new ForbiddenException(
-        "Vous n'avez pas les droits d'accès au back office.",
-      );
-    }
+    this.assertBackOfficeAccess(user);
 
     return user;
   }
@@ -242,14 +232,21 @@ export class AuthService {
       throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
     }
 
-    const hasAdminRight = user.role.rights.includes(RightEnum.ADMIN);
-    if (!hasAdminRight) {
+    this.assertBackOfficeAccess(user);
+
+    return this.buildTokens(user);
+  }
+
+  private assertBackOfficeAccess(user: { role: { rights: RightEnum[] } }): void {
+    const canAccessBackOffice =
+      user.role.rights.includes(RightEnum.ADMIN) ||
+      user.role.rights.includes(RightEnum.CREATE_AD);
+
+    if (!canAccessBackOffice) {
       throw new ForbiddenException(
         "Vous n'avez pas les droits d'accès au back office.",
       );
     }
-
-    return this.buildTokens(user);
   }
 
   private buildTokens(user: { id: number; email: string }) {

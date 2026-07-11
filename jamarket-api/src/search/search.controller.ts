@@ -25,4 +25,9 @@ export class SearchController {
   getFilters(@Query() query: FilterOptionsQuery) {
     return this.searchService.getFilterOptions(query.brand);
   }
+
+  @Get('references')
+  getReferences(@Query() query: FilterOptionsQuery) {
+    return this.searchService.getFormReferences(query.brand);
+  }
 }
