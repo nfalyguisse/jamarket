@@ -50,6 +50,7 @@ export interface ApiAdResponse {
   price?: number | string;
   isActive?: boolean;
   isSold?: boolean;
+  isArchived?: boolean;
   createdAt?: string;
   vehicule?: ApiVehicule;
   seller?: ApiSeller | null;

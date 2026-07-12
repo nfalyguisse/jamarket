@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import type {
   AdminAd,
+  AdminAdListScope,
   AdminFormReferences,
   CreateAdPayload,
   CreateVehiculePayload,
@@ -20,8 +21,10 @@ export class AdminAdsApiService {
   private readonly vehiculesUrl = `${environment.apiUrl}/vehicules`;
   private readonly searchUrl = `${environment.apiUrl}/search`;
 
-  getMyAds(): Observable<AdminAd[]> {
-    return this.http.get<ApiAdResponse[]>(`${this.adsUrl}/mine`).pipe(
+  getMyAds(scope: AdminAdListScope = 'mine'): Observable<AdminAd[]> {
+    return this.http
+      .get<ApiAdResponse[]>(`${this.adsUrl}/mine`, { params: { scope } })
+      .pipe(
       map((ads) =>
         ads
           .map(mapApiAdToAdminAd)

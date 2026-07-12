@@ -198,8 +198,8 @@ export class AuthService {
       await tx.favorite.deleteMany({ where: { userId } });
 
       await tx.ad.updateMany({
-        where: { sellerId: userId, deletedAt: null },
-        data: { deletedAt: new Date(), isActive: false },
+        where: { sellerId: userId, isArchived: false },
+        data: { deletedAt: new Date(), isActive: false, isArchived: true },
       });
 
       await tx.user.update({

@@ -16,6 +16,7 @@ import {
   LucideImagePlus,
   LucideLoader2,
   LucidePlus,
+  LucideSave,
   LucideTrash2,
   LucideUpload,
 } from '@lucide/angular';
@@ -49,6 +50,7 @@ const FUEL_LABELS: Record<FuelType, string> = {
     LucideImagePlus,
     LucideLoader2,
     LucidePlus,
+    LucideSave,
     LucideTrash2,
     LucideUpload,
   ],
@@ -233,6 +235,14 @@ export class AdFormPageComponent implements OnInit {
   }
 
   protected submit(): void {
+    this.saveAd(true);
+  }
+
+  protected saveDraft(): void {
+    this.saveAd(false);
+  }
+
+  private saveAd(publish: boolean): void {
     this.validationError.set('');
 
     if (this.form.invalid || this.isSubmitting()) {
@@ -247,7 +257,7 @@ export class AdFormPageComponent implements OnInit {
     if (this.isEditMode()) {
       this.updateAd();
     } else {
-      this.createAd();
+      this.createAd(publish);
     }
   }
 
@@ -316,7 +326,7 @@ export class AdFormPageComponent implements OnInit {
     });
   }
 
-  private createAd(): void {
+  private createAd(publish: boolean): void {
     const raw = this.getValidatedFormValues();
     const pending = this.pendingImages();
 
@@ -338,6 +348,7 @@ export class AdFormPageComponent implements OnInit {
             description: raw.description,
             price: raw.price,
             vehiculeId,
+            isActive: publish,
           });
 
           if (pending.length === 0) {
@@ -354,7 +365,12 @@ export class AdFormPageComponent implements OnInit {
         finalize(() => this.isSubmitting.set(false)),
       )
       .subscribe({
-        next: () => this.onSuccess('Annonce publiée avec succès.'),
+        next: () =>
+          this.onSuccess(
+            publish
+              ? 'Annonce publiée avec succès.'
+              : 'Brouillon enregistré. L’annonce n’est pas visible en ligne.',
+          ),
         error: (error: unknown) => {
           this.serverError.set(resolveUserFacingError(error, 'ad-form'));
         },

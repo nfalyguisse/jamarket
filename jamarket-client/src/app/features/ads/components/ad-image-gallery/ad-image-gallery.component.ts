@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import type { AdImage } from '@core/models/ad-detail.model';
-
+import { environment } from 'src/environments/environment';
 const VISIBLE_THUMBNAILS = 4;
 
 @Component({
@@ -11,7 +11,7 @@ const VISIBLE_THUMBNAILS = 4;
 export class AdImageGalleryComponent {
   readonly images = input.required<AdImage[]>();
   readonly altPrefix = input('Photo du véhicule');
-
+  readonly environment = environment;
   protected readonly selectedIndex = signal(0);
 
   protected readonly selectedImage = computed(() => {

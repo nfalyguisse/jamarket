@@ -28,7 +28,7 @@ export class AdsService {
 
   async findOne(id: number) {
     const ad = await this.prisma.ad.findFirst({
-      where: { id, deletedAt: null },
+      where: { id, isArchived: false, deletedAt: null },
       include: AD_INCLUDE,
     });
 
@@ -39,13 +39,16 @@ export class AdsService {
     return ad;
   }
 
-  async findMine(requestUser: { id: number; role: { rights: RightEnum[] } }) {
-    const isAdmin = requestUser.role.rights.includes(RightEnum.ADMIN);
+  async findMine(
+    requestUser: { id: number; role: { rights: RightEnum[] } },
+    scope: 'mine' | 'all' = 'mine',
+  ) {
+    const showAll = scope === 'all';
 
     return this.prisma.ad.findMany({
       where: {
-        deletedAt: null,
-        ...(isAdmin ? {} : { sellerId: requestUser.id }),
+        isArchived: false,
+        ...(showAll ? {} : { sellerId: requestUser.id }),
       },
       include: AD_INCLUDE,
       orderBy: { createdAt: 'desc' },
@@ -76,15 +79,15 @@ export class AdsService {
         price: dto.price,
         vehiculeId: dto.vehiculeId,
         sellerId,
+        isActive: dto.isActive ?? true,
       },
       include: AD_INCLUDE,
     });
   }
 
   async update(id: number, dto: UpdateAdDto, requestUser: { id: number; role: { rights: RightEnum[] } }) {
-    const ad = await this.findOne(id);
-
-    this.checkOwnership(ad, requestUser);
+    await this.findOne(id);
+    this.assertCanManageAd(requestUser);
 
     return this.prisma.ad.update({
       where: { id },
@@ -94,13 +97,12 @@ export class AdsService {
   }
 
   async remove(id: number, requestUser: { id: number; role: { rights: RightEnum[] } }) {
-    const ad = await this.findOne(id);
-
-    this.checkOwnership(ad, requestUser);
+    await this.findOne(id);
+    this.assertCanManageAd(requestUser);
 
     return this.prisma.ad.update({
       where: { id },
-      data: { deletedAt: new Date(), isActive: false },
+      data: { deletedAt: new Date(), isActive: false, isArchived: true },
     });
   }
 
@@ -116,9 +118,8 @@ export class AdsService {
   }
 
   async markAsSold(id: number, requestUser: { id: number; role: { rights: RightEnum[] } }) {
-    const ad = await this.findOne(id);
-
-    this.checkOwnership(ad, requestUser);
+    await this.findOne(id);
+    this.assertCanManageAd(requestUser);
 
     return this.prisma.ad.update({
       where: { id },
@@ -127,14 +128,10 @@ export class AdsService {
     });
   }
 
-  private checkOwnership(
-    ad: { sellerId: number | null },
-    user: { id: number; role: { rights: RightEnum[] } },
-  ) {
-    const isAdmin = user.role.rights.includes(RightEnum.ADMIN);
-    const isOwner = ad.sellerId === user.id;
+  private assertCanManageAd(user: { role: { rights: RightEnum[] } }) {
+    const canManageGarageAds = user.role.rights.includes(RightEnum.CREATE_AD);
 
-    if (!isAdmin && !isOwner) {
+    if (!canManageGarageAds) {
       throw new ForbiddenException("Vous n'êtes pas autorisé à modifier cette annonce");
     }
   }

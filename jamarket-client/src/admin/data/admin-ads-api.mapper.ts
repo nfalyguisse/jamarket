@@ -46,7 +46,18 @@ export function mapApiAdToAdminAd(ad: ApiAdResponse): AdminAd | null {
     price: Number(ad.price ?? 0),
     isActive: ad.isActive ?? true,
     isSold: ad.isSold ?? false,
+    isArchived: ad.isArchived ?? false,
     createdAt: ad.createdAt ?? new Date().toISOString(),
     vehicule,
+    ...(ad.seller?.id && ad.seller.name && ad.seller.lastName && ad.seller.email
+      ? {
+          seller: {
+            id: ad.seller.id,
+            name: ad.seller.name,
+            lastName: ad.seller.lastName,
+            email: ad.seller.email,
+          },
+        }
+      : {}),
   };
 }

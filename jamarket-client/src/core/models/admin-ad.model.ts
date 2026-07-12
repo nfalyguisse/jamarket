@@ -22,6 +22,13 @@ export interface AdminAdVehicule {
   images: AdminAdImage[];
 }
 
+export interface AdminAdSeller {
+  id: number;
+  name: string;
+  lastName: string;
+  email: string;
+}
+
 export interface AdminAd {
   id: number;
   label: string;
@@ -29,9 +36,13 @@ export interface AdminAd {
   price: number;
   isActive: boolean;
   isSold: boolean;
+  isArchived: boolean;
   createdAt: string;
   vehicule: AdminAdVehicule;
+  seller?: AdminAdSeller;
 }
+
+export type AdminAdListScope = 'mine' | 'all';
 
 export interface AdminFormReferences {
   brands: { id: number; label: string }[];
@@ -56,6 +67,7 @@ export interface CreateAdPayload {
   description: string;
   price: number;
   vehiculeId: number;
+  isActive?: boolean;
 }
 
 export interface UpdateAdPayload {

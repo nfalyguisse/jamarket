@@ -19,6 +19,7 @@ const AD_INCLUDE = {
 const ACTIVE_AD_WHERE: Prisma.AdWhereInput = {
   isActive: true,
   isSold: false,
+  isArchived: false,
   deletedAt: null,
 };
 

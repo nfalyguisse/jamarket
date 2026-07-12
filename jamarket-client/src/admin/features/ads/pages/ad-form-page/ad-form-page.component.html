@@ -336,6 +336,21 @@
         >
           Annuler
         </a>
+        @if (!isEditMode()) {
+          <button
+            type="button"
+            [disabled]="isSubmitting()"
+            class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-60"
+            (click)="saveDraft()"
+          >
+            @if (isSubmitting()) {
+              <svg lucideLoader2 class="h-4 w-4 animate-spin" aria-hidden="true"></svg>
+            } @else {
+              <svg lucideSave class="h-4 w-4" aria-hidden="true"></svg>
+            }
+            Enregistrer en brouillon
+          </button>
+        }
         <button
           type="submit"
           [disabled]="isSubmitting()"

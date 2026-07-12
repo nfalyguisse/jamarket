@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 import { RouterLink } from '@angular/router';
 import { LucideCalendar, LucideFuel, LucideGauge, LucideHeart } from '@lucide/angular';
 import type { VehicleCard } from '@core/models/vehicle-card.model';
-
+import { environment } from 'src/environments/environment';
 @Component({
   selector: 'app-catalogue-vehicle-card',
   imports: [RouterLink, CurrencyPipe, DecimalPipe, LucideGauge, LucideCalendar, LucideFuel, LucideHeart],
@@ -14,7 +14,7 @@ import type { VehicleCard } from '@core/models/vehicle-card.model';
 export class CatalogueVehicleCardComponent {
   readonly vehicle = input.required<VehicleCard>();
   readonly favoriteToggle = output<string>();
-
+  readonly environment = environment;
   onFavoriteClick(event: Event): void {
     event.preventDefault();
     event.stopPropagation();
