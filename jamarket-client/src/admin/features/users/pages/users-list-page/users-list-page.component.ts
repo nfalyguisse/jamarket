@@ -11,10 +11,13 @@ import Swal from 'sweetalert2';
 import {
   LucideBan,
   LucideCheckCircle,
+  LucideKeyRound,
   LucideLoader2,
+  LucidePlus,
   LucideSearch,
   LucideShield,
   LucideUsers,
+  LucideX,
 } from '@lucide/angular';
 import { AdminUsersApiService } from '@admin/data/admin-users-api.service';
 import type { AdminUser, AdminUserRole } from '@core/models/admin-user.model';
@@ -34,10 +37,13 @@ type UserTab = 'clients' | 'team';
     FormsModule,
     LucideBan,
     LucideCheckCircle,
+    LucideKeyRound,
     LucideLoader2,
+    LucidePlus,
     LucideSearch,
     LucideShield,
     LucideUsers,
+    LucideX,
   ],
   templateUrl: './users-list-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -58,6 +64,13 @@ export class UsersListPageComponent implements OnInit {
   protected readonly totalPages = signal(1);
   protected readonly totalUsers = signal(0);
   protected readonly actionUserId = signal<number | null>(null);
+  protected readonly showCreateForm = signal(false);
+  protected readonly isCreating = signal(false);
+
+  protected formName = '';
+  protected formLastName = '';
+  protected formEmail = '';
+  protected formRoleId: number | null = null;
 
   protected readonly roleLabels = ROLE_LABELS;
 
@@ -72,7 +85,105 @@ export class UsersListPageComponent implements OnInit {
     }
     this.activeTab.set(tab);
     this.currentPage.set(1);
+    this.closeCreateForm();
     this.loadUsers();
+  }
+
+  protected openCreateForm(): void {
+    const roles = this.assignableRoles();
+    this.formName = '';
+    this.formLastName = '';
+    this.formEmail = '';
+    this.formRoleId = roles[0]?.id ?? null;
+    this.showCreateForm.set(true);
+  }
+
+  protected closeCreateForm(): void {
+    this.showCreateForm.set(false);
+    this.formName = '';
+    this.formLastName = '';
+    this.formEmail = '';
+    this.formRoleId = null;
+  }
+
+  protected submitCreateForm(): void {
+    const name = this.formName.trim();
+    const lastName = this.formLastName.trim();
+    const email = this.formEmail.trim();
+    const roleId = this.formRoleId;
+
+    if (!name || !lastName || !email || !roleId) {
+      void Swal.fire({
+        icon: 'warning',
+        title: 'Champs requis',
+        text: 'Veuillez renseigner le prénom, le nom, l’email et le rôle.',
+        confirmButtonColor: '#006b5e',
+      });
+      return;
+    }
+
+    this.isCreating.set(true);
+
+    this.adminUsersApi.createEmployee({ name, lastName, email, roleId }).subscribe({
+      next: (response) => {
+        this.isCreating.set(false);
+        this.closeCreateForm();
+
+        if (this.activeTab() === 'team') {
+          this.users.update((items) => [response.user, ...items]);
+          this.totalUsers.update((count) => count + 1);
+        }
+
+        void this.showTemporaryPasswordPopup(response, 'created');
+      },
+      error: (error: unknown) => {
+        this.isCreating.set(false);
+        void Swal.fire({
+          icon: 'error',
+          title: 'Création impossible',
+          text: resolveUserFacingError(error, 'generic'),
+          confirmButtonColor: '#006b5e',
+        });
+      },
+    });
+  }
+
+  private async showTemporaryPasswordPopup(
+    response: { user: AdminUser; temporaryPassword: string },
+    context: 'created' | 'reset',
+  ): Promise<void> {
+    const title =
+      context === 'created' ? 'Compte employé créé' : 'Mot de passe régénéré';
+    const intro =
+      context === 'created'
+        ? `Le compte de <strong>${this.fullName(response.user)}</strong> est actif. Communiquez ce mot de passe à l’employé — il ne sera plus affiché.`
+        : `Un nouveau mot de passe a été généré pour <strong>${this.fullName(response.user)}</strong>. L’ancien mot de passe n’est plus valide.`;
+
+    await Swal.fire({
+      icon: 'success',
+      title,
+      html: `
+        <p class="text-sm text-gray-600 mb-4">${intro}</p>
+        <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+          <p class="text-xs font-medium uppercase tracking-wide text-gray-500 mb-1">Mot de passe temporaire</p>
+          <p id="temp-password" class="font-mono text-lg font-bold text-gray-900 tracking-wider">${response.temporaryPassword}</p>
+        </div>
+      `,
+      confirmButtonText: 'Copier le mot de passe',
+      confirmButtonColor: '#006b5e',
+      showCancelButton: true,
+      cancelButtonText: 'Fermer',
+      cancelButtonColor: '#6b7280',
+      preConfirm: async () => {
+        try {
+          await navigator.clipboard.writeText(response.temporaryPassword);
+          return true;
+        } catch {
+          Swal.showValidationMessage('Impossible de copier automatiquement. Sélectionnez le mot de passe manuellement.');
+          return false;
+        }
+      },
+    });
   }
 
   protected onSearchSubmit(): void {
@@ -117,23 +228,62 @@ export class UsersListPageComponent implements OnInit {
     return user.id === this.authState.adminProfile()?.id;
   }
 
-  protected confirmBan(user: AdminUser): void {
-    const isBanning = user.isActive;
+  protected confirmResetPassword(user: AdminUser): void {
+    if (this.isCurrentUser(user)) {
+      return;
+    }
 
     void Swal.fire({
       icon: 'warning',
-      title: isBanning ? 'Désactiver ce compte client ?' : 'Réactiver ce compte client ?',
-      text: isBanning
-        ? `${this.fullName(user)} ne pourra plus se connecter à Jamarket Auto.`
-        : `${this.fullName(user)} pourra à nouveau accéder à son compte.`,
+      title: 'Régénérer le mot de passe ?',
+      text: `Un nouveau mot de passe sera généré pour ${this.fullName(user)}. L’ancien ne fonctionnera plus.`,
       showCancelButton: true,
-      confirmButtonColor: isBanning ? '#dc2626' : '#006b5e',
+      confirmButtonColor: '#006b5e',
       cancelButtonColor: '#6b7280',
-      confirmButtonText: isBanning ? 'Désactiver' : 'Réactiver',
+      confirmButtonText: 'Régénérer',
       cancelButtonText: 'Annuler',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.toggleBan(user, isBanning);
+        this.resetPassword(user);
+      }
+    });
+  }
+
+  protected confirmBan(user: AdminUser): void {
+    this.confirmToggleStatus(user, 'client');
+  }
+
+  protected confirmToggleEmployeeStatus(user: AdminUser): void {
+    if (this.isCurrentUser(user)) {
+      return;
+    }
+    this.confirmToggleStatus(user, 'employee');
+  }
+
+  private confirmToggleStatus(user: AdminUser, context: 'client' | 'employee'): void {
+    const isDeactivating = user.isActive;
+    const appName = context === 'client' ? 'Jamarket Auto' : 'le back-office';
+
+    void Swal.fire({
+      icon: 'warning',
+      title: isDeactivating
+        ? context === 'client'
+          ? 'Désactiver ce compte client ?'
+          : 'Désactiver ce compte employé ?'
+        : context === 'client'
+          ? 'Réactiver ce compte client ?'
+          : 'Réactiver ce compte employé ?',
+      text: isDeactivating
+        ? `${this.fullName(user)} ne pourra plus se connecter à ${appName}.`
+        : `${this.fullName(user)} pourra à nouveau accéder à ${appName}.`,
+      showCancelButton: true,
+      confirmButtonColor: isDeactivating ? '#dc2626' : '#006b5e',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: isDeactivating ? 'Désactiver' : 'Réactiver',
+      cancelButtonText: 'Annuler',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.toggleBan(user, isDeactivating);
       }
     });
   }
@@ -143,7 +293,8 @@ export class UsersListPageComponent implements OnInit {
       return;
     }
 
-    const newRoleLabel = this.roleLabel(newRoleId);
+    const newRole = this.assignableRoles().find((r) => r.id === newRoleId);
+    const newRoleLabel = newRole?.label ?? this.roleLabel(newRoleId);
 
     void Swal.fire({
       icon: 'question',
@@ -229,6 +380,26 @@ export class UsersListPageComponent implements OnInit {
         void Swal.fire({
           icon: 'error',
           title: 'Action impossible',
+          text: resolveUserFacingError(error, 'generic'),
+          confirmButtonColor: '#006b5e',
+        });
+      },
+    });
+  }
+
+  private resetPassword(user: AdminUser): void {
+    this.actionUserId.set(user.id);
+
+    this.adminUsersApi.resetPassword(user.id).subscribe({
+      next: (response) => {
+        this.actionUserId.set(null);
+        void this.showTemporaryPasswordPopup(response, 'reset');
+      },
+      error: (error: unknown) => {
+        this.actionUserId.set(null);
+        void Swal.fire({
+          icon: 'error',
+          title: 'Régénération impossible',
           text: resolveUserFacingError(error, 'generic'),
           confirmButtonColor: '#006b5e',
         });

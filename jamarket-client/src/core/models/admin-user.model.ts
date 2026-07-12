@@ -28,6 +28,18 @@ export interface PaginatedAdminUsers {
   meta: PaginatedMeta;
 }
 
+export interface CreateEmployeePayload {
+  name: string;
+  lastName: string;
+  email: string;
+  roleId: number;
+}
+
+export interface CreateEmployeeResponse {
+  user: AdminUser;
+  temporaryPassword: string;
+}
+
 export const CUSTOMER_ROLE_ID = 3;
 export const ADMIN_ROLE_ID = 1;
 export const EMPLOYEE_ROLE_ID = 2;

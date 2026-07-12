@@ -5,6 +5,8 @@ import type {
   AdminUser,
   AdminUserRole,
   AdminUsersFilters,
+  CreateEmployeePayload,
+  CreateEmployeeResponse,
   PaginatedAdminUsers,
 } from '@core/models/admin-user.model';
 import { environment } from '../../environments/environment';
@@ -41,6 +43,14 @@ export class AdminUsersApiService {
 
   getAssignableRoles(): Observable<AdminUserRole[]> {
     return this.http.get<AdminUserRole[]>(`${this.baseUrl}/roles`);
+  }
+
+  createEmployee(payload: CreateEmployeePayload): Observable<CreateEmployeeResponse> {
+    return this.http.post<CreateEmployeeResponse>(this.baseUrl, payload);
+  }
+
+  resetPassword(id: number): Observable<CreateEmployeeResponse> {
+    return this.http.patch<CreateEmployeeResponse>(`${this.baseUrl}/${id}/reset-password`, {});
   }
 
   banUser(id: number, banned: boolean): Observable<AdminUser> {
