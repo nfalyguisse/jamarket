@@ -5,6 +5,7 @@ import {
   LucideMegaphone,
   LucideMessageSquare,
   LucideUsers,
+  LucideKeyRound,
   LucideSettings,
   LucideBell,
   LucidePlus,
@@ -12,6 +13,7 @@ import {
   LucideX,
   LucideLogOut,
 } from '@lucide/angular';
+import { hasSuperAdminRight } from '@core/constants/auth.constants';
 import { AuthStateService } from '@core/services/auth-state.service';
 import { AdminAuthApiService } from '@admin/data/admin-auth-api.service';
 
@@ -25,6 +27,7 @@ import { AdminAuthApiService } from '@admin/data/admin-auth-api.service';
     LucideMegaphone,
     LucideMessageSquare,
     LucideUsers,
+    LucideKeyRound,
     LucideSettings,
     LucideBell,
     LucidePlus,
@@ -60,6 +63,11 @@ export class AdminLayoutComponent implements OnInit {
     const profile = this.authState.adminProfile();
     if (!profile) return 'Administrateur';
     return `${profile.name} ${profile.lastName}`;
+  }
+
+  protected get canManageUsers(): boolean {
+    const profile = this.authState.adminProfile();
+    return !!profile && hasSuperAdminRight(profile);
   }
 
   protected logout(): void {

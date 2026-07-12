@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { adminGuard } from './guards/admin.guard';
+import { superAdminGuard } from './guards/super-admin.guard';
 
 export const adminRoutes: Routes = [
   {
@@ -55,11 +56,21 @@ export const adminRoutes: Routes = [
       },
       {
         path: 'utilisateurs',
+        canActivate: [superAdminGuard],
         loadComponent: () =>
           import('./features/users/pages/users-list-page/users-list-page.component').then(
             (m) => m.UsersListPageComponent,
           ),
         title: 'Utilisateurs | Jamarket Back Office',
+      },
+      {
+        path: 'roles',
+        canActivate: [superAdminGuard],
+        loadComponent: () =>
+          import('./features/roles/pages/roles-list-page/roles-list-page.component').then(
+            (m) => m.RolesListPageComponent,
+          ),
+        title: 'Gestion des rôles | Jamarket Back Office',
       },
     ],
   },

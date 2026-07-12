@@ -1,0 +1,257 @@
+<div class="p-6 md:p-8">
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">Gestion des utilisateurs</h1>
+    <p class="mt-1 text-sm text-gray-500">
+      Désactivez les comptes clients et gérez les rôles de votre équipe garage.
+    </p>
+  </div>
+
+  <!-- Onglets -->
+  <div
+    class="mb-6 inline-flex rounded-xl border border-gray-200 bg-white p-1"
+    role="tablist"
+    aria-label="Catégories d'utilisateurs"
+  >
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'clients'"
+      class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+      [class]="
+        activeTab() === 'clients'
+          ? 'bg-emerald-600 text-white'
+          : 'text-gray-600 hover:bg-gray-50'
+      "
+      (click)="switchTab('clients')"
+    >
+      <svg lucideUsers class="h-4 w-4" aria-hidden="true"></svg>
+      Clients
+    </button>
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'team'"
+      class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+      [class]="
+        activeTab() === 'team'
+          ? 'bg-emerald-600 text-white'
+          : 'text-gray-600 hover:bg-gray-50'
+      "
+      (click)="switchTab('team')"
+    >
+      <svg lucideShield class="h-4 w-4" aria-hidden="true"></svg>
+      Équipe garage
+    </button>
+  </div>
+
+  <!-- Filtres -->
+  <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
+    <form
+      class="relative flex-1"
+      (ngSubmit)="onSearchSubmit()"
+      role="search"
+      aria-label="Rechercher un utilisateur"
+    >
+      <svg
+        lucideSearch
+        class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+        aria-hidden="true"
+      ></svg>
+      <input
+        type="search"
+        name="search"
+        [(ngModel)]="searchInput"
+        placeholder="Rechercher par nom ou email…"
+        class="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder:text-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+        aria-label="Rechercher par nom ou email"
+      />
+    </form>
+
+    @if (activeTab() === 'clients') {
+      <select
+        [ngModel]="statusFilter()"
+        (ngModelChange)="onStatusFilterChange($event)"
+        class="rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+        aria-label="Filtrer par statut"
+      >
+        <option value="all">Tous les statuts</option>
+        <option value="active">Actifs</option>
+        <option value="inactive">Désactivés</option>
+      </select>
+    }
+  </div>
+
+  @if (isLoading()) {
+    <div class="flex items-center justify-center py-24 text-gray-500" role="status">
+      <svg lucideLoader2 class="h-6 w-6 animate-spin" aria-hidden="true"></svg>
+      <span class="ml-3 text-sm">Chargement des utilisateurs…</span>
+    </div>
+  } @else if (errorMessage()) {
+    <div
+      class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+      role="alert"
+    >
+      {{ errorMessage() }}
+    </div>
+  } @else if (users().length === 0) {
+    <div class="rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-16 text-center">
+      <svg lucideUsers class="mx-auto h-10 w-10 text-gray-300" aria-hidden="true"></svg>
+      <h2 class="mt-4 text-lg font-semibold text-gray-900">Aucun utilisateur trouvé</h2>
+      <p class="mt-2 text-sm text-gray-500">
+        @if (activeTab() === 'clients') {
+          Aucun compte client ne correspond à votre recherche.
+        } @else {
+          Aucun membre de l'équipe garage ne correspond à votre recherche.
+        }
+      </p>
+    </div>
+  } @else {
+    <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
+              >
+                Utilisateur
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
+              >
+                @if (activeTab() === 'clients') {
+                  Statut
+                } @else {
+                  Rôle
+                }
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
+              >
+                Inscription
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500"
+              >
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 bg-white">
+            @for (user of users(); track user.id) {
+              <tr class="hover:bg-gray-50/80">
+                <td class="whitespace-nowrap px-6 py-4">
+                  <div>
+                    <p class="text-sm font-semibold text-gray-900">{{ fullName(user) }}</p>
+                    <p class="text-xs text-gray-500">{{ user.email }}</p>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap px-6 py-4">
+                  @if (activeTab() === 'clients') {
+                    <span
+                      class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium"
+                      [class]="statusClass(user)"
+                    >
+                      {{ statusLabel(user) }}
+                    </span>
+                  } @else {
+                    @if (isCurrentUser(user)) {
+                      <span
+                        class="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700"
+                      >
+                        {{ roleLabel(user.roleId) }} (vous)
+                      </span>
+                    } @else {
+                      <select
+                        [ngModel]="user.roleId"
+                        (ngModelChange)="onRoleChange(user, $event)"
+                        [disabled]="actionUserId() === user.id"
+                        class="rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-50"
+                        [attr.aria-label]="'Rôle de ' + fullName(user)"
+                      >
+                        @for (role of assignableRoles(); track role.id) {
+                          <option [ngValue]="role.id">{{ role.label }}</option>
+                        }
+                      </select>
+                    }
+                  }
+                </td>
+                <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                  {{ user.createdAt | date: 'dd/MM/yyyy' : '' : 'fr-FR' }}
+                </td>
+                <td class="whitespace-nowrap px-6 py-4 text-right">
+                  @if (activeTab() === 'clients') {
+                    <button
+                      type="button"
+                      class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition disabled:opacity-50"
+                      [class]="
+                        user.isActive
+                          ? 'text-red-600 hover:bg-red-50'
+                          : 'text-emerald-600 hover:bg-emerald-50'
+                      "
+                      [disabled]="actionUserId() === user.id"
+                      [attr.aria-label]="
+                        (user.isActive ? 'Désactiver ' : 'Réactiver ') + fullName(user)
+                      "
+                      (click)="confirmBan(user)"
+                    >
+                      @if (actionUserId() === user.id) {
+                        <svg lucideLoader2 class="h-4 w-4 animate-spin" aria-hidden="true"></svg>
+                      } @else if (user.isActive) {
+                        <svg lucideBan class="h-4 w-4" aria-hidden="true"></svg>
+                        Désactiver
+                      } @else {
+                        <svg lucideCheckCircle class="h-4 w-4" aria-hidden="true"></svg>
+                        Réactiver
+                      }
+                    </button>
+                  } @else {
+                    <span class="text-xs text-gray-400">—</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    @if (totalPages() > 1) {
+      <nav
+        class="mt-6 flex items-center justify-between"
+        aria-label="Pagination des utilisateurs"
+      >
+        <p class="text-sm text-gray-500">
+          {{ totalUsers() }} utilisateur{{ totalUsers() > 1 ? 's' : '' }} au total
+        </p>
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-50"
+            [disabled]="currentPage() <= 1"
+            (click)="goToPage(currentPage() - 1)"
+            aria-label="Page précédente"
+          >
+            Précédent
+          </button>
+          <span class="text-sm text-gray-600">
+            Page {{ currentPage() }} / {{ totalPages() }}
+          </span>
+          <button
+            type="button"
+            class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-50"
+            [disabled]="currentPage() >= totalPages()"
+            (click)="goToPage(currentPage() + 1)"
+            aria-label="Page suivante"
+          >
+            Suivant
+          </button>
+        </div>
+      </nav>
+    }
+  }
+</div>

@@ -23,3 +23,7 @@ export function hasBackOfficeAccess(profile: { role: { rights: string[] } }): bo
 export function hasCreateAdRight(profile: { role: { rights: string[] } }): boolean {
   return profile.role.rights.includes('CREATE_AD');
 }
+
+export function hasSuperAdminRight(profile: { role: { rights: string[] } }): boolean {
+  return profile.role.rights.includes('SUPER_ADMIN');
+}

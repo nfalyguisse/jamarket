@@ -26,13 +26,18 @@ interface AuthRequest {
 
 @Controller('admin/users')
 @UseGuards(JwtAuthGuard, RightsGuard)
-@RequireRights(RightEnum.MANAGE_USER)
+@RequireRights(RightEnum.SUPER_ADMIN)
 export class AdminUsersController {
   constructor(private readonly adminUsersService: AdminUsersService) {}
 
   @Get()
   findAll(@Query() filters: FilterUsersDto) {
     return this.adminUsersService.findAll(filters);
+  }
+
+  @Get('roles')
+  getAssignableRoles() {
+    return this.adminUsersService.getAssignableRoles();
   }
 
   @Patch(':id/ban')

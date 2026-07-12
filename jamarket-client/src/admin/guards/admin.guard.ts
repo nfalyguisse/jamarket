@@ -23,7 +23,7 @@ export const adminGuard: CanActivateFn = () => {
   const adminAuthApi = inject(AdminAuthApiService);
   const platformId = inject(PLATFORM_ID);
 
-  const loginUrl = router.createUrlTree(['/admin/connexi)on']);
+  const loginUrl = router.createUrlTree(['/admin/connexion']);
 
   if (!isPlatformBrowser(platformId)) {
     return true;

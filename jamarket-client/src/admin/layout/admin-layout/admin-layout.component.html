@@ -71,17 +71,30 @@
           </a>
         </li>
 
-        <li>
-          <a
-            routerLink="/admin/utilisateurs"
-            routerLinkActive="bg-white/10 !text-white"
-            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
-            (click)="closeSidebar()"
-          >
-            <svg lucideUsers class="h-[18px] w-[18px] flex-shrink-0" aria-hidden="true"></svg>
-            Utilisateurs
-          </a>
-        </li>
+        @if (canManageUsers) {
+          <li>
+            <a
+              routerLink="/admin/utilisateurs"
+              routerLinkActive="bg-white/10 !text-white"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+              (click)="closeSidebar()"
+            >
+              <svg lucideUsers class="h-[18px] w-[18px] flex-shrink-0" aria-hidden="true"></svg>
+              Utilisateurs
+            </a>
+          </li>
+          <li>
+            <a
+              routerLink="/admin/roles"
+              routerLinkActive="bg-white/10 !text-white"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+              (click)="closeSidebar()"
+            >
+              <svg lucideKeyRound class="h-[18px] w-[18px] flex-shrink-0" aria-hidden="true"></svg>
+              Gestion des rôles
+            </a>
+          </li>
+        }
 
       </ul>
     </nav>
