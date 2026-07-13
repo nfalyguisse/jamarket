@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -8,8 +9,11 @@ import {
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
+import { ImageProcessingService } from '../upload/image-processing.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { ChangeAdminPasswordDto } from './dto/change-admin-password.dto';
+import { UpdateAdminProfileDto } from './dto/update-admin-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { JwtPayload } from './strategies/jwt.strategy';
 import { RightEnum } from 'generated/prisma/enums';
@@ -28,6 +32,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly imageProcessing: ImageProcessingService,
   ) { }
 
   async register(dto: RegisterDto) {
@@ -117,6 +122,117 @@ export class AuthService {
     this.assertBackOfficeAccess(user);
 
     return user;
+  }
+
+  async updateAdminProfile(userId: number, dto: UpdateAdminProfileDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { role: true },
+    });
+
+    if (!user || user.deletedAt || !user.isActive) {
+      throw new NotFoundException('Utilisateur introuvable');
+    }
+
+    this.assertBackOfficeAccess(user);
+
+    const data: { name?: string; lastName?: string } = {};
+    if (dto.name !== undefined) data.name = dto.name;
+    if (dto.lastName !== undefined) data.lastName = dto.lastName;
+
+    return this.prisma.user.update({
+      where: { id: userId },
+      data,
+      include: { role: true },
+      omit: { password: true },
+    });
+  }
+
+  async changeAdminPassword(userId: number, dto: ChangeAdminPasswordDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { role: true },
+    });
+
+    if (!user || user.deletedAt || !user.isActive) {
+      throw new NotFoundException('Utilisateur introuvable');
+    }
+
+    this.assertBackOfficeAccess(user);
+
+    const passwordMatch = await bcrypt.compare(dto.currentPassword, user.password);
+    if (!passwordMatch) {
+      throw new BadRequestException('Le mot de passe actuel est incorrect');
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.newPassword, BCRYPT_ROUNDS);
+
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+      include: { role: true },
+      omit: { password: true },
+    });
+  }
+
+  async uploadAdminAvatar(userId: number, file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('Aucun fichier fourni');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { role: true },
+    });
+
+    if (!user || user.deletedAt || !user.isActive) {
+      throw new NotFoundException('Utilisateur introuvable');
+    }
+
+    this.assertBackOfficeAccess(user);
+
+    if (user.avatarUrl) {
+      const oldPath = this.imageProcessing.urlToAbsolutePath(user.avatarUrl);
+      if (oldPath) {
+        await this.imageProcessing.deleteFile(oldPath);
+      }
+    }
+
+    const processed = await this.imageProcessing.processAndSaveUserAvatar(userId, file);
+
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl: processed.url },
+      include: { role: true },
+      omit: { password: true },
+    });
+  }
+
+  async deleteAdminAvatar(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { role: true },
+    });
+
+    if (!user || user.deletedAt || !user.isActive) {
+      throw new NotFoundException('Utilisateur introuvable');
+    }
+
+    this.assertBackOfficeAccess(user);
+
+    if (user.avatarUrl) {
+      const oldPath = this.imageProcessing.urlToAbsolutePath(user.avatarUrl);
+      if (oldPath) {
+        await this.imageProcessing.deleteFile(oldPath);
+      }
+    }
+
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl: null },
+      include: { role: true },
+      omit: { password: true },
+    });
   }
 
   async refresh(userId: number) {

@@ -19,13 +19,18 @@
     <!-- Logo -->
     <div class="flex gap-5 h-16 items-center border-b border-white/10 px-6">
         <!-- Avatar -->
-        <button
-          type="button"
-          class="flex h-9 w-9 items-center justify-center rounded-md bg-emerald-600 text-sm font-semibold text-white"
-          aria-label="Mon compte"
+        <a
+          routerLink="/admin/parametres"
+          class="flex h-9 w-9 items-center justify-center overflow-hidden rounded-md bg-emerald-600 text-sm font-semibold text-white"
+          [attr.aria-label]="'Mon profil — ' + adminFullName"
+          title="Mon profil"
         >
-          A
-        </button>
+          @if (adminAvatarUrl; as src) {
+            <img [src]="src" alt="" class="h-full w-full object-cover" />
+          } @else {
+            {{ adminInitials }}
+          }
+        </a>
       <div class="flex items-center gap-2">
         <span class="text-sm font-semibold tracking-wide">Jamarket Back office</span>
       </div>
@@ -161,13 +166,18 @@
         </a>
 
         <!-- Avatar + initiales -->
-        <div
-          class="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-600 text-sm font-semibold text-white select-none"
+        <a
+          routerLink="/admin/parametres"
+          class="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-emerald-600 text-sm font-semibold text-white select-none transition hover:ring-2 hover:ring-emerald-300"
           [title]="adminFullName"
-          [attr.aria-label]="'Connecté en tant que ' + adminFullName"
+          [attr.aria-label]="'Mon profil — ' + adminFullName"
         >
-          {{ adminInitials }}
-        </div>
+          @if (adminAvatarUrl; as src) {
+            <img [src]="src" alt="" class="h-full w-full object-cover" />
+          } @else {
+            {{ adminInitials }}
+          }
+        </a>
 
         <!-- Déconnexion -->
         <button

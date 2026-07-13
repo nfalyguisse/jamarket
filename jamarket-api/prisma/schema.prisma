@@ -51,6 +51,7 @@ model User {
   lastName  String    @map("last_name")
   email     String    @unique
   password  String
+  avatarUrl String?   @map("avatar_url")
   isActive  Boolean   @default(true) @map("is_active")
   roleId    Int       @map("role_id")
   deletedAt DateTime? @map("deleted_at")

@@ -36,6 +36,29 @@ export class ImageProcessingService {
     };
   }
 
+  async processAndSaveUserAvatar(
+    userId: number,
+    file: Express.Multer.File,
+  ): Promise<ProcessedImage> {
+    const userDir = path.join(UPLOAD_DIR, 'users', String(userId));
+    await fs.mkdir(userDir, { recursive: true });
+
+    const ext = extensionFromMime(file.mimetype, file.originalname);
+    const filename = `${randomUUID()}${ext}`;
+    const absolutePath = path.join(userDir, filename);
+
+    await fs.writeFile(absolutePath, file.buffer);
+
+    const url = `${UPLOAD_URL_PREFIX}/users/${userId}/${filename}`;
+
+    return {
+      filename,
+      url,
+      absolutePath,
+      sizeBytes: file.size,
+    };
+  }
+
   async deleteFile(absolutePath: string): Promise<void> {
     try {
       await fs.unlink(absolutePath);

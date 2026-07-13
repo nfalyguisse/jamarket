@@ -72,6 +72,14 @@ export const adminRoutes: Routes = [
           ),
         title: 'Gestion des rôles | Jamarket Back Office',
       },
+      {
+        path: 'parametres',
+        loadComponent: () =>
+          import('./features/profile/pages/admin-profile-page/admin-profile-page.component').then(
+            (m) => m.AdminProfilePageComponent,
+          ),
+        title: 'Mon profil | Jamarket Back Office',
+      },
     ],
   },
 ];

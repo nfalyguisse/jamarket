@@ -15,6 +15,7 @@ import {
 } from '@lucide/angular';
 import { hasSuperAdminRight } from '@core/constants/auth.constants';
 import { AuthStateService } from '@core/services/auth-state.service';
+import { resolveMediaUrl } from '@core/utils/media-url.util';
 import { AdminAuthApiService } from '@admin/data/admin-auth-api.service';
 
 @Component({
@@ -57,6 +58,11 @@ export class AdminLayoutComponent implements OnInit {
     const profile = this.authState.adminProfile();
     if (!profile) return 'A';
     return `${profile.name.charAt(0)}${profile.lastName.charAt(0)}`.toUpperCase();
+  }
+
+  protected get adminAvatarUrl(): string | null {
+    const url = this.authState.adminProfile()?.avatarUrl;
+    return url ? resolveMediaUrl(url) : null;
   }
 
   protected get adminFullName(): string {
