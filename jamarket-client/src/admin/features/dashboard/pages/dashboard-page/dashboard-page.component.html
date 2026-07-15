@@ -122,107 +122,137 @@
         <button
           type="button"
           (click)="approveAll()"
-          class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+          [disabled]="pendingAds().length === 0 || isApprovingAll() || isLoadingPending()"
+          class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Tout approuver
+          @if (isApprovingAll()) {
+            Approbation…
+          } @else {
+            Tout approuver
+          }
         </button>
       </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm" aria-label="Liste des annonces en attente de validation">
-          <thead>
-            <tr class="border-b border-gray-100 text-left">
-              <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">
-                Véhicule
-              </th>
-              <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">
-                Vendeur
-              </th>
-              <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">
-                Prix
-              </th>
-              <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">
-                Date
-              </th>
-              <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">
-                Statut
-              </th>
-              <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-50">
-            @for (ad of pendingAds; track ad.id) {
-            <tr class="transition-colors hover:bg-gray-50/50">
-              <!-- Véhicule -->
-              <td class="px-5 py-4">
-                <div class="flex items-center gap-3">
-                  <div
-                    class="h-10 w-12 flex-shrink-0 rounded-lg bg-gray-200"
-                    aria-hidden="true"
-                  ></div>
-                  <div>
-                    <p class="font-medium leading-tight text-gray-900">{{ ad.vehicle }}</p>
-                    <p class="text-xs text-gray-400">{{ ad.model }}</p>
-                  </div>
-                </div>
-              </td>
+      @if (isLoadingPending()) {
+        <div class="flex items-center justify-center py-16 text-gray-500" role="status">
+          <svg lucideLoader2 class="h-6 w-6 animate-spin" aria-hidden="true"></svg>
+          <span class="ml-3 text-sm">Chargement des annonces en attente…</span>
+        </div>
+      } @else if (pendingError()) {
+        <div class="px-5 py-8 text-center text-sm text-red-600" role="alert">
+          {{ pendingError() }}
+        </div>
+      } @else if (pendingAds().length === 0) {
+        <div class="flex flex-col items-center justify-center py-12 text-gray-400">
+          <svg lucideCheck class="h-10 w-10" aria-hidden="true"></svg>
+          <p class="mt-3 text-sm">Aucune annonce en attente</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm" aria-label="Liste des annonces en attente de validation">
+            <thead>
+              <tr class="border-b border-gray-100 text-left">
+                <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">
+                  Véhicule
+                </th>
+                <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">
+                  Vendeur
+                </th>
+                <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">
+                  Prix
+                </th>
+                <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">
+                  Date
+                </th>
+                <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">
+                  Statut
+                </th>
+                <th class="px-5 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+              @for (ad of pendingAds(); track ad.id) {
+                <tr class="transition-colors hover:bg-gray-50/50">
+                  <!-- Véhicule -->
+                  <td class="px-5 py-4">
+                    <div class="flex items-center gap-3">
+                      <img
+                        [src]="imageUrl(ad)"
+                        [alt]="'Photo de ' + vehicleTitle(ad)"
+                        class="h-10 w-12 flex-shrink-0 rounded-lg object-cover bg-gray-200"
+                        loading="lazy"
+                      />
+                      <div>
+                        <p class="font-medium leading-tight text-gray-900">{{ vehicleTitle(ad) }}</p>
+                        <p class="text-xs text-gray-400">{{ vehicleSubtitle(ad) }}</p>
+                      </div>
+                    </div>
+                  </td>
 
-              <!-- Vendeur -->
-              <td class="px-5 py-4">
-                <span class="cursor-pointer text-blue-600 hover:underline">{{ ad.seller }}</span>
-              </td>
+                  <!-- Vendeur -->
+                  <td class="px-5 py-4">
+                    <span class="text-blue-600">{{ sellerName(ad) }}</span>
+                  </td>
 
-              <!-- Prix -->
-              <td class="px-5 py-4 font-medium text-gray-900">
-                {{ ad.price | currency: 'EUR':'symbol':'1.0-0':'fr' }}
-              </td>
+                  <!-- Prix -->
+                  <td class="px-5 py-4 font-medium text-gray-900">
+                    {{ ad.price | currency: 'EUR':'symbol':'1.0-0':'fr' }}
+                  </td>
 
-              <!-- Date -->
-              <td class="px-5 py-4 text-gray-500">{{ ad.date }}</td>
+                  <!-- Date -->
+                  <td class="px-5 py-4 text-gray-500">
+                    {{ ad.createdAt | date: 'dd/MM/yyyy' }}
+                  </td>
 
-              <!-- Statut -->
-              <td class="px-5 py-4">
-                <span
-                  class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20"
-                >
-                  En attente
-                </span>
-              </td>
+                  <!-- Statut -->
+                  <td class="px-5 py-4">
+                    <span
+                      class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20"
+                    >
+                      En attente
+                    </span>
+                  </td>
 
-              <!-- Actions -->
-              <td class="px-5 py-4">
-                <div class="flex items-center gap-2">
-                  <button
-                    type="button"
-                    (click)="approveAd(ad.id)"
-                    class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-emerald-600 transition-colors hover:border-emerald-200 hover:bg-emerald-50"
-                    [attr.aria-label]="'Approuver ' + ad.vehicle"
-                  >
-                    <svg lucideCheck class="h-4 w-4" aria-hidden="true"></svg>
-                  </button>
-                  <button
-                    type="button"
-                    (click)="rejectAd(ad.id)"
-                    class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-red-500 transition-colors hover:border-red-200 hover:bg-red-50"
-                    [attr.aria-label]="'Rejeter ' + ad.vehicle"
-                  >
-                    <svg lucideX class="h-4 w-4" aria-hidden="true"></svg>
-                  </button>
-                </div>
-              </td>
-            </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-
-      @if (pendingAds.length === 0) {
-      <div class="flex flex-col items-center justify-center py-12 text-gray-400">
-        <svg lucideCheck class="h-10 w-10" aria-hidden="true"></svg>
-        <p class="mt-3 text-sm">Aucune annonce en attente</p>
-      </div>
+                  <!-- Actions -->
+                  <td class="px-5 py-4">
+                    <div class="flex items-center gap-2">
+                      <button
+                        type="button"
+                        (click)="approveAd(ad)"
+                        [disabled]="actionAdId() === ad.id"
+                        class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-emerald-600 transition-colors hover:border-emerald-200 hover:bg-emerald-50 disabled:opacity-50"
+                        [attr.aria-label]="'Approuver ' + vehicleTitle(ad)"
+                      >
+                        @if (actionAdId() === ad.id) {
+                          <svg lucideLoader2 class="h-4 w-4 animate-spin" aria-hidden="true"></svg>
+                        } @else {
+                          <svg lucideCheck class="h-4 w-4" aria-hidden="true"></svg>
+                        }
+                      </button>
+                      <button
+                        type="button"
+                        (click)="rejectAd(ad)"
+                        [disabled]="actionAdId() === ad.id"
+                        class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-red-500 transition-colors hover:border-red-200 hover:bg-red-50 disabled:opacity-50"
+                        [attr.aria-label]="'Rejeter ' + vehicleTitle(ad)"
+                      >
+                        <svg lucideX class="h-4 w-4" aria-hidden="true"></svg>
+                      </button>
+                      <a
+                        [routerLink]="['/admin/annonces', ad.id, 'modifier']"
+                        class="text-xs text-gray-500 underline-offset-2 hover:text-gray-700 hover:underline"
+                      >
+                        Voir
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       }
     </div>
   </div>

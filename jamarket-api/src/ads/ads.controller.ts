@@ -51,6 +51,20 @@ export class AdsController {
     return this.adsService.findMine(req.user, filters.scope);
   }
 
+  @Get('pending')
+  @UseGuards(JwtAuthGuard, RightsGuard)
+  @RequireRights(RightEnum.CREATE_AD)
+  findPending(@Request() req: AuthRequest) {
+    return this.adsService.findPending(req.user);
+  }
+
+  @Patch('pending/approve-all')
+  @UseGuards(JwtAuthGuard, RightsGuard)
+  @RequireRights(RightEnum.CREATE_AD)
+  approveAllPending(@Request() req: AuthRequest) {
+    return this.adsService.approveAllPending(req.user);
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.adsService.findOne(id);

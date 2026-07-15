@@ -33,6 +33,24 @@ export class AdminAdsApiService {
     );
   }
 
+  getPendingAds(): Observable<AdminAd[]> {
+    return this.http.get<ApiAdResponse[]>(`${this.adsUrl}/pending`).pipe(
+      map((ads) =>
+        ads
+          .map(mapApiAdToAdminAd)
+          .filter((ad): ad is AdminAd => ad !== null),
+      ),
+    );
+  }
+
+  approveAd(id: number): Observable<AdminAd> {
+    return this.updateAd(id, { isActive: true });
+  }
+
+  approveAllPending(): Observable<{ approved: number }> {
+    return this.http.patch<{ approved: number }>(`${this.adsUrl}/pending/approve-all`, {});
+  }
+
   getAd(id: number): Observable<AdminAd> {
     return this.http.get<ApiAdResponse>(`${this.adsUrl}/${id}`).pipe(
       map((ad) => {

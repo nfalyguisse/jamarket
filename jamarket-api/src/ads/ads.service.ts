@@ -55,6 +55,35 @@ export class AdsService {
     });
   }
 
+  async findPending(requestUser: { role: { rights: RightEnum[] } }) {
+    this.assertCanManageAd(requestUser);
+
+    return this.prisma.ad.findMany({
+      where: {
+        isActive: false,
+        isSold: false,
+        isArchived: false,
+      },
+      include: AD_INCLUDE,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async approveAllPending(requestUser: { role: { rights: RightEnum[] } }) {
+    this.assertCanManageAd(requestUser);
+
+    const result = await this.prisma.ad.updateMany({
+      where: {
+        isActive: false,
+        isSold: false,
+        isArchived: false,
+      },
+      data: { isActive: true },
+    });
+
+    return { approved: result.count };
+  }
+
   async create(dto: CreateAdDto, sellerId: number) {
     const vehicule = await this.prisma.vehicule.findUnique({
       where: { id: dto.vehiculeId },
