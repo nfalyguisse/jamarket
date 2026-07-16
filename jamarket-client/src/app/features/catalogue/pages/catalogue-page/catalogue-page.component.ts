@@ -44,7 +44,6 @@ import {
   CATALOGUE_DEFAULT_SORT,
   CATALOGUE_PAGE_SIZE,
   CATALOGUE_SORT_OPTIONS,
-  CATALOGUE_VEHICLES,
   type CatalogueSortValue,
 } from '../../data/catalogue.mock';
 
@@ -79,8 +78,8 @@ export class CataloguePageComponent implements OnInit {
   protected readonly filtersMobileOpen = signal(false);
 
   protected readonly filterOptions = signal<ApiFilterOptions>(EMPTY_FILTER_OPTIONS);
-  protected readonly searchResult = signal<SearchPageResult>({ ...EMPTY_SEARCH_RESULT, vehicles: CATALOGUE_VEHICLES });
-  protected readonly isLoading = signal(false);
+  protected readonly searchResult = signal<SearchPageResult>(EMPTY_SEARCH_RESULT);
+  protected readonly isLoading = signal(isPlatformBrowser(this.platformId));
 
   protected readonly brandOptions = computed<ApiFilterBrand[]>(() =>
     this.filterOptions().brands,

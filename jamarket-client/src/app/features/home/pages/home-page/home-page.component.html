@@ -174,11 +174,25 @@
             <svg lucideArrowRight class="size-5 transition-transform group-hover:translate-x-1" aria-hidden="true"></svg>
           </a>
         </div>
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          @for (vehicle of vehicles(); track vehicle.id) {
-            <app-vehicle-card [vehicle]="vehicle" />
-          }
-        </div>
+        @if (isLoadingVehicles()) {
+          <div class="flex items-center justify-center py-16 text-on-surface-variant" role="status">
+            <svg lucideLoader2 class="size-6 animate-spin" aria-hidden="true"></svg>
+            <span class="ml-3 text-body-md">Chargement des derniers arrivages…</span>
+          </div>
+        } @else if (vehicles().length === 0) {
+          <div class="rounded-2xl border border-outline/10 bg-surface-container-lowest py-16 text-center">
+            <p class="font-headline-md text-on-surface-variant">Aucun véhicule en stock pour le moment</p>
+            <p class="mt-2 text-body-md text-on-surface-variant/70">
+              Revenez bientôt ou contactez-nous pour connaître les prochaines arrivées.
+            </p>
+          </div>
+        } @else {
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            @for (vehicle of vehicles(); track vehicle.id) {
+              <app-vehicle-card [vehicle]="vehicle" />
+            }
+          </div>
+        }
       </div>
     </section>
 

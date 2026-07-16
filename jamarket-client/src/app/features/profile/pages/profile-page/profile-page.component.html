@@ -123,6 +123,10 @@
                     <p class="mt-0.5 text-label-sm text-on-surface-variant line-clamp-1">{{ msg.preview }}</p>
                   </div>
                 </li>
+              } @empty {
+                <li class="py-6 text-center text-label-sm text-on-surface-variant">
+                  Aucun message pour le moment.
+                </li>
               }
             </ul>
 

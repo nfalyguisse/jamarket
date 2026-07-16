@@ -11,13 +11,14 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
-import { EMPTY, catchError } from 'rxjs';
+import { EMPTY, catchError, finalize } from 'rxjs';
 import {
   LucideArrowRight,
   LucideBadgeCheck,
   LucideCheckCircle,
   LucideHandshake,
   LucideHeadphones,
+  LucideLoader2,
   LucideSearch,
   LucideShield,
   LucideShieldCheck,
@@ -26,9 +27,10 @@ import {
 import { SiteFooterComponent } from '../../../../../shared/layout/site-footer/site-footer.component';
 import { SiteHeaderComponent } from '../../../../../shared/layout/site-header/site-header.component';
 import { VehicleCardComponent } from '../../../../../shared/ui/vehicle-card/vehicle-card.component';
+import type { VehicleCard } from '@core/models/vehicle-card.model';
 import { logHttpError } from '@core/utils/http-error.util';
 import { HomeApiService } from '../../data/home-api.service';
-import { BENTO_WORKSHOP_IMAGE, HOME_HERO_IMAGE, LATEST_VEHICLES } from '../../data/home.mock';
+import { BENTO_WORKSHOP_IMAGE, HOME_HERO_IMAGE } from '../../data/home.mock';
 import { CatalogueSearchApiService } from '../../../catalogue/data/catalogue-search-api.service';
 import { filtersToQueryParams } from '../../../catalogue/data/catalogue-filters.util';
 import { DEFAULT_CATALOGUE_FILTERS } from '../../../catalogue/data/catalogue-filters.model';
@@ -53,6 +55,7 @@ const PRICE_SLIDER_MAX = 80_000;
     LucideCheckCircle,
     LucideHandshake,
     LucideHeadphones,
+    LucideLoader2,
     LucideSearch,
     LucideShield,
     LucideShieldCheck,
@@ -70,8 +73,8 @@ export class HomePageComponent implements OnInit {
 
   protected readonly heroImage = HOME_HERO_IMAGE;
   protected readonly bentoImage = BENTO_WORKSHOP_IMAGE;
-  protected readonly vehicles = signal(LATEST_VEHICLES);
-
+  protected readonly vehicles = signal<VehicleCard[]>([]);
+  protected readonly isLoadingVehicles = signal(isPlatformBrowser(this.platformId));
   protected readonly brands = signal<ApiFilterBrand[]>([]);
   protected readonly allModels = signal<ApiFilterModel[]>([]);
 
@@ -104,12 +107,11 @@ export class HomePageComponent implements OnInit {
           logHttpError(error, '[home] chargement des véhicules');
           return EMPTY;
         }),
+        finalize(() => this.isLoadingVehicles.set(false)),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((vehicles) => {
-        if (vehicles.length > 0) {
-          this.vehicles.set(vehicles);
-        }
+        this.vehicles.set(vehicles);
       });
 
     this.searchApiService
