@@ -10,10 +10,11 @@
 .env.*
 !.env.example
 
-# Fichiers d'environnement Angular
+# Fichiers d'environnement Angular (générés par jamarket-client/scripts/generate-env.mjs)
 jamarket-client/src/environments/*.ts
+!jamarket-client/src/environments/.gitkeep
 
-# Fichier d'environnement NestJS
+# Fichier d'environnement NestJS (secrets)
 jamarket-api/.env
 
 

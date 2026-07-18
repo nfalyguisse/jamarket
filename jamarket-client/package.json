@@ -3,6 +3,10 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
+    "env:generate": "node scripts/generate-env.mjs",
+    "postinstall": "node scripts/generate-env.mjs",
+    "prestart": "node scripts/generate-env.mjs",
+    "prebuild": "node scripts/generate-env.mjs",
     "start": "ng serve",
     "start:staging": "ng serve --configuration staging",
     "build": "ng build",
