@@ -1,24 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
-import { AppModule } from './../src/app.module';
+/**
+ * Smoke e2e conservé pour valider le runner sans DB.
+ * Les parcours métier sont dans vital-paths.e2e-spec.ts.
+ */
+import { describe, expect, it } from 'vitest';
 
-describe('AppController (e2e)', () => {
-  let app: INestApplication;
-
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
-  });
-
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+describe('Vitest e2e runner (smoke)', () => {
+  it('est opérationnel', () => {
+    expect(true).toBe(true);
   });
 });
