@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import helmet from 'helmet';
 import { join } from 'path';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -10,6 +11,16 @@ import { UPLOAD_DIR, UPLOAD_URL_PREFIX } from './upload/upload.constants';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  // Helmet avant CORS / routes : en-têtes HTTP de sécurité (OWASP A05)
+  // CSP assouplie hors prod pour ne pas casser Swagger UI (/api/docs).
+  app.use(
+    helmet({
+      contentSecurityPolicy: isProduction ? undefined : false,
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
 
   const allowedOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:4000,http://localhost:4200')
     .split(',')

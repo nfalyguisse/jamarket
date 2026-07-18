@@ -21,6 +21,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { ChangeAdminPasswordDto } from './dto/change-admin-password.dto';
 import { LoginDto } from './dto/login.dto';
@@ -32,12 +33,16 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { avatarMulterOptions } from '../upload/multer.config';
 
+/** Limite stricte anti brute-force sur les endpoints d’auth (5 / min / IP). */
+const AUTH_THROTTLE = { default: { limit: 5, ttl: 60_000 } };
+
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
+  @Throttle(AUTH_THROTTLE)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Inscrire un acheteur (client)',
@@ -54,6 +59,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @Throttle(AUTH_THROTTLE)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Connexion acheteur (front-office)',
@@ -70,6 +76,7 @@ export class AuthController {
   }
 
   @Post('admin/login')
+  @Throttle(AUTH_THROTTLE)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Connexion back-office (garage / admin)',
@@ -190,6 +197,7 @@ export class AuthController {
   }
 
   @Post('admin/refresh')
+  @Throttle(AUTH_THROTTLE)
   @UseGuards(JwtRefreshGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -209,6 +217,7 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @Throttle(AUTH_THROTTLE)
   @UseGuards(JwtRefreshGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
