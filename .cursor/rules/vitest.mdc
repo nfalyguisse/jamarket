@@ -1,0 +1,37 @@
+---
+description: Stratégie de tests Vitest (unitaires ciblés + e2e vitaux) — NestJS et Angular
+globs: "**/*.{spec,test,e2e-spec}.{ts,tsx},**/vitest*.{ts,mjs,js},**/vite.config.*"
+alwaysApply: false
+---
+
+# Tests — Vitest (Jammarket)
+
+## Principe
+
+- **Vitest** est le runner unique pour `jamarket-api` (NestJS) et `jamarket-client` (Angular).
+- Objectif : homogénéiser le dépôt multi-packages (même syntaxe, mêmes scripts, pas de Jest / Jasmine / Karma).
+- **Pas d'overkill** : ne pas viser une couverture globale de tout le code (contrainte solo / RNCP).
+
+## Périmètre attendu
+
+1. **Unitaires (C2.2.2)** : batterie **restreinte** sur **une seule** fonctionnalité métier critique (ex. `AuthService`, recherche filtrée, cycle de vie d'une annonce). Quelques cas Arrange/Act/Assert suffisent.
+2. **E2E** : une **poignée** de scénarios sur les parcours vitaux uniquement :
+   - auth client / admin
+   - catalogue / recherche
+   - fiche annonce
+   - CRUD annonce (employé/admin)
+   - accès refusé (droits insuffisants / sans token)
+
+## Conventions
+
+- Fichiers : `*.spec.ts` ou `*.test.ts` (unitaires) ; `*.e2e-spec.ts` ou dossier `e2e/` pour les parcours vitaux.
+- Config : `vitest.config.ts` (ou équivalent) **par package** (`jamarket-api`, `jamarket-client`) si besoin de réglages distincts.
+- Scripts npm : `test`, `test:e2e`, éventuellement `test:coverage` — alignés sur Vitest, pas sur Jest/Karma.
+- Préférer les mocks légers (`vi.mock`, `vi.fn`) ; pour NestJS, s'appuyer sur le testing module Nest si utile, toujours exécuté via Vitest.
+- Ne pas réintroduire Jest, Jasmine ou Karma « par défaut » ; si une dépendance native l'impose, documenter l'exception.
+
+## Ce qu'il ne faut pas faire
+
+- Générer des suites massives sur tous les modules / composants.
+- Exiger un seuil de couverture « majorité du code » sur tout le monorepo.
+- Dupliquer la même logique de test en Jest **et** Vitest.

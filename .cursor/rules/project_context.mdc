@@ -32,7 +32,7 @@ Jamarket is a B2B2C SaaS platform designed to digitize small car dealerships. It
 - **Eco-conception**: Lazy loading for images + server-side compression (WebP).
 - **Performance**: High Lighthouse scores and optimized DB queries via Prisma.
 - **Security**: JWT-based Auth, Bcrypt hashing, and GDPR compliance (Right to be forgotten).
-- **Tests**: Mandatory Unit/E2E tests for vital flows (Auth, CRUD, Search).
+- **Tests**: **Vitest** only (NestJS + Angular) — unitaires ciblés sur une fonctionnalité critique + e2e sur parcours vitaux uniquement ; pas de couverture globale ; pas Jest/Jasmine/Karma. Voir `.cursor/rules/vitest.mdc`.
 
 ## Persona & Content Writing
 
