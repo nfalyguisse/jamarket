@@ -1,7 +1,7 @@
 <div class="flex min-h-screen flex-col bg-surface-container-low">
   <app-site-header />
 
-  <main class="flex-1 pt-24 pb-16">
+  <main id="main-content" tabindex="-1" class="flex-1 pt-24 pb-16 outline-none">
     <div class="container-jm">
       @if (isLoading()) {
         <div class="animate-pulse space-y-8">
