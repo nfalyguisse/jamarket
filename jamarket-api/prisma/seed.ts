@@ -12,10 +12,24 @@ async function main() {
   // ─── Roles ──────────────────────────────────────────────────────────────
   const adminRole = await prisma.role.upsert({
     where: { id: 1 },
-    update: {},
+    update: {
+      rights: [
+        RightEnum.ADMIN,
+        RightEnum.CREATE_AD,
+        RightEnum.DELETE_AD,
+        RightEnum.MANAGE_USER,
+        RightEnum.SUPER_ADMIN,
+      ],
+    },
     create: {
       label: 'Admin',
-      rights: [RightEnum.ADMIN, RightEnum.CREATE_AD, RightEnum.DELETE_AD, RightEnum.MANAGE_USER],
+      rights: [
+        RightEnum.ADMIN,
+        RightEnum.CREATE_AD,
+        RightEnum.DELETE_AD,
+        RightEnum.MANAGE_USER,
+        RightEnum.SUPER_ADMIN,
+      ],
     },
   });
 

@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { UploadService } from '../upload/upload.service';
 import { CreateVehiculeDto } from './dto/create-vehicule.dto';
 import { FilterVehiculeDto } from './dto/filter-vehicule.dto';
 import { UpdateVehiculeDto } from './dto/update-vehicule.dto';
@@ -20,7 +21,10 @@ const VEHICULE_INCLUDE = {
 
 @Injectable()
 export class VehiculesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly uploadService: UploadService,
+  ) {}
 
   async findAll(filters: FilterVehiculeDto) {
     const {
@@ -178,7 +182,7 @@ export class VehiculesService {
       );
     }
 
-    await this.prisma.image.deleteMany({ where: { vehiculeId: id } });
+    await this.uploadService.deleteAllVehiculeImages(id);
     await this.prisma.vehicule.delete({ where: { id } });
   }
 }

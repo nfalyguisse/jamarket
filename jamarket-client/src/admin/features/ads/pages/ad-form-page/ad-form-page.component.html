@@ -1,0 +1,369 @@
+<div class="p-6 pb-10 md:p-8">
+  <div class="mb-8">
+    <a
+      routerLink="/admin/annonces"
+      class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 transition hover:text-emerald-600"
+    >
+      <svg lucideArrowLeft class="h-4 w-4" aria-hidden="true"></svg>
+      Retour aux annonces
+    </a>
+    <h1 class="mt-4 text-2xl font-bold text-gray-900">{{ pageTitle() }}</h1>
+    <p class="mt-1 text-sm text-gray-500">
+      Renseignez les informations du véhicule et de l’annonce. Les photos seront converties en WebP côté serveur.
+    </p>
+  </div>
+
+  @if (isLoading()) {
+    <div class="flex items-center justify-center py-24 text-gray-500" role="status">
+      <svg lucideLoader2 class="h-6 w-6 animate-spin" aria-hidden="true"></svg>
+      <span class="ml-3 text-sm">Chargement de l’annonce…</span>
+    </div>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-8" novalidate>
+      @if (validationError()) {
+        <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800" role="alert">
+          {{ validationError() }}
+        </div>
+      }
+
+      @if (serverError()) {
+        <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+          {{ serverError() }}
+        </div>
+      }
+
+      <!-- Annonce -->
+      <section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <h2 class="text-lg font-semibold text-gray-900">Informations de l’annonce</h2>
+
+        <div class="mt-6 grid gap-5 md:grid-cols-2">
+          <div class="md:col-span-2">
+            <label for="ad-label" class="mb-1.5 block text-sm font-medium text-gray-700">
+              Titre de l’annonce <span class="text-red-500" aria-hidden="true">*</span>
+            </label>
+            <input
+              id="ad-label"
+              type="text"
+              formControlName="label"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              placeholder="Ex. Renault Clio 5 – Faible kilométrage"
+            />
+            @if (form.controls.label.touched && form.controls.label.invalid) {
+              <p class="mt-1 text-xs text-red-600">Le titre est obligatoire.</p>
+            }
+          </div>
+
+          <div class="md:col-span-2">
+            <label for="ad-description" class="mb-1.5 block text-sm font-medium text-gray-700">
+              Description <span class="text-red-500" aria-hidden="true">*</span>
+            </label>
+            <textarea
+              id="ad-description"
+              formControlName="description"
+              rows="4"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              placeholder="Décrivez l’état du véhicule, l’historique d’entretien, les équipements…"
+            ></textarea>
+            @if (form.controls.description.touched && form.controls.description.invalid) {
+              <p class="mt-1 text-xs text-red-600">La description doit contenir au moins 20 caractères.</p>
+            }
+          </div>
+
+          <div>
+            <label for="ad-price" class="mb-1.5 block text-sm font-medium text-gray-700">
+              Prix (€) <span class="text-red-500" aria-hidden="true">*</span>
+            </label>
+            <input
+              id="ad-price"
+              type="number"
+              min="1"
+              formControlName="price"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            />
+            @if (isInvalid('price')) {
+              <p class="mt-1 text-xs text-red-600">Indiquez un prix supérieur à 0 €.</p>
+            }
+          </div>
+
+          @if (isEditMode()) {
+            <div class="flex items-end">
+              <label class="inline-flex cursor-pointer items-center gap-3">
+                <input
+                  type="checkbox"
+                  formControlName="isActive"
+                  class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                />
+                <span class="text-sm font-medium text-gray-700">Annonce visible en ligne</span>
+              </label>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Véhicule -->
+      <section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <h2 class="text-lg font-semibold text-gray-900">Caractéristiques du véhicule</h2>
+
+        <div class="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <div>
+            <label for="vehicule-brand" class="mb-1.5 block text-sm font-medium text-gray-700">Marque *</label>
+            <select
+              id="vehicule-brand"
+              formControlName="brandId"
+              (change)="onBrandChange()"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            >
+              <option [ngValue]="null" disabled>Sélectionner une marque</option>
+              @for (brand of references().brands; track brand.id) {
+                <option [ngValue]="brand.id">{{ brand.label }}</option>
+              }
+            </select>
+            @if (isInvalid('brandId')) {
+              <p class="mt-1 text-xs text-red-600">Sélectionnez une marque.</p>
+            }
+            <button
+              type="button"
+              class="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-emerald-600 transition hover:text-emerald-700 disabled:opacity-50"
+              [disabled]="isAddingReference()"
+              (click)="addBrand()"
+            >
+              <svg lucidePlus class="h-3.5 w-3.5" aria-hidden="true"></svg>
+              Ajouter une marque
+            </button>
+          </div>
+
+          <div>
+            <label for="vehicule-model" class="mb-1.5 block text-sm font-medium text-gray-700">Modèle *</label>
+            <select
+              id="vehicule-model"
+              formControlName="modelId"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            >
+              <option [ngValue]="null" disabled>Sélectionner un modèle</option>
+              @for (model of filteredModels(); track model.id) {
+                <option [ngValue]="model.id">{{ model.label }}</option>
+              }
+            </select>
+            @if (isInvalid('modelId')) {
+              <p class="mt-1 text-xs text-red-600">Sélectionnez un modèle.</p>
+            }
+            <button
+              type="button"
+              class="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-emerald-600 transition hover:text-emerald-700 disabled:opacity-50"
+              [disabled]="isAddingReference()"
+              (click)="addModel()"
+            >
+              <svg lucidePlus class="h-3.5 w-3.5" aria-hidden="true"></svg>
+              Ajouter un modèle
+            </button>
+          </div>
+
+          <div>
+            <label for="vehicule-type" class="mb-1.5 block text-sm font-medium text-gray-700">Type *</label>
+            <select
+              id="vehicule-type"
+              formControlName="vehiculeTypeId"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            >
+              <option [ngValue]="null" disabled>Sélectionner un type</option>
+              @for (type of references().vehiculeTypes; track type.id) {
+                <option [ngValue]="type.id">{{ type.label }}</option>
+              }
+            </select>
+            @if (isInvalid('vehiculeTypeId')) {
+              <p class="mt-1 text-xs text-red-600">Sélectionnez un type de véhicule.</p>
+            }
+            <button
+              type="button"
+              class="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-emerald-600 transition hover:text-emerald-700 disabled:opacity-50"
+              [disabled]="isAddingReference()"
+              (click)="addVehiculeType()"
+            >
+              <svg lucidePlus class="h-3.5 w-3.5" aria-hidden="true"></svg>
+              Ajouter un type
+            </button>
+          </div>
+
+          <div>
+            <label for="vehicule-year" class="mb-1.5 block text-sm font-medium text-gray-700">Année *</label>
+            <input
+              id="vehicule-year"
+              type="number"
+              min="1900"
+              formControlName="year"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            />
+          </div>
+
+          <div>
+            <label for="vehicule-km" class="mb-1.5 block text-sm font-medium text-gray-700">Kilométrage *</label>
+            <input
+              id="vehicule-km"
+              type="number"
+              min="0"
+              formControlName="kilometer"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            />
+          </div>
+
+          <div>
+            <label for="vehicule-doors" class="mb-1.5 block text-sm font-medium text-gray-700">Portes *</label>
+            <input
+              id="vehicule-doors"
+              type="number"
+              min="1"
+              formControlName="doorsNumber"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            />
+          </div>
+
+          <div>
+            <label for="vehicule-power" class="mb-1.5 block text-sm font-medium text-gray-700">Puissance *</label>
+            <input
+              id="vehicule-power"
+              type="text"
+              formControlName="power"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              placeholder="Ex. 130 ch"
+            />
+          </div>
+
+          <div>
+            <label for="vehicule-fuel" class="mb-1.5 block text-sm font-medium text-gray-700">Carburant *</label>
+            <select
+              id="vehicule-fuel"
+              formControlName="fuel"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            >
+              @for (fuel of references().fuelTypes; track fuel) {
+                <option [ngValue]="fuel">{{ fuelLabel(fuel) }}</option>
+              }
+            </select>
+          </div>
+
+          <div>
+            <label for="vehicule-color" class="mb-1.5 block text-sm font-medium text-gray-700">Couleur *</label>
+            <input
+              id="vehicule-color"
+              type="text"
+              formControlName="color"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              placeholder="Ex. Gris métallisé"
+            />
+          </div>
+        </div>
+      </section>
+
+      <!-- Photos -->
+      <section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900">Photos du véhicule</h2>
+            <p class="mt-1 text-sm text-gray-500">Jusqu’à 10 images (JPEG, PNG, WebP). Max 5 Mo par fichier.</p>
+          </div>
+          <label
+            class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+          >
+            <svg lucideUpload class="h-4 w-4" aria-hidden="true"></svg>
+            Ajouter des photos
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              multiple
+              class="sr-only"
+              (change)="onFilesSelected($event)"
+            />
+          </label>
+        </div>
+
+        @if (existingImages().length === 0 && pendingImages().length === 0) {
+          <div
+            class="mt-6 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 px-6 py-12 text-center"
+          >
+            <svg lucideImagePlus class="h-10 w-10 text-gray-300" aria-hidden="true"></svg>
+            <p class="mt-3 text-sm text-gray-500">Aucune photo pour le moment. Ajoutez au moins une image.</p>
+          </div>
+        } @else {
+          <div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            @for (image of existingImages(); track image.id) {
+              <div class="group relative aspect-[4/3] w-full overflow-hidden rounded-xl border border-gray-200">
+                <img
+                  [src]="resolveImage(image.url)"
+                  alt="Photo existante du véhicule"
+                  class="absolute inset-0 h-full w-full object-cover"
+                />
+                <button
+                  type="button"
+                  class="absolute right-2 top-2 rounded-lg bg-white/90 p-1.5 text-red-600 opacity-0 shadow transition group-hover:opacity-100 disabled:opacity-50"
+                  [disabled]="deletingImageId() === image.id"
+                  aria-label="Supprimer cette photo"
+                  (click)="removeExistingImage(image)"
+                >
+                  @if (deletingImageId() === image.id) {
+                    <svg lucideLoader2 class="h-4 w-4 animate-spin" aria-hidden="true"></svg>
+                  } @else {
+                    <svg lucideTrash2 class="h-4 w-4" aria-hidden="true"></svg>
+                  }
+                </button>
+              </div>
+            }
+
+            @for (image of pendingImages(); track image.previewUrl; let i = $index) {
+              <div class="group relative aspect-[4/3] w-full overflow-hidden rounded-xl border border-emerald-200">
+                <img
+                  [src]="image.previewUrl"
+                  alt="Nouvelle photo à téléverser"
+                  class="absolute inset-0 h-full w-full object-cover"
+                />
+                <button
+                  type="button"
+                  class="absolute right-2 top-2 rounded-lg bg-white/90 p-1.5 text-red-600 opacity-0 shadow transition group-hover:opacity-100"
+                  aria-label="Retirer cette photo"
+                  (click)="removePendingImage(i)"
+                >
+                  <svg lucideTrash2 class="h-4 w-4" aria-hidden="true"></svg>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </section>
+
+      <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <a
+          routerLink="/admin/annonces"
+          class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          Annuler
+        </a>
+        @if (!isEditMode()) {
+          <button
+            type="button"
+            [disabled]="isSubmitting()"
+            class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-60"
+            (click)="saveDraft()"
+          >
+            @if (isSubmitting()) {
+              <svg lucideLoader2 class="h-4 w-4 animate-spin" aria-hidden="true"></svg>
+            } @else {
+              <svg lucideSave class="h-4 w-4" aria-hidden="true"></svg>
+            }
+            Enregistrer en brouillon
+          </button>
+        }
+        <button
+          type="submit"
+          [disabled]="isSubmitting()"
+          class="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:opacity-60"
+        >
+          @if (isSubmitting()) {
+            <svg lucideLoader2 class="h-4 w-4 animate-spin" aria-hidden="true"></svg>
+            Enregistrement…
+          } @else {
+            {{ isEditMode() ? 'Enregistrer les modifications' : 'Publier l’annonce' }}
+          }
+        </button>
+      </div>
+    </form>
+  }
+</div>

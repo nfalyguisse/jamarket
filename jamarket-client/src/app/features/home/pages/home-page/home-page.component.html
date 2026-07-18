@@ -1,0 +1,298 @@
+<div class="flex min-h-screen flex-col overflow-x-hidden">
+  <app-site-header />
+
+  <main class="flex-1 pt-20 md:pt-24">
+    <!-- Hero -->
+    <section class="relative flex min-h-[min(870px,90vh)] items-center overflow-hidden" aria-labelledby="hero-title">
+      <div class="container-jm grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+        <div class="z-10 space-y-6">
+          <span
+            class="inline-block rounded-full bg-primary-container/10 px-4 py-1 text-label-md uppercase tracking-widest text-primary"
+          >
+            Garage de proximité
+          </span>
+          <h1 id="hero-title" class="font-headline-xl text-on-background">
+            Votre prochain véhicule <br />
+            <span class="font-light italic text-primary">d'occasion</span> vous attend.
+          </h1>
+          <p class="max-w-xl text-body-lg text-on-surface-variant">
+            Jamarket Auto achète, répare et revend des voitures contrôlées avec soin. Parcourez notre stock en ligne et
+            contactez-nous facilement par messagerie.
+          </p>
+          <div class="flex flex-wrap gap-4 pt-2">
+            <a
+              routerLink="/catalogue"
+              class="rounded-xl bg-primary px-8 py-4 font-headline-md text-body-md text-on-primary transition-all hover:-translate-y-0.5 hover:shadow-lg"
+            >
+              Voir le stock
+            </a>
+            <a
+              routerLink="/contact"
+              class="rounded-xl border-2 border-primary px-8 py-4 font-headline-md text-body-md text-primary transition-all hover:bg-primary/5"
+            >
+              Nous écrire
+            </a>
+          </div>
+        </div>
+
+        <div class="group relative">
+          <div
+            class="absolute -inset-10 rounded-full bg-primary-container/20 blur-[100px] transition-all duration-1000 group-hover:bg-primary-container/30"
+            aria-hidden="true"
+          ></div>
+          <img
+            [src]="heroImage"
+            alt="Véhicule d'occasion contrôlé, présenté dans un garage moderne et lumineux"
+            class="relative z-10 w-full rounded-3xl object-cover shadow-2xl"
+            width="800"
+            height="600"
+            fetchpriority="high"
+          />
+          <div class="glass-card absolute bottom-8 -left-2 z-20 max-w-xs rounded-2xl p-6 shadow-xl md:-left-6">
+            <div class="flex items-center gap-4">
+              <div class="flex size-12 items-center justify-center rounded-full bg-primary text-on-primary">
+                <svg lucideBadgeCheck class="size-6" aria-hidden="true"></svg>
+              </div>
+              <div>
+                <p class="text-label-md text-on-surface-variant">Véhicules révisés</p>
+                <p class="font-headline-md text-primary">Contrôle atelier</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recherche rapide -->
+    <section class="relative z-30 -mt-10 md:-mt-16" aria-labelledby="search-title">
+      <div class="container-jm">
+        <div class="rounded-[2.5rem] border border-outline/10 bg-on-background p-6 shadow-2xl md:p-8">
+          <h2 id="search-title" class="sr-only">Recherche rapide de véhicules</h2>
+          <div class="grid grid-cols-1 items-end gap-6 md:grid-cols-4">
+            <!-- Marque -->
+            <div class="space-y-2">
+              <label for="brand-filter" class="pl-2 text-label-sm uppercase tracking-widest text-on-surface-variant">
+                Marque
+              </label>
+              <select
+                id="brand-filter"
+                class="w-full rounded-full border border-outline/20 bg-surface-container/10 px-6 py-3 text-white focus:border-primary focus:ring-primary"
+                [value]="selectedBrandId() ?? ''"
+                (change)="onBrandChange($event)"
+              >
+                <option value="" class="text-black">Toutes les marques</option>
+                @for (brand of brands(); track brand.id) {
+                  <option [value]="brand.id" class="text-black">{{ brand.label }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- Modèle -->
+            <div class="space-y-2">
+              <label for="model-filter" class="pl-2 text-label-sm uppercase tracking-widest text-on-surface-variant">
+                Modèle
+              </label>
+              <select
+                id="model-filter"
+                class="w-full rounded-full border border-outline/20 bg-surface-container/10 px-6 py-3 text-white focus:border-primary focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
+                [value]="selectedModelId() ?? ''"
+                [disabled]="modelsDisabled()"
+                (change)="onModelChange($event)"
+              >
+                <option value="" class="text-black">Tous les modèles</option>
+                @for (model of filteredModels(); track model.id) {
+                  <option [value]="model.id" class="text-black">{{ model.label }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- Budget -->
+            <div class="space-y-2">
+              <label for="price-filter" class="pl-2 text-label-sm uppercase tracking-widest text-on-surface-variant">
+                Budget max : {{ maxPrice() | number: '1.0-0' : 'fr' }} €
+              </label>
+              <input
+                id="price-filter"
+                type="range"
+                min="5000"
+                [max]="priceSliderMax"
+                step="500"
+                class="h-2 w-full cursor-pointer appearance-none rounded-lg accent-primary-container bg-surface-container/20"
+                [value]="maxPrice()"
+                (input)="onPriceChange($event)"
+                aria-valuemin="5000"
+                [attr.aria-valuemax]="priceSliderMax"
+                [attr.aria-valuenow]="maxPrice()"
+              />
+              <div class="mt-1 flex justify-between text-label-sm text-surface-dim">
+                <span>5 000 €</span>
+                <span>{{ priceSliderMax | number: '1.0-0' : 'fr' }} €</span>
+              </div>
+            </div>
+
+            <!-- Bouton rechercher -->
+            <button
+              type="button"
+              class="flex h-[50px] w-full items-center justify-center gap-2 rounded-full bg-primary-container font-headline-md text-on-primary-container transition-colors hover:bg-primary-fixed-dim active:scale-[0.98]"
+              (click)="onSearch()"
+            >
+              <svg lucideSearch class="size-5" aria-hidden="true"></svg>
+              Rechercher
+            </button>
+          </div>
+          <ul class="mt-6 flex flex-wrap justify-center gap-6 text-label-sm text-surface-dim md:gap-8">
+            <li class="flex items-center gap-2">
+              <svg lucideCheckCircle class="size-4 text-primary-container" aria-hidden="true"></svg>
+              Stock mis à jour régulièrement
+            </li>
+            <li class="flex items-center gap-2">
+              <svg lucideShield class="size-4 text-primary-container" aria-hidden="true"></svg>
+              Garage local de confiance
+            </li>
+            <li class="flex items-center gap-2">
+              <svg lucideHeadphones class="size-4 text-primary-container" aria-hidden="true"></svg>
+              Messagerie directe avec l'équipe
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Derniers arrivages -->
+    <section class="py-16 md:py-20" aria-labelledby="latest-title">
+      <div class="container-jm">
+        <div class="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between md:mb-12">
+          <div>
+            <h2 id="latest-title" class="font-headline-lg text-on-background">Derniers arrivages</h2>
+            <p class="text-on-surface-variant">Les véhicules récemment ajoutés à notre stock</p>
+          </div>
+          <a
+            routerLink="/catalogue"
+            class="group inline-flex items-center gap-2 font-headline-md text-primary"
+          >
+            Voir tout le stock
+            <svg lucideArrowRight class="size-5 transition-transform group-hover:translate-x-1" aria-hidden="true"></svg>
+          </a>
+        </div>
+        @if (isLoadingVehicles()) {
+          <div class="flex items-center justify-center py-16 text-on-surface-variant" role="status">
+            <svg lucideLoader2 class="size-6 animate-spin" aria-hidden="true"></svg>
+            <span class="ml-3 text-body-md">Chargement des derniers arrivages…</span>
+          </div>
+        } @else if (vehicles().length === 0) {
+          <div class="rounded-2xl border border-outline/10 bg-surface-container-lowest py-16 text-center">
+            <p class="font-headline-md text-on-surface-variant">Aucun véhicule en stock pour le moment</p>
+            <p class="mt-2 text-body-md text-on-surface-variant/70">
+              Revenez bientôt ou contactez-nous pour connaître les prochaines arrivées.
+            </p>
+          </div>
+        } @else {
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            @for (vehicle of vehicles(); track vehicle.id) {
+              <app-vehicle-card [vehicle]="vehicle" />
+            }
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Bento confiance -->
+    <section class="bg-surface-container-low py-16 md:py-20" aria-labelledby="trust-title">
+      <div class="container-jm">
+        <div class="mb-10 text-center md:mb-12">
+          <h2 id="trust-title" class="mb-4 font-headline-lg text-on-background">Pourquoi Jamarket Auto ?</h2>
+          <p class="mx-auto max-w-2xl text-on-surface-variant">
+            Un garage qui connaît chaque véhicule : réparation, contrôle et accompagnement personnalisé.
+          </p>
+        </div>
+
+        <div class="grid h-auto grid-cols-1 gap-6 md:h-[700px] md:grid-cols-6 md:grid-rows-2">
+          <div
+            class="bento-item relative flex flex-col justify-end overflow-hidden rounded-[2.5rem] bg-on-background p-8 text-surface md:col-span-3 md:row-span-2 md:p-12"
+          >
+            <img
+              [src]="bentoImage"
+              alt="Atelier du garage Jamarket Auto, technicien en train de contrôler un véhicule"
+              class="absolute inset-0 h-full w-full object-cover opacity-40 mix-blend-overlay"
+              loading="lazy"
+            />
+            <div class="relative z-10">
+              <svg lucideWrench class="mb-6 size-10 text-primary-container" aria-hidden="true" />
+              <h3 class="mb-4 font-headline-lg">Réparation &amp; contrôle</h3>
+              <p class="text-body-lg text-surface-variant">
+                Chaque véhicule est préparé dans notre atelier avant mise en vente. Transparence et sérieux garantis.
+              </p>
+            </div>
+          </div>
+
+          <div
+            class="bento-item flex flex-col justify-between rounded-[2.5rem] bg-primary-container p-8 group md:col-span-3 md:row-span-1 md:p-10"
+          >
+            <svg lucideHandshake class="size-10 text-on-primary-container" aria-hidden="true" />
+            <div>
+              <h3 class="mb-2 font-headline-md text-on-primary-container">Achat &amp; reprise</h3>
+              <p class="text-on-primary-container/80">
+                Vous vendez votre voiture ? Nous étudions votre reprise avec un devis clair et rapide.
+              </p>
+            </div>
+          </div>
+
+          <div
+            class="bento-item flex flex-col items-center justify-center rounded-[2.5rem] bg-surface-container-highest p-8 text-center"
+          >
+            <svg lucideShieldCheck class="mb-2 size-10 text-secondary" aria-hidden="true" />
+            <p class="font-headline-md">100%</p>
+            <p class="text-label-sm text-on-surface-variant">TRANSPARENT</p>
+          </div>
+
+          <div class="bento-item flex flex-col justify-center rounded-[2.5rem] bg-white p-8 md:col-span-2">
+            <div class="mb-4 flex items-center gap-4">
+              <div class="flex size-12 items-center justify-center rounded-full bg-tertiary-container/20">
+                <svg lucideHeadphones class="size-6 text-tertiary" aria-hidden="true" />
+              </div>
+              <h3 class="font-headline-md">Messagerie intégrée</h3>
+            </div>
+            <p class="text-body-md text-on-surface-variant">
+              Posez vos questions en ligne : notre équipe vous répond pour organiser un essai ou un rendez-vous.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Newsletter -->
+    <!-- <section class="relative overflow-hidden py-16 md:py-20" aria-labelledby="newsletter-title">
+      <div class="container-jm">
+        <div
+          class="relative flex flex-col items-center justify-between gap-8 rounded-[3rem] bg-primary p-10 md:flex-row md:gap-12 md:p-16"
+        >
+          <div class="max-w-xl text-on-primary">
+            <h2 id="newsletter-title" class="mb-4 font-headline-lg">Ne ratez aucune bonne affaire</h2>
+            <p class="text-body-lg opacity-90">
+              Recevez nos nouveaux arrivages et offres du garage directement par e-mail.
+            </p>
+          </div>
+          <form class="flex w-full flex-col gap-4 sm:flex-row md:w-auto" (submit)="$event.preventDefault()">
+            <label for="newsletter-email" class="sr-only">Adresse e-mail</label>
+            <input
+              id="newsletter-email"
+              type="email"
+              name="email"
+              autocomplete="email"
+              placeholder="votre@email.com"
+              class="min-w-0 flex-1 rounded-full border-none bg-on-primary/10 px-8 py-4 text-on-primary placeholder:text-on-primary/50 focus:ring-2 focus:ring-on-primary sm:min-w-[280px]"
+            />
+            <button
+              type="submit"
+              class="rounded-full bg-on-primary px-8 py-4 font-headline-md text-primary transition-all hover:shadow-xl"
+            >
+              S'inscrire
+            </button>
+          </form>
+        </div>
+      </div>
+    </section> -->
+  </main>
+
+  <app-site-footer />
+</div>

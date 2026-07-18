@@ -57,6 +57,11 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     return this.client.theme;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async $transaction<T>(fn: (tx: any) => Promise<T>): Promise<T> {
+    return this.client.$transaction(fn);
+  }
+
   async ping(): Promise<void> {
     await this.client.$queryRaw`SELECT 1`;
   }

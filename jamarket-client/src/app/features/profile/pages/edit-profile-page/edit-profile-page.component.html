@@ -1,0 +1,208 @@
+<div class="flex min-h-screen flex-col bg-surface-container-low">
+  <app-site-header />
+
+  <main class="flex-1 pt-24 pb-16">
+    <div class="container-jm max-w-2xl">
+
+      <!-- Fil d'ariane -->
+      <a
+        routerLink="/profil"
+        class="mb-6 inline-flex items-center gap-2 text-label-md text-on-surface-variant transition hover:text-primary"
+      >
+        <svg lucideArrowLeft class="size-4" aria-hidden="true" />
+        Retour au profil
+      </a>
+
+      @if (isLoading()) {
+        <div class="animate-pulse rounded-2xl bg-surface-container-lowest p-8 shadow-sm">
+          <div class="mb-6 h-7 w-1/3 rounded-lg bg-outline/10"></div>
+          <div class="space-y-4">
+            <div class="h-12 rounded-xl bg-outline/10"></div>
+            <div class="h-12 rounded-xl bg-outline/10"></div>
+            <div class="h-12 rounded-xl bg-outline/10"></div>
+          </div>
+        </div>
+      }
+
+      @if (!isLoading() && profile(); as p) {
+        <div class="rounded-2xl border border-outline/10 bg-surface-container-lowest shadow-sm">
+
+          <!-- En-tête de la carte -->
+          <div class="border-b border-outline/10 px-8 py-6">
+            <div class="flex items-center gap-4">
+              <div
+                class="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-white"
+                aria-hidden="true"
+              >
+                {{ p.name[0] }}{{ p.lastName[0] }}
+              </div>
+              <div>
+                <h1 class="font-headline-md text-on-background">Modifier le profil</h1>
+                <p class="text-body-md text-on-surface-variant">{{ p.email }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Corps du formulaire -->
+          <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="px-8 py-6 space-y-6">
+
+            <!-- Section : Informations personnelles -->
+            <div class="space-y-4">
+              <div class="flex items-center gap-2 border-b border-outline/10 pb-3">
+                <svg lucideUser class="size-4 text-primary" aria-hidden="true" />
+                <h2 class="text-label-md font-semibold uppercase tracking-widest text-on-surface-variant">
+                  Informations personnelles
+                </h2>
+              </div>
+
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <!-- Prénom -->
+                <div class="space-y-1.5">
+                  <label for="name" class="block text-label-sm font-semibold uppercase tracking-[0.12em] text-on-surface-variant">
+                    Prénom
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    autocomplete="given-name"
+                    formControlName="name"
+                    class="w-full rounded-xl border bg-surface px-4 py-3 text-body-md text-on-background outline-none transition-all placeholder:text-on-surface-variant/40 focus:border-primary focus:ring-2 focus:ring-primary/15"
+                    [class.!border-error]="form.controls.name.touched && form.controls.name.invalid"
+                    [class.border-outline/30]="!(form.controls.name.touched && form.controls.name.invalid)"
+                  />
+                  @if (form.controls.name.touched && form.controls.name.invalid) {
+                    <p class="text-xs text-error">Le prénom est obligatoire.</p>
+                  }
+                </div>
+
+                <!-- Nom -->
+                <div class="space-y-1.5">
+                  <label for="lastName" class="block text-label-sm font-semibold uppercase tracking-[0.12em] text-on-surface-variant">
+                    Nom
+                  </label>
+                  <input
+                    id="lastName"
+                    type="text"
+                    autocomplete="family-name"
+                    formControlName="lastName"
+                    class="w-full rounded-xl border bg-surface px-4 py-3 text-body-md text-on-background outline-none transition-all placeholder:text-on-surface-variant/40 focus:border-primary focus:ring-2 focus:ring-primary/15"
+                    [class.!border-error]="form.controls.lastName.touched && form.controls.lastName.invalid"
+                    [class.border-outline/30]="!(form.controls.lastName.touched && form.controls.lastName.invalid)"
+                  />
+                  @if (form.controls.lastName.touched && form.controls.lastName.invalid) {
+                    <p class="text-xs text-error">Le nom est obligatoire.</p>
+                  }
+                </div>
+              </div>
+
+              <!-- Email — lecture seule -->
+              <div class="space-y-1.5">
+                <label for="email-readonly" class="block text-label-sm font-semibold uppercase tracking-[0.12em] text-on-surface-variant">
+                  Adresse email
+                  <span class="ml-2 rounded-full bg-surface-container px-2 py-0.5 text-label-sm normal-case tracking-normal text-on-surface-variant">
+                    Non modifiable
+                  </span>
+                </label>
+                <input
+                  id="email-readonly"
+                  type="email"
+                  [value]="p.email"
+                  readonly
+                  disabled
+                  class="w-full cursor-not-allowed rounded-xl border border-outline/15 bg-surface-container px-4 py-3 text-body-md text-on-surface-variant/60 outline-none"
+                  aria-readonly="true"
+                />
+                <p class="text-xs text-on-surface-variant/60">
+                  L'adresse email ne peut pas être modifiée pour des raisons de sécurité.
+                </p>
+              </div>
+            </div>
+
+            <!-- Section : Mot de passe -->
+            <div class="space-y-4">
+              <div class="flex items-center gap-2 border-b border-outline/10 pb-3">
+                <svg lucideLock class="size-4 text-primary" aria-hidden="true" />
+                <h2 class="text-label-md font-semibold uppercase tracking-widest text-on-surface-variant">
+                  Changer le mot de passe
+                  <span class="ml-2 text-label-sm font-normal normal-case tracking-normal text-on-surface-variant/60">
+                    (optionnel)
+                  </span>
+                </h2>
+              </div>
+
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <!-- Nouveau mot de passe -->
+                <div class="space-y-1.5">
+                  <label for="password" class="block text-label-sm font-semibold uppercase tracking-[0.12em] text-on-surface-variant">
+                    Nouveau mot de passe
+                  </label>
+                  <input
+                    id="password"
+                    type="password"
+                    autocomplete="new-password"
+                    formControlName="password"
+                    placeholder="8 caractères minimum"
+                    class="w-full rounded-xl border bg-surface px-4 py-3 text-body-md text-on-background outline-none transition-all placeholder:text-on-surface-variant/40 focus:border-primary focus:ring-2 focus:ring-primary/15"
+                    [class.!border-error]="form.controls.password.touched && form.controls.password.invalid"
+                    [class.border-outline/30]="!(form.controls.password.touched && form.controls.password.invalid)"
+                  />
+                  @if (form.controls.password.touched && form.controls.password.hasError('minlength')) {
+                    <p class="text-xs text-error">8 caractères minimum.</p>
+                  }
+                </div>
+
+                <!-- Confirmer le mot de passe -->
+                <div class="space-y-1.5">
+                  <label for="passwordConfirm" class="block text-label-sm font-semibold uppercase tracking-[0.12em] text-on-surface-variant">
+                    Confirmer le mot de passe
+                  </label>
+                  <input
+                    id="passwordConfirm"
+                    type="password"
+                    autocomplete="new-password"
+                    formControlName="passwordConfirm"
+                    placeholder="Répétez le mot de passe"
+                    class="w-full rounded-xl border border-outline/30 bg-surface px-4 py-3 text-body-md text-on-background outline-none transition-all placeholder:text-on-surface-variant/40 focus:border-primary focus:ring-2 focus:ring-primary/15"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Erreur serveur -->
+            @if (serverError()) {
+              <div class="flex items-start gap-2 rounded-xl border border-error/25 bg-error-container px-4 py-3 text-sm text-on-error-container" role="alert">
+                <svg xmlns="http://www.w3.org/2000/svg" class="mt-0.5 size-4 shrink-0 text-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                {{ serverError() }}
+              </div>
+            }
+
+            <!-- Actions -->
+            <div class="flex flex-col-reverse gap-3 border-t border-outline/10 pt-6 sm:flex-row sm:justify-end">
+              <a
+                routerLink="/profil"
+                class="flex items-center justify-center rounded-xl border border-outline/30 px-6 py-3 text-label-md font-semibold text-on-surface-variant transition hover:bg-surface-container"
+              >
+                Annuler
+              </a>
+              <button
+                type="submit"
+                [disabled]="isSubmitting()"
+                class="flex items-center justify-center gap-2 rounded-xl bg-primary px-8 py-3 text-label-md font-semibold text-white transition hover:opacity-90 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                @if (isSubmitting()) {
+                  <svg class="size-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                  Enregistrement…
+                } @else {
+                  Enregistrer les modifications
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      }
+
+    </div>
+  </main>
+
+  <app-site-footer />
+</div>

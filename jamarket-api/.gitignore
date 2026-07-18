@@ -34,3 +34,7 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 /generated/prisma
+
+# Uploads (fichiers générés en local)
+/uploads/*
+!/uploads/.gitkeep

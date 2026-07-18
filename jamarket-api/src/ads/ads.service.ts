@@ -7,7 +7,6 @@ import {
 import { RightEnum } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAdDto } from './dto/create-ad.dto';
-import { FilterAdDto } from './dto/filter-ad.dto';
 import { UpdateAdDto } from './dto/update-ad.dto';
 
 const AD_INCLUDE = {
@@ -27,53 +26,9 @@ const AD_INCLUDE = {
 export class AdsService {
   constructor(private readonly prisma: PrismaService) { }
 
-  async findAll(filters: FilterAdDto) {
-    const { brandId, modelId, priceMin, priceMax, kmMax, fuel, color, vehiculeTypeId, page = 1, limit = 12 } = filters;
-
-    const skip = (page - 1) * limit;
-
-    const where = {
-      isActive: true,
-      deletedAt: null,
-      price: {
-        ...(priceMin !== undefined && { gte: priceMin }),
-        ...(priceMax !== undefined && { lte: priceMax }),
-      },
-      vehicule: {
-        ...(fuel && { fuel }),
-        ...(color && { color }),
-        ...(vehiculeTypeId && { vehiculeTypeId }),
-        ...(kmMax !== undefined && { kilometer: { lte: kmMax } }),
-        ...(modelId && { modelId }),
-        ...(brandId && { model: { brandId } }),
-      },
-    };
-
-    const [data, total] = await Promise.all([
-      this.prisma.ad.findMany({
-        where,
-        include: AD_INCLUDE,
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: limit,
-      }),
-      this.prisma.ad.count({ where }),
-    ]);
-
-    return {
-      data,
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
-    };
-  }
-
   async findOne(id: number) {
     const ad = await this.prisma.ad.findFirst({
-      where: { id, deletedAt: null },
+      where: { id, isArchived: false, deletedAt: null },
       include: AD_INCLUDE,
     });
 
@@ -82,6 +37,51 @@ export class AdsService {
     }
 
     return ad;
+  }
+
+  async findMine(
+    requestUser: { id: number; role: { rights: RightEnum[] } },
+    scope: 'mine' | 'all' = 'mine',
+  ) {
+    const showAll = scope === 'all';
+
+    return this.prisma.ad.findMany({
+      where: {
+        isArchived: false,
+        ...(showAll ? {} : { sellerId: requestUser.id }),
+      },
+      include: AD_INCLUDE,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async findPending(requestUser: { role: { rights: RightEnum[] } }) {
+    this.assertCanManageAd(requestUser);
+
+    return this.prisma.ad.findMany({
+      where: {
+        isActive: false,
+        isSold: false,
+        isArchived: false,
+      },
+      include: AD_INCLUDE,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async approveAllPending(requestUser: { role: { rights: RightEnum[] } }) {
+    this.assertCanManageAd(requestUser);
+
+    const result = await this.prisma.ad.updateMany({
+      where: {
+        isActive: false,
+        isSold: false,
+        isArchived: false,
+      },
+      data: { isActive: true },
+    });
+
+    return { approved: result.count };
   }
 
   async create(dto: CreateAdDto, sellerId: number) {
@@ -108,15 +108,15 @@ export class AdsService {
         price: dto.price,
         vehiculeId: dto.vehiculeId,
         sellerId,
+        isActive: dto.isActive ?? true,
       },
       include: AD_INCLUDE,
     });
   }
 
   async update(id: number, dto: UpdateAdDto, requestUser: { id: number; role: { rights: RightEnum[] } }) {
-    const ad = await this.findOne(id);
-
-    this.checkOwnership(ad, requestUser);
+    await this.findOne(id);
+    this.assertCanManageAd(requestUser);
 
     return this.prisma.ad.update({
       where: { id },
@@ -126,13 +126,12 @@ export class AdsService {
   }
 
   async remove(id: number, requestUser: { id: number; role: { rights: RightEnum[] } }) {
-    const ad = await this.findOne(id);
-
-    this.checkOwnership(ad, requestUser);
+    await this.findOne(id);
+    this.assertCanManageAd(requestUser);
 
     return this.prisma.ad.update({
       where: { id },
-      data: { deletedAt: new Date(), isActive: false },
+      data: { deletedAt: new Date(), isActive: false, isArchived: true },
     });
   }
 
@@ -148,9 +147,8 @@ export class AdsService {
   }
 
   async markAsSold(id: number, requestUser: { id: number; role: { rights: RightEnum[] } }) {
-    const ad = await this.findOne(id);
-
-    this.checkOwnership(ad, requestUser);
+    await this.findOne(id);
+    this.assertCanManageAd(requestUser);
 
     return this.prisma.ad.update({
       where: { id },
@@ -159,14 +157,10 @@ export class AdsService {
     });
   }
 
-  private checkOwnership(
-    ad: { sellerId: number | null },
-    user: { id: number; role: { rights: RightEnum[] } },
-  ) {
-    const isAdmin = user.role.rights.includes(RightEnum.ADMIN);
-    const isOwner = ad.sellerId === user.id;
+  private assertCanManageAd(user: { role: { rights: RightEnum[] } }) {
+    const canManageGarageAds = user.role.rights.includes(RightEnum.CREATE_AD);
 
-    if (!isAdmin && !isOwner) {
+    if (!canManageGarageAds) {
       throw new ForbiddenException("Vous n'êtes pas autorisé à modifier cette annonce");
     }
   }

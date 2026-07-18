@@ -1,0 +1,23 @@
+import { CurrencyPipe, DecimalPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { LucideCalendar, LucideFuel, LucideGauge, LucideHeart } from '@lucide/angular';
+import type { VehicleCard } from '@core/models/vehicle-card.model';
+import { environment } from 'src/environments/environment';
+@Component({
+  selector: 'app-catalogue-vehicle-card',
+  imports: [RouterLink, CurrencyPipe, DecimalPipe, LucideGauge, LucideCalendar, LucideFuel, LucideHeart],
+  templateUrl: './catalogue-vehicle-card.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'block h-full' },
+})
+export class CatalogueVehicleCardComponent {
+  readonly vehicle = input.required<VehicleCard>();
+  readonly favoriteToggle = output<string>();
+  readonly environment = environment;
+  onFavoriteClick(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.favoriteToggle.emit(this.vehicle().id);
+  }
+}
