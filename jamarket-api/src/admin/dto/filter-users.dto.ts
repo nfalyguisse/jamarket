@@ -15,6 +15,11 @@ export class FilterUsersDto {
   @IsBoolean()
   @IsOptional()
   @Transform(({ value }) => value === 'true' || value === true)
+  garageOnly?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
   isActive?: boolean;
 
   @IsInt()

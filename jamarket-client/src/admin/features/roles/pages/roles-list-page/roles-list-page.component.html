@@ -1,0 +1,217 @@
+<div class="p-6 md:p-8">
+  <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Gestion des rôles</h1>
+      <p class="mt-1 text-sm text-gray-500">
+        Créez des rôles personnalisés et assignez les droits adaptés à votre équipe.
+      </p>
+    </div>
+    @if (!showForm()) {
+      <button
+        type="button"
+        class="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+        (click)="openCreateForm()"
+      >
+        <svg lucidePlus class="h-4 w-4" aria-hidden="true"></svg>
+        Nouveau rôle
+      </button>
+    }
+  </div>
+
+  @if (showForm()) {
+    <section
+      class="mb-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
+      aria-labelledby="role-form-title"
+    >
+      <div class="mb-6 flex items-center justify-between">
+        <h2 id="role-form-title" class="text-lg font-semibold text-gray-900">
+          {{ editingRoleId() ? 'Modifier le rôle' : 'Nouveau rôle' }}
+        </h2>
+        <button
+          type="button"
+          class="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100"
+          aria-label="Fermer le formulaire"
+          (click)="closeForm()"
+        >
+          <svg lucideX class="h-4 w-4" aria-hidden="true"></svg>
+        </button>
+      </div>
+
+      <form (ngSubmit)="submitForm()" class="space-y-6">
+        <div>
+          <label for="role-label" class="mb-1.5 block text-sm font-medium text-gray-700">
+            Nom du rôle
+          </label>
+          <input
+            id="role-label"
+            type="text"
+            name="label"
+            [(ngModel)]="formLabel"
+            maxlength="80"
+            placeholder="Ex. : Vendeur senior"
+            class="w-full max-w-md rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            required
+          />
+        </div>
+
+        <fieldset>
+          <legend class="mb-3 text-sm font-medium text-gray-700">Droits associés</legend>
+          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            @for (right of availableRights(); track right.value) {
+              <label
+                class="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-200 p-3 transition hover:border-emerald-300 hover:bg-emerald-50/50"
+                [class.border-emerald-400]="isRightSelected(right.value)"
+                [class.bg-emerald-50]="isRightSelected(right.value)"
+              >
+                <input
+                  type="checkbox"
+                  class="mt-0.5 h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                  [checked]="isRightSelected(right.value)"
+                  (change)="toggleRight(right.value)"
+                />
+                <span>
+                  <span class="block text-sm font-medium text-gray-900">{{ right.label }}</span>
+                  <span class="block text-xs text-gray-500">{{ right.value }}</span>
+                </span>
+              </label>
+            }
+          </div>
+        </fieldset>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="submit"
+            class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+            [disabled]="isSaving()"
+          >
+            @if (isSaving()) {
+              <svg lucideLoader2 class="h-4 w-4 animate-spin" aria-hidden="true"></svg>
+            }
+            {{ editingRoleId() ? 'Enregistrer' : 'Créer le rôle' }}
+          </button>
+          <button
+            type="button"
+            class="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+            (click)="closeForm()"
+          >
+            Annuler
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+
+  @if (isLoading()) {
+    <div class="flex items-center justify-center py-24 text-gray-500" role="status">
+      <svg lucideLoader2 class="h-6 w-6 animate-spin" aria-hidden="true"></svg>
+      <span class="ml-3 text-sm">Chargement des rôles…</span>
+    </div>
+  } @else if (errorMessage()) {
+    <div
+      class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+      role="alert"
+    >
+      {{ errorMessage() }}
+    </div>
+  } @else if (roles().length === 0) {
+    <div class="rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-16 text-center">
+      <svg lucideKeyRound class="mx-auto h-10 w-10 text-gray-300" aria-hidden="true"></svg>
+      <h2 class="mt-4 text-lg font-semibold text-gray-900">Aucun rôle configuré</h2>
+      <p class="mt-2 text-sm text-gray-500">
+        Créez votre premier rôle pour structurer les accès de votre équipe.
+      </p>
+      <button
+        type="button"
+        class="mt-6 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
+        (click)="openCreateForm()"
+      >
+        <svg lucidePlus class="h-4 w-4" aria-hidden="true"></svg>
+        Créer un rôle
+      </button>
+    </div>
+  } @else {
+    <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
+              >
+                Rôle
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
+              >
+                Droits
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
+              >
+                Utilisateurs
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500"
+              >
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 bg-white">
+            @for (role of roles(); track role.id) {
+              <tr class="hover:bg-gray-50/80">
+                <td class="whitespace-nowrap px-6 py-4">
+                  <p class="text-sm font-semibold text-gray-900">{{ role.label }}</p>
+                  <p class="text-xs text-gray-500">ID #{{ role.id }}</p>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex flex-wrap gap-1.5">
+                    @for (right of role.rights; track right) {
+                      <span
+                        class="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700"
+                      >
+                        {{ rightLabel(right) }}
+                      </span>
+                    }
+                  </div>
+                </td>
+                <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+                  {{ role.userCount }}
+                </td>
+                <td class="whitespace-nowrap px-6 py-4 text-right">
+                  <div class="inline-flex items-center gap-2">
+                    <button
+                      type="button"
+                      class="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-emerald-600"
+                      [attr.aria-label]="'Modifier ' + role.label"
+                      (click)="openEditForm(role)"
+                    >
+                      <svg lucideEdit class="h-4 w-4" aria-hidden="true"></svg>
+                    </button>
+                    <button
+                      type="button"
+                      class="rounded-lg p-2 text-gray-500 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                      [disabled]="deletingId() === role.id"
+                      [attr.aria-label]="'Supprimer ' + role.label"
+                      (click)="confirmDelete(role)"
+                    >
+                      @if (deletingId() === role.id) {
+                        <svg lucideLoader2 class="h-4 w-4 animate-spin" aria-hidden="true"></svg>
+                      } @else {
+                        <svg lucideTrash2 class="h-4 w-4" aria-hidden="true"></svg>
+                      }
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

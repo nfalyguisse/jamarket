@@ -26,3 +26,11 @@ export const imageMulterOptions = {
     callback(null, true);
   },
 };
+
+export const avatarMulterOptions = {
+  ...imageMulterOptions,
+  limits: {
+    fileSize: UPLOAD_CONSTANTS.MAX_FILE_SIZE_BYTES,
+    files: 1,
+  },
+};

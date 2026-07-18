@@ -1,3 +1,4 @@
+import { CatalogModule } from './catalog/catalog.module';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AdminModule } from './admin/admin.module';
@@ -17,6 +18,7 @@ import { VehiculesModule } from './vehicules/vehicules.module';
     AdminModule,
     SearchModule,
     UploadModule,
+    CatalogModule,
   ],
   controllers: [AppController],
 })

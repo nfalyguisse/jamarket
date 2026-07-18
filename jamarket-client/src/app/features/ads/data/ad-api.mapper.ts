@@ -2,15 +2,18 @@ import type { AdDetail, AdSpecItem, FuelType } from '@core/models/ad-detail.mode
 import type { VehicleCard } from '@core/models/vehicle-card.model';
 
 interface ApiBrand {
+  id?: number;
   label?: string;
 }
 
 interface ApiModel {
+  id?: number;
   label?: string;
   brand?: ApiBrand;
 }
 
 interface ApiVehiculeType {
+  id?: number;
   label?: string;
 }
 
@@ -47,6 +50,7 @@ export interface ApiAdResponse {
   price?: number | string;
   isActive?: boolean;
   isSold?: boolean;
+  isArchived?: boolean;
   createdAt?: string;
   vehicule?: ApiVehicule;
   seller?: ApiSeller | null;

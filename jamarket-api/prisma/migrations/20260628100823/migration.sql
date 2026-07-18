@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "RightEnum" ADD VALUE 'SUPER_ADMIN';

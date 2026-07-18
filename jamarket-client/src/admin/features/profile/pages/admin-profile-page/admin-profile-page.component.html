@@ -1,0 +1,264 @@
+<div class="space-y-6 p-6 md:p-8">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900">Mon profil</h1>
+    <p class="mt-1 text-sm text-gray-500">
+      Gérez vos informations personnelles, votre photo et votre mot de passe.
+    </p>
+  </div>
+
+  @if (isLoading()) {
+    <div class="animate-pulse space-y-4">
+      <div class="h-40 rounded-xl bg-gray-200"></div>
+      <div class="h-64 rounded-xl bg-gray-200"></div>
+    </div>
+  }
+
+  @if (!isLoading() && profile(); as p) {
+    <!-- Photo de profil -->
+    <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      <h2 class="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
+        Photo de profil
+      </h2>
+
+      <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
+        <div class="relative h-24 w-24 shrink-0">
+          @if (avatarSrc(); as src) {
+            <img
+              [src]="src"
+              alt="Photo de profil"
+              class="h-24 w-24 rounded-full border border-gray-200 object-cover"
+            />
+          } @else {
+            <div
+              class="flex h-24 w-24 items-center justify-center rounded-full bg-emerald-600 text-2xl font-semibold text-white"
+              aria-hidden="true"
+            >
+              {{ initials() }}
+            </div>
+          }
+          @if (isUploadingAvatar()) {
+            <div
+              class="absolute inset-0 flex items-center justify-center rounded-full bg-black/40"
+              aria-live="polite"
+              aria-label="Téléversement en cours"
+            >
+              <svg lucideLoader2 class="h-6 w-6 animate-spin text-white" aria-hidden="true"></svg>
+            </div>
+          }
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <input
+            #avatarInput
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            class="sr-only"
+            aria-label="Choisir une photo de profil"
+            (change)="onAvatarSelected($event)"
+          />
+          <div class="flex flex-wrap gap-2">
+            <button
+              type="button"
+              [disabled]="isUploadingAvatar()"
+              class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-60"
+              (click)="openAvatarPicker()"
+            >
+              <svg lucideCamera class="h-4 w-4" aria-hidden="true"></svg>
+              Changer la photo
+            </button>
+            @if (p.avatarUrl) {
+              <button
+                type="button"
+                [disabled]="isUploadingAvatar()"
+                class="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 transition hover:bg-red-100 disabled:opacity-60"
+                (click)="confirmRemoveAvatar()"
+              >
+                <svg lucideTrash2 class="h-4 w-4" aria-hidden="true"></svg>
+                Supprimer
+              </button>
+            }
+          </div>
+          <p class="text-xs text-gray-500">JPEG, PNG, WebP ou GIF — 5 Mo maximum.</p>
+          @if (avatarError()) {
+            <p class="text-sm text-red-600" role="alert">{{ avatarError() }}</p>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- Informations personnelles -->
+    <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div class="mb-4 flex items-center gap-2">
+        <svg lucideUser class="h-4 w-4 text-emerald-600" aria-hidden="true"></svg>
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500">
+          Informations personnelles
+        </h2>
+      </div>
+
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" novalidate class="space-y-4">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div class="space-y-1.5">
+            <label for="name" class="block text-sm font-medium text-gray-700">Prénom</label>
+            <input
+              id="name"
+              type="text"
+              autocomplete="given-name"
+              formControlName="name"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+              [class.border-red-400]="profileForm.controls.name.touched && profileForm.controls.name.invalid"
+            />
+            @if (profileForm.controls.name.touched && profileForm.controls.name.invalid) {
+              <p class="text-xs text-red-600">Le prénom est obligatoire.</p>
+            }
+          </div>
+
+          <div class="space-y-1.5">
+            <label for="lastName" class="block text-sm font-medium text-gray-700">Nom</label>
+            <input
+              id="lastName"
+              type="text"
+              autocomplete="family-name"
+              formControlName="lastName"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+              [class.border-red-400]="profileForm.controls.lastName.touched && profileForm.controls.lastName.invalid"
+            />
+            @if (profileForm.controls.lastName.touched && profileForm.controls.lastName.invalid) {
+              <p class="text-xs text-red-600">Le nom est obligatoire.</p>
+            }
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
+          <label for="email" class="block text-sm font-medium text-gray-700">
+            Adresse email
+            <span class="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-normal text-gray-500">
+              Non modifiable
+            </span>
+          </label>
+          <input
+            id="email"
+            type="email"
+            [value]="p.email"
+            readonly
+            disabled
+            class="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-500"
+            aria-readonly="true"
+          />
+        </div>
+
+        <div class="space-y-1.5">
+          <label for="role" class="block text-sm font-medium text-gray-700">Rôle</label>
+          <input
+            id="role"
+            type="text"
+            [value]="roleLabel()"
+            readonly
+            disabled
+            class="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-500"
+            aria-readonly="true"
+          />
+        </div>
+
+        @if (profileError()) {
+          <p class="text-sm text-red-600" role="alert">{{ profileError() }}</p>
+        }
+
+        <div class="flex justify-end border-t border-gray-100 pt-4">
+          <button
+            type="submit"
+            [disabled]="isSavingProfile()"
+            class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:opacity-60"
+          >
+            @if (isSavingProfile()) {
+              <svg lucideLoader2 class="h-4 w-4 animate-spin" aria-hidden="true"></svg>
+              Enregistrement…
+            } @else {
+              Enregistrer les informations
+            }
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Mot de passe -->
+    <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div class="mb-4 flex items-center gap-2">
+        <svg lucideLock class="h-4 w-4 text-emerald-600" aria-hidden="true"></svg>
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500">
+          Changer le mot de passe
+        </h2>
+      </div>
+
+      <form [formGroup]="passwordForm" (ngSubmit)="savePassword()" novalidate class="space-y-4">
+        <div class="space-y-1.5">
+          <label for="currentPassword" class="block text-sm font-medium text-gray-700">
+            Mot de passe actuel
+          </label>
+          <input
+            id="currentPassword"
+            type="password"
+            autocomplete="current-password"
+            formControlName="currentPassword"
+            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+            [class.border-red-400]="passwordForm.controls.currentPassword.touched && passwordForm.controls.currentPassword.invalid"
+          />
+          @if (passwordForm.controls.currentPassword.touched && passwordForm.controls.currentPassword.invalid) {
+            <p class="text-xs text-red-600">Le mot de passe actuel est obligatoire.</p>
+          }
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div class="space-y-1.5">
+            <label for="newPassword" class="block text-sm font-medium text-gray-700">
+              Nouveau mot de passe
+            </label>
+            <input
+              id="newPassword"
+              type="password"
+              autocomplete="new-password"
+              formControlName="newPassword"
+              placeholder="8 caractères minimum"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+              [class.border-red-400]="passwordForm.controls.newPassword.touched && passwordForm.controls.newPassword.invalid"
+            />
+            @if (passwordForm.controls.newPassword.touched && passwordForm.controls.newPassword.hasError('minlength')) {
+              <p class="text-xs text-red-600">8 caractères minimum.</p>
+            }
+          </div>
+
+          <div class="space-y-1.5">
+            <label for="newPasswordConfirm" class="block text-sm font-medium text-gray-700">
+              Confirmer le mot de passe
+            </label>
+            <input
+              id="newPasswordConfirm"
+              type="password"
+              autocomplete="new-password"
+              formControlName="newPasswordConfirm"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+            />
+          </div>
+        </div>
+
+        @if (passwordError()) {
+          <p class="text-sm text-red-600" role="alert">{{ passwordError() }}</p>
+        }
+
+        <div class="flex justify-end border-t border-gray-100 pt-4">
+          <button
+            type="submit"
+            [disabled]="isSavingPassword()"
+            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-60"
+          >
+            @if (isSavingPassword()) {
+              <svg lucideLoader2 class="h-4 w-4 animate-spin" aria-hidden="true"></svg>
+              Mise à jour…
+            } @else {
+              Modifier le mot de passe
+            }
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+</div>

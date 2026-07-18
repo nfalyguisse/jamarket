@@ -54,6 +54,10 @@ export const routes: Routes = [
     title: 'Détail annonce | Jamarket Auto',
   },
   {
+    path: 'admin',
+    loadChildren: () => import('../admin/admin.routes').then((m) => m.adminRoutes),
+  },
+  {
     path: '**',
     redirectTo: '',
   },

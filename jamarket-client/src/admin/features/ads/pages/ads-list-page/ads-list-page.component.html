@@ -1,0 +1,191 @@
+<div class="p-6 md:p-8">
+  <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Annonces</h1>
+      <p class="mt-1 text-sm text-gray-500">
+        Gérez le stock de véhicules du garage : création, modification et publication.
+      </p>
+    </div>
+    <a
+      routerLink="/admin/annonces/nouvelle"
+      class="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+    >
+      <svg lucidePlus class="h-4 w-4" aria-hidden="true"></svg>
+      Nouvelle annonce
+    </a>
+  </div>
+
+  <div
+    class="mb-6 inline-flex rounded-xl border border-gray-200 bg-white p-1"
+    role="tablist"
+    aria-label="Filtre des annonces"
+  >
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="listScope() === 'mine'"
+      class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+      [class]="
+        listScope() === 'mine'
+          ? 'bg-emerald-600 text-white'
+          : 'text-gray-600 hover:bg-gray-50'
+      "
+      (click)="switchScope('mine')"
+    >
+      <svg lucideUser class="h-4 w-4" aria-hidden="true"></svg>
+      Mes annonces
+    </button>
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="listScope() === 'all'"
+      class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+      [class]="
+        listScope() === 'all'
+          ? 'bg-emerald-600 text-white'
+          : 'text-gray-600 hover:bg-gray-50'
+      "
+      (click)="switchScope('all')"
+    >
+      <svg lucideLayoutGrid class="h-4 w-4" aria-hidden="true"></svg>
+      Toutes les annonces
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="flex items-center justify-center py-24 text-gray-500" role="status">
+      <svg lucideLoader2 class="h-6 w-6 animate-spin" aria-hidden="true"></svg>
+      <span class="ml-3 text-sm">
+        @if (listScope() === 'mine') {
+          Chargement de vos annonces…
+        } @else {
+          Chargement de toutes les annonces…
+        }
+      </span>
+    </div>
+  } @else if (errorMessage()) {
+    <div
+      class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+      role="alert"
+    >
+      {{ errorMessage() }}
+    </div>
+  } @else if (ads().length === 0) {
+    <div class="rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-16 text-center">
+      <svg lucideTag class="mx-auto h-10 w-10 text-gray-300" aria-hidden="true"></svg>
+      <h2 class="mt-4 text-lg font-semibold text-gray-900">Aucune annonce trouvée</h2>
+      <p class="mt-2 text-sm text-gray-500">
+        @if (listScope() === 'mine') {
+          Vous n'avez pas encore publié de véhicule sur Jamarket Auto.
+        } @else {
+          Aucune annonce n'est disponible dans le stock du garage pour le moment.
+        }
+      </p>
+      @if (listScope() === 'mine') {
+        <a
+          routerLink="/admin/annonces/nouvelle"
+          class="mt-6 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
+        >
+          <svg lucidePlus class="h-4 w-4" aria-hidden="true"></svg>
+          Créer une annonce
+        </a>
+      }
+    </div>
+  } @else {
+    <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                Véhicule
+              </th>
+              @if (listScope() === 'all') {
+                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                  Vendeur
+                </th>
+              }
+              <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                Prix
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                Statut
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                Date
+              </th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 bg-white">
+            @for (ad of ads(); track ad.id) {
+              <tr class="hover:bg-gray-50/80">
+                <td class="whitespace-nowrap px-6 py-4">
+                  <div class="flex items-center gap-4">
+                    <img
+                      [src]="imageUrl(ad)"
+                      [alt]="'Photo de ' + ad.label"
+                      class="h-12 w-16 rounded-lg object-cover"
+                      loading="lazy"
+                    />
+                    <div>
+                      <p class="text-sm font-semibold text-gray-900">{{ ad.label }}</p>
+                      <p class="text-xs text-gray-500">
+                        {{ ad.vehicule.brandLabel }} {{ ad.vehicule.modelLabel }} · {{ ad.vehicule.year }}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+                @if (listScope() === 'all') {
+                  <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+                    {{ sellerName(ad) }}
+                  </td>
+                }
+                <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
+                  {{ ad.price | currency: 'EUR' : 'symbol' : '1.0-0' : 'fr-FR' }}
+                </td>
+                <td class="whitespace-nowrap px-6 py-4">
+                  <span
+                    class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium"
+                    [class]="statusClass(ad)"
+                  >
+                    {{ statusLabel(ad) }}
+                  </span>
+                </td>
+                <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                  {{ ad.createdAt | date: 'dd/MM/yyyy' : '' : 'fr-FR' }}
+                </td>
+                <td class="whitespace-nowrap px-6 py-4 text-right">
+                  <div class="inline-flex items-center gap-2">
+                    <a
+                      [routerLink]="['/admin/annonces', ad.id, 'modifier']"
+                      class="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-emerald-600"
+                      [attr.aria-label]="'Modifier ' + ad.label"
+                    >
+                      <svg lucideEdit class="h-4 w-4" aria-hidden="true"></svg>
+                    </a>
+                    <button
+                      type="button"
+                      class="rounded-lg p-2 text-gray-500 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                      [disabled]="deletingId() === ad.id"
+                      [attr.aria-label]="'Supprimer ' + ad.label"
+                      (click)="confirmDelete(ad)"
+                    >
+                      @if (deletingId() === ad.id) {
+                        <svg lucideLoader2 class="h-4 w-4 animate-spin" aria-hidden="true"></svg>
+                      } @else {
+                        <svg lucideTrash2 class="h-4 w-4" aria-hidden="true"></svg>
+                      }
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

@@ -1,11 +1,8 @@
-
 import { isPlatformBrowser } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, PLATFORM_ID, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { EMPTY, catchError } from 'rxjs';
 import {
-  LucideGrid2x2,
-  LucideList,
   LucideMail,
   LucideMapPin,
   LucideLogOut,
@@ -29,69 +26,6 @@ interface MessagePreview {
   isNew: boolean;
 }
 
-const FAVORITES_MOCK: VehicleCard[] = [
-  {
-    id: 'f1',
-    title: 'Porsche 911 Carrera S',
-    year: 2023,
-    price: 132000,
-    mileageKm: 8500,
-    transmission: 'Automatique',
-    badge: 'Sport',
-    imageUrl:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuBhGhRegbtOE4zk-erFfgYf19E--ewgEfL0Z40oFDcnrCIqomJ1OKkxKU5kPUdH1K9aY_du7MtHWi7Q3cFDaYSMLSjbcslZT-BzL_tyQpLCOE3y2bu06rWmMQUx6BehGgf2Oby8Neg7S2AfqNxWu_L3vLnAD7fS4rkwHZ5HXEV4KQzPH8sPUpvph8dJich7lZTLe1N6zhKKjjqZzrm0VYWrbkjBe6-Fmmbt8rLDgXlcebljrt5swA83ipdiRiFzFmEoxPBiLU8tSB0',
-    imageAlt: 'Porsche 911 Carrera S',
-  },
-  {
-    id: 'f2',
-    title: 'BMW M4 Competition',
-    year: 2022,
-    price: 98500,
-    mileageKm: 15200,
-    transmission: 'Automatique',
-    badge: 'Coupé',
-    imageUrl:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuC9lhgljPaO9LHCZMEK7UInY2V2JeFWKtRQvTjioIPSeQp7SzUjNNWgZmIDXqxgkaPQK-klOR60MMl7JE9Yruv_e_2eSawklhhqMUhXzCCFVy6aUtvl8oJOHo70cIBcpCA1TJDQzAbfR8LIv1OfnNykIipWDh6DUsf1w_or1lLM1JJ_OqDdIqFOFX0tzhNWq8pFWClAN6BxcFaGjUxP5BrOEuD_n4R8t3XOR1Hx2JWsoZk_IbYgS-zBDTMJ8DjILPzSncr9U5QgCtk',
-    imageAlt: 'BMW M4 Competition',
-  },
-  {
-    id: 'f3',
-    title: 'Audi RS6 Avant',
-    year: 2024,
-    price: 145000,
-    mileageKm: 3200,
-    transmission: 'Automatique',
-    badge: 'Break',
-    imageUrl:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuCvH5VhH2TTSKKbowuEqw-045rn6uh7J8ZMHx5SnHGXTTqBm-b75MUZaSKRWrREM9dkrutGQfqRWAAOcasIaoqckF07QYUJfU0REzQIUZQabjNLcnLoICLkE8eBllM9J7xyEN2rBI9XAIeoUV8dhDeO1uClvdbxdx3cuhat81wYDAQmtBBpT9CfS4vMmd5Fgxgy7wdLHA_BAbM-cm5LR32WlH8efe5hgo6yHLZ-Bub_s6TjtgLKAvSUsJQDAQIctt09aErtBfFGhhc',
-    imageAlt: 'Audi RS6 Avant',
-  },
-];
-
-const MESSAGES_MOCK: MessagePreview[] = [
-  {
-    id: 1,
-    senderName: 'Marc Dubois',
-    preview: "La Porsche est disponible pour l'essai demain matin…",
-    time: '11h20',
-    isNew: true,
-  },
-  {
-    id: 2,
-    senderName: 'Garage Precision',
-    preview: "Votre rapport d'expertise technique est prêt.",
-    time: 'Hier',
-    isNew: false,
-  },
-  {
-    id: 3,
-    senderName: 'Sophie Martin',
-    preview: "Bonjour, j'ai bien reçu les documents.",
-    time: 'Lun',
-    isNew: false,
-  },
-];
-
 @Component({
   selector: 'app-profile-page',
   imports: [
@@ -104,8 +38,6 @@ const MESSAGES_MOCK: MessagePreview[] = [
     LucideLogOut,
     LucidePencil,
     LucideMessageSquare,
-    LucideGrid2x2,
-    LucideList,
   ],
   templateUrl: './profile-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -118,11 +50,9 @@ export class ProfilePageComponent implements OnInit {
 
   protected readonly profile = signal<UserProfile | null>(null);
   protected readonly isLoading = signal(true);
-  protected readonly favorites = signal(FAVORITES_MOCK);
-  protected readonly messages = signal(MESSAGES_MOCK);
-  protected readonly newMessagesCount = signal(
-    MESSAGES_MOCK.filter((m) => m.isNew).length,
-  );
+  protected readonly favorites = signal<VehicleCard[]>([]);
+  protected readonly messages = signal<MessagePreview[]>([]);
+  protected readonly newMessagesCount = signal(0);
 
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) {

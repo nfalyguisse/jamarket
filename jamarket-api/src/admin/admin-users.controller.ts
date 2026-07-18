@@ -5,6 +5,7 @@ import {
   Param,
   ParseIntPipe,
   Patch,
+  Post,
   Query,
   Request,
   UseGuards,
@@ -14,6 +15,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RequireRights, RightsGuard } from '../common/guards/rights.guard';
 import { AdminUsersService } from './admin-users.service';
 import { BanUserDto } from './dto/ban-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 import { FilterUsersDto } from './dto/filter-users.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 
@@ -26,13 +28,31 @@ interface AuthRequest {
 
 @Controller('admin/users')
 @UseGuards(JwtAuthGuard, RightsGuard)
-@RequireRights(RightEnum.MANAGE_USER)
+@RequireRights(RightEnum.SUPER_ADMIN)
 export class AdminUsersController {
   constructor(private readonly adminUsersService: AdminUsersService) {}
 
   @Get()
   findAll(@Query() filters: FilterUsersDto) {
     return this.adminUsersService.findAll(filters);
+  }
+
+  @Get('roles')
+  getAssignableRoles() {
+    return this.adminUsersService.getAssignableRoles();
+  }
+
+  @Post()
+  create(@Body() dto: CreateUserDto, @Request() req: AuthRequest) {
+    return this.adminUsersService.create(dto, req.user);
+  }
+
+  @Patch(':id/reset-password')
+  resetPassword(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: AuthRequest,
+  ) {
+    return this.adminUsersService.resetPassword(id, req.user);
   }
 
   @Patch(':id/ban')

@@ -1,7 +1,6 @@
-import { IsInt, IsNotEmpty, IsNumber, IsPositive, IsString } from 'class-validator';
+import { IsBoolean, IsInt, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
 
-export class CreateAdDto {
-  @IsString()
+export class CreateAdDto {  @IsString()
   @IsNotEmpty({ message: "Le titre de l'annonce est obligatoire" })
   label: string;
 
@@ -16,4 +15,8 @@ export class CreateAdDto {
   @IsInt({ message: "L'identifiant du véhicule doit être un entier" })
   @IsPositive({ message: "L'identifiant du véhicule doit être supérieur à 0" })
   vehiculeId: number;
+
+  @IsBoolean()
+  @IsOptional()
+  isActive?: boolean;
 }

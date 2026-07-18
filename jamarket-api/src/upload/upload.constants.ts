@@ -7,7 +7,7 @@ export const UPLOAD_CONSTANTS = {
 } as const;
 
 export const UPLOAD_DIR = process.env.UPLOAD_DIR ?? 'uploads';
-export const UPLOAD_URL_PREFIX = process.env.UPLOAD_URL_PREFIX ?? '/api/uploads';
+export const UPLOAD_URL_PREFIX = process.env.UPLOAD_URL_PREFIX ?? '/uploads';
 
 const MIME_TO_EXT: Record<string, string> = {
   'image/jpeg': '.jpg',

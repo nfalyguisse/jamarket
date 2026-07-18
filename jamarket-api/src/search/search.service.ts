@@ -19,6 +19,7 @@ const AD_INCLUDE = {
 const ACTIVE_AD_WHERE: Prisma.AdWhereInput = {
   isActive: true,
   isSold: false,
+  isArchived: false,
   deletedAt: null,
 };
 
@@ -174,6 +175,31 @@ export class SearchService {
         min: mileageAgg._min.kilometer ?? 0,
         max: mileageAgg._max.kilometer ?? 0,
       },
+    };
+  }
+
+  async getFormReferences(brandId?: number) {
+    const [brands, models, vehiculeTypes] = await Promise.all([
+      this.prisma.brand.findMany({
+        select: { id: true, label: true },
+        orderBy: { label: 'asc' },
+      }),
+      this.prisma.model.findMany({
+        where: brandId ? { brandId } : {},
+        select: { id: true, label: true, brandId: true },
+        orderBy: { label: 'asc' },
+      }),
+      this.prisma.vehiculeType.findMany({
+        select: { id: true, label: true },
+        orderBy: { label: 'asc' },
+      }),
+    ]);
+
+    return {
+      brands,
+      models,
+      vehiculeTypes,
+      fuelTypes: ['essence', 'diesel', 'electrique', 'hybride'],
     };
   }
 

@@ -20,6 +20,7 @@ import { SearchAdDto } from '../search/dto/search-ad.dto';
 import { SearchService } from '../search/search.service';
 import { AdsService } from './ads.service';
 import { CreateAdDto } from './dto/create-ad.dto';
+import { FilterMineAdsDto } from './dto/filter-mine-ads.dto';
 import { UpdateAdDto } from './dto/update-ad.dto';
 
 interface AuthRequest {
@@ -41,6 +42,27 @@ export class AdsController {
   @Get()
   findAll(@Query() filters: SearchAdDto) {
     return this.searchService.search(filters);
+  }
+
+  @Get('mine')
+  @UseGuards(JwtAuthGuard, RightsGuard)
+  @RequireRights(RightEnum.CREATE_AD)
+  findMine(@Query() filters: FilterMineAdsDto, @Request() req: AuthRequest) {
+    return this.adsService.findMine(req.user, filters.scope);
+  }
+
+  @Get('pending')
+  @UseGuards(JwtAuthGuard, RightsGuard)
+  @RequireRights(RightEnum.CREATE_AD)
+  findPending(@Request() req: AuthRequest) {
+    return this.adsService.findPending(req.user);
+  }
+
+  @Patch('pending/approve-all')
+  @UseGuards(JwtAuthGuard, RightsGuard)
+  @RequireRights(RightEnum.CREATE_AD)
+  approveAllPending(@Request() req: AuthRequest) {
+    return this.adsService.approveAllPending(req.user);
   }
 
   @Get(':id')
