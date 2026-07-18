@@ -13,6 +13,7 @@ import { environment } from 'src/environments/environment';
 })
 export class CatalogueVehicleCardComponent {
   readonly vehicle = input.required<VehicleCard>();
+  readonly isFavorite = input(false);
   readonly favoriteToggle = output<string>();
   readonly environment = environment;
   onFavoriteClick(event: Event): void {

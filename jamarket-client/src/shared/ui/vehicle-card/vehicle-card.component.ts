@@ -12,6 +12,7 @@ import type { VehicleCard } from '@core/models/vehicle-card.model';
 })
 export class VehicleCardComponent {
   readonly vehicle = input.required<VehicleCard>();
+  readonly isFavorite = input(false);
   readonly favoriteToggle = output<string>();
 
   onFavoriteClick(event: Event): void {

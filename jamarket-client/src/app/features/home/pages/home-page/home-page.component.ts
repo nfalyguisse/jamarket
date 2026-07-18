@@ -29,6 +29,7 @@ import { SiteHeaderComponent } from '../../../../../shared/layout/site-header/si
 import { VehicleCardComponent } from '../../../../../shared/ui/vehicle-card/vehicle-card.component';
 import type { VehicleCard } from '@core/models/vehicle-card.model';
 import { logHttpError } from '@core/utils/http-error.util';
+import { FavoritesStateService } from '@core/services/favorites-state.service';
 import { HomeApiService } from '../../data/home-api.service';
 import { BENTO_WORKSHOP_IMAGE, HOME_HERO_IMAGE } from '../../data/home.mock';
 import { CatalogueSearchApiService } from '../../../catalogue/data/catalogue-search-api.service';
@@ -70,6 +71,7 @@ export class HomePageComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly destroyRef = inject(DestroyRef);
+  protected readonly favoritesState = inject(FavoritesStateService);
 
   protected readonly heroImage = HOME_HERO_IMAGE;
   protected readonly bentoImage = BENTO_WORKSHOP_IMAGE;
@@ -155,5 +157,9 @@ export class HomePageComponent implements OnInit {
     const queryParams = filtersToQueryParams(filters, CATALOGUE_DEFAULT_SORT, 1, CATALOGUE_DEFAULT_SORT);
 
     void this.router.navigate(['/catalogue'], { queryParams });
+  }
+
+  protected onFavoriteToggle(vehicleId: string): void {
+    this.favoritesState.toggle(vehicleId);
   }
 }

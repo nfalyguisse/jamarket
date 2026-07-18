@@ -12,11 +12,23 @@
     />
     <button
       type="button"
-      class="absolute right-3 top-3 z-10 flex size-9 items-center justify-center rounded-full bg-white/90 text-on-surface-variant shadow-sm transition hover:bg-white hover:text-primary"
-      [attr.aria-label]="'Ajouter ' + vehicle().title + ' aux favoris'"
+      class="absolute right-3 top-3 z-10 flex size-9 items-center justify-center rounded-full bg-white/90 shadow-sm transition hover:bg-white"
+      [class.text-primary]="isFavorite()"
+      [class.text-on-surface-variant]="!isFavorite()"
+      [attr.aria-pressed]="isFavorite()"
+      [attr.aria-label]="
+        isFavorite()
+          ? 'Retirer ' + vehicle().title + ' des favoris'
+          : 'Ajouter ' + vehicle().title + ' aux favoris'
+      "
       (click)="onFavoriteClick($event)"
     >
-      <svg lucideHeart class="size-4" aria-hidden="true" />
+      <svg
+        lucideHeart
+        class="size-4"
+        [class.fill-current]="isFavorite()"
+        aria-hidden="true"
+      />
     </button>
   </div>
 

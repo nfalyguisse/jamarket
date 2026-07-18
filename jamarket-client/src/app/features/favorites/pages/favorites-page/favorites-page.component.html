@@ -1,0 +1,58 @@
+<div class="flex min-h-screen flex-col bg-surface-container-low">
+  <app-site-header />
+
+  <main class="flex-1 pt-24 pb-16">
+    <div class="container-jm">
+      <header class="mb-10">
+        <p class="text-label-sm font-bold uppercase tracking-[0.15em] text-primary">
+          Wishlist
+        </p>
+        <h1 class="mt-2 font-headline-xl text-on-background">Mes favoris</h1>
+        <p class="mt-2 max-w-2xl text-body-md text-on-surface-variant">
+          Retrouvez ici les véhicules que vous avez sauvegardés pour les comparer ou y revenir plus tard.
+        </p>
+      </header>
+
+      @if (isLoading()) {
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          @for (_ of [1, 2, 3]; track $index) {
+            <div class="h-96 animate-pulse rounded-3xl bg-outline/10"></div>
+          }
+        </div>
+      } @else if (vehicles().length === 0) {
+        <div
+          class="flex flex-col items-center justify-center rounded-2xl border border-outline/10 bg-surface-container-lowest py-20 text-center"
+        >
+          <div
+            class="mb-4 flex size-14 items-center justify-center rounded-full bg-primary/10 text-primary"
+            aria-hidden="true"
+          >
+            <svg lucideHeart class="size-6" />
+          </div>
+          <p class="font-headline-md text-on-surface-variant">Aucun favori pour le moment</p>
+          <p class="mt-2 max-w-md text-body-md text-on-surface-variant/70">
+            Explorez le catalogue et touchez le cœur sur une annonce pour l’ajouter à votre liste.
+          </p>
+          <a
+            routerLink="/catalogue"
+            class="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-label-md font-semibold text-on-primary transition hover:opacity-90"
+          >
+            Voir le catalogue
+          </a>
+        </div>
+      } @else {
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          @for (vehicle of vehicles(); track vehicle.id) {
+            <app-vehicle-card
+              [vehicle]="vehicle"
+              [isFavorite]="isFavorite(vehicle.id)"
+              (favoriteToggle)="onFavoriteToggle($event)"
+            />
+          }
+        </div>
+      }
+    </div>
+  </main>
+
+  <app-site-footer />
+</div>
