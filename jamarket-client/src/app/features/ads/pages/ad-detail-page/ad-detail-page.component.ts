@@ -1,7 +1,8 @@
-import { CurrencyPipe, DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { CurrencyPipe, DatePipe, isPlatformBrowser } from '@angular/common';
+import { ChangeDetectionStrategy, Component, OnInit, PLATFORM_ID, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { EMPTY, catchError } from 'rxjs';
+import Swal from 'sweetalert2';
 import {
   LucideCalendar,
   LucideCar,
@@ -14,6 +15,9 @@ import {
   LucideZap,
 } from '@lucide/angular';
 import type { AdDetail, AdSpecItem } from '@core/models/ad-detail.model';
+import { AUTH_SCOPE_KEY } from '@core/constants/auth.constants';
+import { AuthStateService } from '@core/services/auth-state.service';
+import { ChatApiService } from '@core/services/chat-api.service';
 import { logHttpError } from '@core/utils/http-error.util';
 import { SiteFooterComponent } from '@shared/layout/site-footer/site-footer.component';
 import { SiteHeaderComponent } from '@shared/layout/site-header/site-header.component';
@@ -45,11 +49,16 @@ import { AdDetailApiService } from '../../data/ad-detail-api.service';
 })
 export class AdDetailPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly adDetailApi = inject(AdDetailApiService);
+  private readonly chatApi = inject(ChatApiService);
+  private readonly authState = inject(AuthStateService);
+  private readonly platformId = inject(PLATFORM_ID);
 
   protected readonly ad = signal<AdDetail | null>(null);
   protected readonly isLoading = signal(true);
   protected readonly hasError = signal(false);
+  protected readonly isContacting = signal(false);
 
   protected readonly specs = computed<AdSpecItem[]>(() => {
     const detail = this.ad();
@@ -106,4 +115,66 @@ export class AdDetailPageComponent implements OnInit {
       });
   }
 
+  protected async contactSeller(): Promise<void> {
+    const detail = this.ad();
+    if (!detail || !this.isAvailable()) {
+      return;
+    }
+
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    const isAdminScope = localStorage.getItem(AUTH_SCOPE_KEY) === 'admin';
+    if (!this.authState.isLoggedIn() || isAdminScope) {
+      const result = await Swal.fire({
+        icon: 'info',
+        title: 'Connexion requise',
+        text: 'Connectez-vous avec votre compte client pour contacter le vendeur à propos de ce véhicule.',
+        confirmButtonText: 'Se connecter',
+        showCancelButton: true,
+        cancelButtonText: 'Annuler',
+      });
+      if (result.isConfirmed) {
+        void this.router.navigate(['/connexion'], {
+          queryParams: { returnUrl: `/annonces/${detail.id}` },
+        });
+      }
+      return;
+    }
+
+    if (!detail.seller) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Contact indisponible',
+        text: 'Cette annonce n’a pas encore de vendeur associé.',
+        confirmButtonText: 'Compris',
+      });
+      return;
+    }
+
+    this.isContacting.set(true);
+    this.chatApi
+      .create({
+        adId: detail.id,
+        initialMessage: `Bonjour, je suis intéressé(e) par « ${detail.label} ». Est-il toujours disponible ?`,
+      })
+      .pipe(
+        catchError((error: unknown) => {
+          logHttpError(error, '[ad-detail] ouverture conversation');
+          this.isContacting.set(false);
+          void Swal.fire({
+            icon: 'error',
+            title: 'Impossible d’ouvrir la conversation',
+            text: 'Réessayez dans un instant ou contactez le garage par e-mail.',
+            confirmButtonText: 'OK',
+          });
+          return EMPTY;
+        }),
+      )
+      .subscribe((conversation) => {
+        this.isContacting.set(false);
+        void this.router.navigate(['/messages', conversation.id]);
+      });
+  }
 }

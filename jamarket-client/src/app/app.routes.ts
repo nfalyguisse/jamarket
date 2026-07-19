@@ -54,6 +54,22 @@ export const routes: Routes = [
     title: 'Détail annonce | Jamarket Auto',
   },
   {
+    path: 'messages',
+    loadComponent: () =>
+      import('./features/messages/pages/messages-page/messages-page.component').then(
+        (m) => m.MessagesPageComponent,
+      ),
+    title: 'Messages | Jamarket Auto',
+  },
+  {
+    path: 'messages/:id',
+    loadComponent: () =>
+      import('./features/messages/pages/messages-page/messages-page.component').then(
+        (m) => m.MessagesPageComponent,
+      ),
+    title: 'Conversation | Jamarket Auto',
+  },
+  {
     path: 'admin',
     loadChildren: () => import('../admin/admin.routes').then((m) => m.adminRoutes),
   },
