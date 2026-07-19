@@ -1,6 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import type { AdImage } from '@core/models/ad-detail.model';
-import { environment } from 'src/environments/environment';
+import {
+  DISABLE_REMOTE_MEDIA,
+  VEHICLE_IMAGE_PLACEHOLDER,
+  resolveMediaUrl,
+} from '@core/utils/media-url.util';
+
 const VISIBLE_THUMBNAILS = 4;
 
 @Component({
@@ -11,25 +16,35 @@ const VISIBLE_THUMBNAILS = 4;
 export class AdImageGalleryComponent {
   readonly images = input.required<AdImage[]>();
   readonly altPrefix = input('Photo du véhicule');
-  readonly environment = environment;
   protected readonly selectedIndex = signal(0);
 
+  protected readonly displayImages = computed<AdImage[]>(() => {
+    if (DISABLE_REMOTE_MEDIA) {
+      return [{ id: 0, url: VEHICLE_IMAGE_PLACEHOLDER }];
+    }
+    return this.images();
+  });
+
   protected readonly selectedImage = computed(() => {
-    const imgs = this.images();
+    const imgs = this.displayImages();
     const index = this.selectedIndex();
     return imgs[index] ?? imgs[0] ?? null;
   });
 
   protected readonly visibleThumbnails = computed(() =>
-    this.images().slice(0, VISIBLE_THUMBNAILS),
+    this.displayImages().slice(0, VISIBLE_THUMBNAILS),
   );
 
   protected readonly hiddenCount = computed(() =>
-    Math.max(0, this.images().length - VISIBLE_THUMBNAILS),
+    Math.max(0, this.displayImages().length - VISIBLE_THUMBNAILS),
   );
 
+  protected mediaUrl(url: string): string {
+    return resolveMediaUrl(url);
+  }
+
   protected selectImage(index: number): void {
-    if (index >= 0 && index < this.images().length) {
+    if (index >= 0 && index < this.displayImages().length) {
       this.selectedIndex.set(index);
     }
   }

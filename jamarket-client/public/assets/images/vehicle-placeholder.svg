@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="Photo indisponible">
+  <rect width="960" height="600" fill="#e8eeed"/>
+  <g fill="none" stroke="#8aa3a0" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M210 390h540"/>
+    <path d="M260 390c20-70 70-120 140-120h160c70 0 120 50 140 120"/>
+    <circle cx="340" cy="390" r="48"/>
+    <circle cx="620" cy="390" r="48"/>
+    <path d="M300 270h120l40 50H300z"/>
+  </g>
+  <text x="480" y="480" text-anchor="middle" fill="#5f7a77" font-family="system-ui,sans-serif" font-size="28">
+    Photo indisponible
+  </text>
+</svg>

@@ -3,7 +3,7 @@
 >
   <div class="relative aspect-[4/3] overflow-hidden">
     <img
-      [src]="environment.cdnUrl + vehicle().imageUrl"
+      [src]="imageSrc()"
       [alt]="vehicle().imageAlt"
       class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
       loading="lazy"

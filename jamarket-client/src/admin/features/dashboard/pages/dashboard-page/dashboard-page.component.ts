@@ -138,7 +138,7 @@ export class DashboardPageComponent implements OnInit {
 
   protected imageUrl(ad: AdminAd): string {
     const url = ad.vehicule.images[0]?.url;
-    return url ? resolveMediaUrl(url) : '/assets/images/vehicle-placeholder.webp';
+    return url ? resolveMediaUrl(url) : '/assets/images/vehicle-placeholder.svg';
   }
 
   protected approveAd(ad: AdminAd): void {
