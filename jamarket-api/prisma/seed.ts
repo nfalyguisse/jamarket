@@ -1,23 +1,40 @@
 import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
 import { PrismaClient, RightEnum } from '../generated/prisma/client';
 import * as bcrypt from 'bcrypt';
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
-const prisma = new PrismaClient({ adapter });
+function createPrismaClient() {
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error('DATABASE_URL est requis pour le seed');
+  }
 
-/** `npm run prisma:seed:prod` force le seed référentiel (sans démo). */
-if (process.env.npm_lifecycle_event === 'prisma:seed:prod') {
-  process.env.SEED_INCLUDE_DEMO = 'false';
-  process.env.NODE_ENV ??= 'production';
+  // Render (et la plupart des Postgres cloud) exigent SSL depuis l’extérieur
+  const needsSsl =
+    /sslmode=require/i.test(connectionString) ||
+    /render\.com/i.test(connectionString) ||
+    process.env.PGSSLMODE === 'require';
+
+  const pool = new Pool({
+    connectionString,
+    ssl: needsSsl ? { rejectUnauthorized: false } : undefined,
+    connectionTimeoutMillis: 20_000,
+    idleTimeoutMillis: 10_000,
+  });
+
+  return new PrismaClient({ adapter: new PrismaPg(pool) });
 }
 
-const isProduction = process.env.NODE_ENV === 'production';
+const prisma = createPrismaClient();
 
-/** Annonces / users démo : off en prod sauf SEED_INCLUDE_DEMO=true */
-const includeDemo =
-  process.env.SEED_INCLUDE_DEMO === 'true' ||
-  (process.env.SEED_INCLUDE_DEMO !== 'false' && !isProduction);
+/** `npm run prisma:seed:prod` = seed référentiel uniquement (sans démo). */
+if (process.env.npm_lifecycle_event === 'prisma:seed:prod') {
+  process.env.SEED_INCLUDE_DEMO = 'false';
+}
+
+/** Annonces / users démo : activé par défaut (y compris en prod). Désactiver avec SEED_INCLUDE_DEMO=false */
+const includeDemo = process.env.SEED_INCLUDE_DEMO !== 'false';
 
 async function seedRoles() {
   const adminRole = await prisma.role.upsert({
@@ -73,18 +90,14 @@ async function seedRoles() {
 }
 
 async function seedSuperAdmin(adminRoleId: number) {
-  const email =
-    process.env.SEED_SUPERADMIN_EMAIL ??
-    (isProduction ? undefined : 'admin@jamarket.fr');
-  const password =
-    process.env.SEED_SUPERADMIN_PASSWORD ??
-    (isProduction ? undefined : 'Password123!');
+  const email = process.env.SEED_SUPERADMIN_EMAIL;
+  const password = process.env.SEED_SUPERADMIN_PASSWORD;
   const name = process.env.SEED_SUPERADMIN_NAME ?? 'Super';
   const lastName = process.env.SEED_SUPERADMIN_LASTNAME ?? 'Admin';
 
   if (!email || !password) {
     throw new Error(
-      'SEED_SUPERADMIN_EMAIL et SEED_SUPERADMIN_PASSWORD sont requis en production',
+      'SEED_SUPERADMIN_EMAIL et SEED_SUPERADMIN_PASSWORD sont requis pour le seed',
     );
   }
 
@@ -507,7 +520,7 @@ async function main() {
     const seller = await seedDemoUsers(employeeRole.id, customerRole.id, demoPassword);
     await seedDemoAds(catalog, seller.id);
   } else {
-    console.log('⏭️  Seed démo ignoré (prod) — SEED_INCLUDE_DEMO=true pour l’activer');
+    console.log('⏭️  Seed démo ignoré — SEED_INCLUDE_DEMO=false');
   }
 
   console.log('🎉 Seeding complete!');
