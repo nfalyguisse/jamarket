@@ -17,7 +17,7 @@ import { mapApiAdToAdminAd } from './admin-ads-api.mapper';
 @Injectable({ providedIn: 'root' })
 export class AdminAdsApiService {
   private readonly http = inject(HttpClient);
-  private readonly adsUrl = `${environment.apiUrl}/ads`;
+  private readonly adsUrl = `${environment.apiUrl}/annonces`;
   private readonly vehiculesUrl = `${environment.apiUrl}/vehicules`;
   private readonly searchUrl = `${environment.apiUrl}/search`;
 

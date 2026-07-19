@@ -7,7 +7,10 @@ export class RegisterDto {
   @IsNotEmpty({ message: 'Le prénom est obligatoire' })
   name: string;
 
-  @ApiProperty({ description: 'Nom de famille de l’acheteur', example: 'Dupont' })
+  @ApiProperty({
+    description: 'Nom de famille de l’acheteur',
+    example: 'Dupont',
+  })
   @IsString()
   @IsNotEmpty({ message: 'Le nom est obligatoire' })
   lastName: string;
@@ -27,6 +30,8 @@ export class RegisterDto {
     format: 'password',
   })
   @IsString()
-  @MinLength(8, { message: 'Le mot de passe doit contenir au moins 8 caractères' })
+  @MinLength(8, {
+    message: 'Le mot de passe doit contenir au moins 8 caractères',
+  })
   password: string;
 }

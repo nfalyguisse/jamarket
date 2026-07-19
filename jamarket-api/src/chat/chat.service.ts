@@ -311,11 +311,7 @@ export class ChatService {
     );
   }
 
-  async createMessage(
-    userId: number,
-    conversationId: number,
-    text: string,
-  ) {
+  async createMessage(userId: number, conversationId: number, text: string) {
     const trimmed = text?.trim();
     if (!trimmed) {
       throw new BadRequestException('Le message ne peut pas être vide');
@@ -391,9 +387,7 @@ export class ChatService {
       return { adminId: user.id };
     }
 
-    throw new ForbiddenException(
-      'Vous n’avez pas accès à la messagerie',
-    );
+    throw new ForbiddenException('Vous n’avez pas accès à la messagerie');
   }
 
   private assertCustomer(user: AuthUser): void {
@@ -410,8 +404,7 @@ export class ChatService {
   ): void {
     const isSuperAdmin = user.role.rights.includes(RightEnum.SUPER_ADMIN);
     const isParticipant =
-      conversation.customerId === user.id ||
-      conversation.adminId === user.id;
+      conversation.customerId === user.id || conversation.adminId === user.id;
 
     if (!isParticipant && !isSuperAdmin) {
       throw new ForbiddenException(

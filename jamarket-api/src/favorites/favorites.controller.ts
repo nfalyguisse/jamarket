@@ -65,10 +65,7 @@ export class FavoritesController {
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 404, description: 'Annonce introuvable' })
   @ApiResponse({ status: 409, description: 'Déjà en favoris' })
-  add(
-    @Param('adId', ParseIntPipe) adId: number,
-    @Request() req: AuthRequest,
-  ) {
+  add(@Param('adId', ParseIntPipe) adId: number, @Request() req: AuthRequest) {
     return this.favoritesService.add(req.user.id, adId);
   }
 

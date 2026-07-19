@@ -78,8 +78,8 @@ Commande : `npm run test:cov`
 |----------|----------|
 | Auth client (register / login) | OK |
 | Auth admin (login back-office + `/auth/admin/me`) | OK |
-| Catalogue / recherche filtrée (`GET /ads?brand=1&priceMin=1000`) | OK |
-| Consultation fiche annonce (`GET /ads/:id`) | OK |
+| Catalogue / recherche filtrée (`GET /annonces?brand=1&priceMin=1000`) | OK |
+| Consultation fiche annonce (`GET /annonces/:id`) | OK |
 | CRUD annonce employé (POST / PATCH / DELETE) | OK |
 | Accès refusé (sans token 401 ; client sans `CREATE_AD` 401/403) | OK |
 

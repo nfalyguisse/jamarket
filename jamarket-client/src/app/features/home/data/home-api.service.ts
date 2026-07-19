@@ -13,7 +13,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class HomeApiService {
   private readonly http = inject(HttpClient);
-  private readonly adsUrl = `${environment.apiUrl}/ads`;
+  private readonly adsUrl = `${environment.apiUrl}/annonces`;
 
   getLatestVehicles(): Observable<VehicleCard[]> {
     return this.http

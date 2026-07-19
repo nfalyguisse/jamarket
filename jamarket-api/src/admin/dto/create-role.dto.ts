@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ArrayMinSize, IsArray, IsEnum, IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsEnum,
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 import { RightEnum } from '../../../generated/prisma/client';
 
 export class CreateRoleDto {
@@ -10,7 +17,9 @@ export class CreateRoleDto {
   })
   @IsString()
   @IsNotEmpty({ message: 'Le nom du rôle est obligatoire' })
-  @MaxLength(80, { message: 'Le nom du rôle ne peut pas dépasser 80 caractères' })
+  @MaxLength(80, {
+    message: 'Le nom du rôle ne peut pas dépasser 80 caractères',
+  })
   label: string;
 
   @ApiProperty({

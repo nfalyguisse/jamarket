@@ -94,7 +94,10 @@ export class VehiculesController {
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Droit CREATE_AD manquant' })
   @ApiResponse({ status: 404, description: 'Véhicule introuvable' })
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateVehiculeDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateVehiculeDto,
+  ) {
     return this.vehiculesService.update(id, dto);
   }
 

@@ -16,7 +16,10 @@ export class AppController {
       '"ok" ou "degraded", l’uptime du process et la disponibilité de la base. ' +
       'Utile pour les probes Docker/K8s et le monitoring (compétence C4.1.2).',
   })
-  @ApiResponse({ status: 200, description: 'État de santé retourné (ok ou degraded)' })
+  @ApiResponse({
+    status: 200,
+    description: 'État de santé retourné (ok ou degraded)',
+  })
   async health() {
     let database: 'ok' | 'unreachable' = 'unreachable';
 
