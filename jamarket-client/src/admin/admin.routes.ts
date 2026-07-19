@@ -80,6 +80,14 @@ export const adminRoutes: Routes = [
           ),
         title: 'Mon profil | Jamarket Back Office',
       },
+      {
+        path: 'messages',
+        loadComponent: () =>
+          import('./features/messages/pages/admin-messages-page/admin-messages-page.component').then(
+            (m) => m.AdminMessagesPageComponent,
+          ),
+        title: 'Messages | Jamarket Back Office',
+      },
     ],
   },
 ];

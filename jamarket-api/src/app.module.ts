@@ -7,6 +7,7 @@ import { AdminModule } from './admin/admin.module';
 import { AdsModule } from './ads/ads.module';
 import { AuthModule } from './auth/auth.module';
 import { FavoritesModule } from './favorites/favorites.module';
+import { ChatModule } from './chat/chat.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SearchModule } from './search/search.module';
 import { UploadModule } from './upload/upload.module';
@@ -34,6 +35,7 @@ const THROTTLE_LIMIT = Number(process.env.THROTTLE_LIMIT ?? 100);
     UploadModule,
     CatalogModule,
     FavoritesModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [

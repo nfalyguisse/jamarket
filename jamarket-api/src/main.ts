@@ -74,6 +74,7 @@ async function bootstrap() {
       .addTag('Catalogue', 'Marques, modèles et types de véhicules')
       .addTag('Admin Users', 'Gestion des comptes (super-admin)')
       .addTag('Admin Roles', 'Gestion des rôles et droits (super-admin)')
+      .addTag('Chat', 'Messagerie liée aux annonces (REST + WebSocket /chat)')
       .build();
 
     const document = SwaggerModule.createDocument(app, config);

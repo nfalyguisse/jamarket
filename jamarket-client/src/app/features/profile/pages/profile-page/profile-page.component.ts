@@ -11,6 +11,7 @@ import {
 } from '@lucide/angular';
 import { AuthStateService } from '@core/services/auth-state.service';
 import { FavoritesStateService } from '@core/services/favorites-state.service';
+import { ChatApiService } from '@core/services/chat-api.service';
 import { SiteFooterComponent } from '../../../../../shared/layout/site-footer/site-footer.component';
 import { SiteHeaderComponent } from '../../../../../shared/layout/site-header/site-header.component';
 import { VehicleCardComponent } from '../../../../../shared/ui/vehicle-card/vehicle-card.component';
@@ -47,6 +48,7 @@ interface MessagePreview {
 export class ProfilePageComponent implements OnInit {
   private readonly profileApiService = inject(ProfileApiService);
   private readonly favoritesApi = inject(FavoritesApiService);
+  private readonly chatApi = inject(ChatApiService);
   private readonly authState = inject(AuthStateService);
   protected readonly favoritesState = inject(FavoritesStateService);
   private readonly router = inject(Router);
@@ -75,6 +77,7 @@ export class ProfilePageComponent implements OnInit {
       .subscribe((profile) => {
         this.profile.set(profile);
         this.isLoading.set(false);
+        this.loadMessagesPreview();
       });
 
     this.favoritesApi
@@ -103,8 +106,36 @@ export class ProfilePageComponent implements OnInit {
     }
   }
 
+  protected openConversation(id: number): void {
+    void this.router.navigate(['/messages', id]);
+  }
+
   logout(): void {
     this.authState.clearTokens();
     void this.router.navigateByUrl('/');
+  }
+
+  private loadMessagesPreview(): void {
+    this.chatApi
+      .list()
+      .pipe(
+        catchError((error: unknown) => {
+          logHttpError(error, '[profile] messages');
+          return EMPTY;
+        }),
+      )
+      .subscribe((list) => {
+        const previews = list.slice(0, 5).map((c) => ({
+          id: c.id,
+          senderName: `${c.admin.name} ${c.admin.lastName}`.trim() || c.ad.label,
+          preview: c.lastMessage?.text ?? `À propos de « ${c.ad.label} »`,
+          time: c.lastMessage?.createdAt
+            ? new Date(c.lastMessage.createdAt).toLocaleDateString('fr-FR')
+            : new Date(c.createdAt).toLocaleDateString('fr-FR'),
+          isNew: false,
+        }));
+        this.messages.set(previews);
+        this.newMessagesCount.set(list.length);
+      });
   }
 }

@@ -318,13 +318,16 @@ export class AuthService {
         data: { deletedAt: new Date(), isActive: false, isArchived: true },
       });
 
+      // Anonymise le compte : les conversations/messages restent pour l’historique
+      // de l’interlocuteur, mais s’affichent comme « Utilisateur supprimé ».
       await tx.user.update({
         where: { id: userId },
         data: {
           name: 'Utilisateur',
-          lastName: 'Supprimé',
+          lastName: 'supprimé',
           email: anonymizedEmail,
           password: '',
+          avatarUrl: null,
           isActive: false,
           deletedAt: new Date(),
         },
