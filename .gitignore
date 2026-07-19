@@ -10,6 +10,11 @@
 .env.*
 !.env.example
 
+# Ignorer les fichiers package-lock du front et de l'api
+jamarket-client/package-lock.json
+jamarket-api/package-lock.json
+
+
 # Fichiers d'environnement Angular (générés par jamarket-client/scripts/generate-env.mjs)
 jamarket-client/src/environments/*.ts
 !jamarket-client/src/environments/.gitkeep
