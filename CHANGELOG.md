@@ -1,6 +1,11 @@
 # Changelog
 
+Toutes les versions notables de Jamarket sont documentées ici.
+Format des tags Git : `vMAJOR.MINOR.PATCH` (voir [`docs/processus-deploiement.md`](./docs/processus-deploiement.md)).
+
 ## [0.2.0] — 2026-07-19
+
+Première mise en production (Vercel + Render). Tag Git : `v0.2.0`.
 
 ### Ajouté
 
@@ -9,6 +14,7 @@
 - UI client `/messages` et CTA « Contacter le vendeur » sur la fiche annonce
 - Lead Management back-office `/admin/messages` (filtre par annonce, chat temps réel)
 - Documentation `docs/architecture-chat.md`
+- Processus de déploiement + checklist smoke tests (`docs/processus-deploiement.md`)
 
 ### Sécurité / RGPD
 
