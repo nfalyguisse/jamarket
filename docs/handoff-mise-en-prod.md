@@ -27,9 +27,10 @@ Doc d’écart déjà rédigée : [`ecart-architecture-deploiement.md`](./ecart-
 - **Output** : `dist/jamarket-client/browser` (Angular 17+)
 - Fichier `jamarket-client/vercel.json` : `outputDirectory` + rewrite SPA → `index.html`
 - Les fichiers `environment*.ts` sont **générés** au build via `scripts/generate-env.mjs` (`postinstall` / `prebuild`), **non commités** (gitignore)
-- Variables Vercel :
-  - `API_URL` = `https://jamarket-api.onrender.com/api`
-  - `CDN_URL` = origine API (pas de CDN objet pour l’instant)
+- Variables Vercel (Environment = **Production**, puis **Redeploy**) :
+  - `API_URL` = `https://jamarket-api.onrender.com/api` ← aussi utilisée pour Socket.IO `/chat`
+  - `CDN_URL` = `https://jamarket-api.onrender.com` (origine API ; pas de CDN objet pour l’instant)
+  - Sans ces vars au build, le front tombe sur `localhost:3000` → WS cassé en prod
 - SSR Angular **ignoré** volontairement (trop fragile / coûteux sur Vercel)
 - Routes API annonces : préfixe **`/api/annonces`** (pas `/api/ads` — bloqué par adblockers : `ERR_BLOCKED_BY_CLIENT`)
 
