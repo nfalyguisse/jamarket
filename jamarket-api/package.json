@@ -23,6 +23,9 @@
     "prisma:generate": "npx prisma generate",
     "prisma:seed": "ts-node --project tsconfig.json prisma/seed.ts",
     "prisma:seed:prod": "ts-node --project tsconfig.json prisma/seed.ts",
+    "prisma:wipe": "ts-node --project tsconfig.json prisma/wipe.ts",
+    "prisma:reset": "ts-node --project tsconfig.json prisma/wipe.ts && npx prisma db seed",
+    "prisma:migrate:reset": "npx prisma migrate reset --force",
     "prisma:deploy": "npx prisma migrate deploy && npx prisma db seed"
   },
   "dependencies": {

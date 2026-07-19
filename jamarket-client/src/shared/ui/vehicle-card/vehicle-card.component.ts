@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 import { RouterLink } from '@angular/router';
 import { LucideCalendar, LucideGauge, LucideHeart, LucideSettings } from '@lucide/angular';
 import type { VehicleCard } from '@core/models/vehicle-card.model';
+import { resolveMediaUrl } from '@core/utils/media-url.util';
 
 @Component({
   selector: 'app-vehicle-card',
@@ -14,6 +15,10 @@ export class VehicleCardComponent {
   readonly vehicle = input.required<VehicleCard>();
   readonly isFavorite = input(false);
   readonly favoriteToggle = output<string>();
+
+  protected imageSrc(): string {
+    return resolveMediaUrl(this.vehicle().imageUrl);
+  }
 
   onFavoriteClick(event: Event): void {
     event.preventDefault();

@@ -327,8 +327,70 @@ async function seedDemoAds(
   catalog: Awaited<ReturnType<typeof seedCatalog>>,
   sellerId: number,
 ) {
+  /** Photos Unsplash (voitures) — URLs absolues HTTPS, sans CDN Jamarket. */
+  const carPhotos: [string, string][] = [
+    [
+      'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&h=600&q=80',
+      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&h=600&q=80',
+    ],
+    [
+      'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&h=600&q=80',
+      'https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=800&h=600&q=80',
+    ],
+    [
+      'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=800&h=600&q=80',
+      'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=800&h=600&q=80',
+    ],
+    [
+      'https://images.unsplash.com/photo-1617531653332-bd46c24f2068?auto=format&fit=crop&w=800&h=600&q=80',
+      'https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&w=800&h=600&q=80',
+    ],
+    [
+      'https://images.unsplash.com/photo-1511919884226-fd3cad34687a?auto=format&fit=crop&w=800&h=600&q=80',
+      'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=800&h=600&q=80',
+    ],
+    [
+      'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800&h=600&q=80',
+      'https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?auto=format&fit=crop&w=800&h=600&q=80',
+    ],
+    [
+      'https://images.unsplash.com/photo-1489824904134-891ab64532f1?auto=format&fit=crop&w=800&h=600&q=80',
+      'https://images.unsplash.com/photo-1502877338536-702d10cb0bc7?auto=format&fit=crop&w=800&h=600&q=80',
+    ],
+    [
+      'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&w=800&h=600&q=80',
+      'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=800&h=600&q=80',
+    ],
+    [
+      'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&h=600&q=80',
+      'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&h=600&q=80',
+    ],
+    [
+      'https://images.unsplash.com/photo-1549924231-f129b911e442?auto=format&fit=crop&w=800&h=600&q=80',
+      'https://images.unsplash.com/photo-1609521263047-f8f205293f24?auto=format&fit=crop&w=800&h=600&q=80',
+    ],
+  ];
+
   const existingAds = await prisma.ad.count();
   if (existingAds > 0) {
+    // Remplace les anciennes URLs picsum par des photos voiture (re-seed possible)
+    const placeholderImages = await prisma.image.findMany({
+      where: { url: { contains: 'picsum.photos' } },
+      orderBy: { id: 'asc' },
+    });
+
+    if (placeholderImages.length > 0) {
+      for (let i = 0; i < placeholderImages.length; i++) {
+        const pair = carPhotos[i % carPhotos.length];
+        const url = pair[i % 2];
+        await prisma.image.update({
+          where: { id: placeholderImages[i].id },
+          data: { url },
+        });
+      }
+      console.log(`✅ ${placeholderImages.length} image(s) picsum remplacée(s) par des photos voiture`);
+    }
+
     console.log(`⏭️  Annonces démo ignorées (${existingAds} annonce(s) déjà présentes)`);
     return;
   }
@@ -470,6 +532,7 @@ async function seedDemoAds(
 
   for (let i = 0; i < vehicleAds.length; i++) {
     const v = vehicleAds[i];
+    const [photoA, photoB] = carPhotos[i % carPhotos.length];
 
     const vehicule = await prisma.vehicule.create({
       data: {
@@ -483,10 +546,7 @@ async function seedDemoAds(
         vehiculeYear: v.year,
         vehiculeTypeId: v.vType.id,
         images: {
-          create: [
-            { url: `https://picsum.photos/seed/vehicle${i + 1}a/800/600` },
-            { url: `https://picsum.photos/seed/vehicle${i + 1}b/800/600` },
-          ],
+          create: [{ url: photoA }, { url: photoB }],
         },
       },
     });
@@ -504,7 +564,7 @@ async function seedDemoAds(
     });
   }
 
-  console.log('✅ 10 annonces démo');
+  console.log('✅ 10 annonces démo (photos voiture Unsplash)');
 }
 
 async function main() {

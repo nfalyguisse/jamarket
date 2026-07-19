@@ -2,9 +2,23 @@ import { environment } from '../../environments/environment';
 
 const API_ORIGIN = environment.apiUrl.replace(/\/api\/?$/, '');
 
+/** Temporaire : médias distants désactivés (CDN / Render). Remettre à `false` pour réactiver. */
+export const DISABLE_REMOTE_MEDIA = true;
+
+export const VEHICLE_IMAGE_PLACEHOLDER = '/assets/images/vehicle-placeholder.svg';
+
 export function resolveMediaUrl(url: string): string {
   if (!url) {
-    return '';
+    return VEHICLE_IMAGE_PLACEHOLDER;
+  }
+
+  // Previews locales (upload admin) : laisser passer
+  if (url.startsWith('blob:') || url.startsWith('data:')) {
+    return url;
+  }
+
+  if (DISABLE_REMOTE_MEDIA) {
+    return VEHICLE_IMAGE_PLACEHOLDER;
   }
 
   if (url.startsWith('http://') || url.startsWith('https://')) {

@@ -89,7 +89,7 @@ export function mapAdToVehicleCard(ad: ApiAdResponse): VehicleCard {
     transmission: 'Non précisée',
     fuelType: vehicule?.fuel ? formatFuelLabel(vehicule.fuel) : undefined,
     imageUrl:
-      vehicule?.images?.[0]?.url ?? '/assets/images/vehicle-placeholder.webp',
+      vehicule?.images?.[0]?.url ?? '/assets/images/vehicle-placeholder.svg',
     imageAlt: `Photo du véhicule ${title}`,
   };
 }
