@@ -1,5 +1,10 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { ApiOperation, ApiPropertyOptional, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiPropertyOptional,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsInt, IsOptional, IsPositive } from 'class-validator';
 import { SearchAdDto } from './dto/search-ad.dto';
@@ -31,7 +36,10 @@ export class SearchController {
       'Endpoint public du parcours acheteur (P0 Smart Search).',
   })
   @ApiResponse({ status: 200, description: 'Résultats de recherche paginés' })
-  @ApiResponse({ status: 400, description: 'Paramètres de recherche invalides' })
+  @ApiResponse({
+    status: 400,
+    description: 'Paramètres de recherche invalides',
+  })
   search(@Query() dto: SearchAdDto) {
     return this.searchService.search(dto);
   }

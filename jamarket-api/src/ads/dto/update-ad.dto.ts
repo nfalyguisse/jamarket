@@ -1,13 +1,25 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+} from 'class-validator';
 
 export class UpdateAdDto {
-  @ApiPropertyOptional({ description: 'Nouveau titre de l’annonce', example: 'Clio dCi — prix revu' })
+  @ApiPropertyOptional({
+    description: 'Nouveau titre de l’annonce',
+    example: 'Clio dCi — prix revu',
+  })
   @IsString()
   @IsOptional()
   label?: string;
 
-  @ApiPropertyOptional({ description: 'Nouvelle description', example: 'Révision récente effectuée.' })
+  @ApiPropertyOptional({
+    description: 'Nouvelle description',
+    example: 'Révision récente effectuée.',
+  })
   @IsString()
   @IsOptional()
   description?: string;
@@ -18,12 +30,18 @@ export class UpdateAdDto {
   @IsOptional()
   price?: number;
 
-  @ApiPropertyOptional({ description: 'Activer ou désactiver la publication', example: true })
+  @ApiPropertyOptional({
+    description: 'Activer ou désactiver la publication',
+    example: true,
+  })
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
 
-  @ApiPropertyOptional({ description: 'Marquer l’annonce comme vendue', example: false })
+  @ApiPropertyOptional({
+    description: 'Marquer l’annonce comme vendue',
+    example: false,
+  })
   @IsBoolean()
   @IsOptional()
   isSold?: boolean;

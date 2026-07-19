@@ -16,7 +16,10 @@ const MIME_TO_EXT: Record<string, string> = {
   'image/gif': '.gif',
 };
 
-export function extensionFromMime(mimetype: string, originalname: string): string {
+export function extensionFromMime(
+  mimetype: string,
+  originalname: string,
+): string {
   const fromMime = MIME_TO_EXT[mimetype];
   if (fromMime) {
     return fromMime;

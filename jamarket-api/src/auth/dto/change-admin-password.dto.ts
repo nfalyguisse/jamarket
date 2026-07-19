@@ -18,6 +18,8 @@ export class ChangeAdminPasswordDto {
     format: 'password',
   })
   @IsString()
-  @MinLength(8, { message: 'Le nouveau mot de passe doit contenir au moins 8 caractères' })
+  @MinLength(8, {
+    message: 'Le nouveau mot de passe doit contenir au moins 8 caractères',
+  })
   newPassword: string;
 }

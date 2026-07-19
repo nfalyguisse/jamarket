@@ -41,13 +41,18 @@ export class HttpExceptionFilter implements ExceptionFilter {
         exception instanceof Error ? exception.stack : String(exception),
       );
     } else {
-      this.logger.warn(`[${request.method}] ${request.url} → ${statusCode}: ${JSON.stringify(message)}`);
+      this.logger.warn(
+        `[${request.method}] ${request.url} → ${statusCode}: ${JSON.stringify(message)}`,
+      );
     }
 
     response.status(statusCode).json(body);
   }
 
-  private extractErrorInfo(exception: unknown): { statusCode: number; message: string | string[] } {
+  private extractErrorInfo(exception: unknown): {
+    statusCode: number;
+    message: string | string[];
+  } {
     if (exception instanceof HttpException) {
       const statusCode = exception.getStatus();
       const res = exception.getResponse();

@@ -31,6 +31,7 @@ Doc d’écart déjà rédigée : [`ecart-architecture-deploiement.md`](./ecart-
   - `API_URL` = `https://jamarket-api.onrender.com/api`
   - `CDN_URL` = origine API (pas de CDN objet pour l’instant)
 - SSR Angular **ignoré** volontairement (trop fragile / coûteux sur Vercel)
+- Routes API annonces : préfixe **`/api/annonces`** (pas `/api/ads` — bloqué par adblockers : `ERR_BLOCKED_BY_CLIENT`)
 
 ---
 
@@ -92,8 +93,8 @@ Doc d’écart déjà rédigée : [`ecart-architecture-deploiement.md`](./ecart-
     → SSL manquant vers Postgres cloud.  
     → Pool `pg` avec `ssl: { rejectUnauthorized: false }` si URL `render.com` / `sslmode=require` (dans `seed.ts`, `wipe.ts`, `PrismaService`).
 
-11. **Pre-Deploy indisponible (free)**  
-    → Seed / wipe / reset depuis le PC avec External `DATABASE_URL`.
+12. **Adblockers (`ERR_BLOCKED_BY_CLIENT` sur `/api/ads/*`)**  
+    → Préfixe API renommé en `/api/annonces`. Redéployer API + front.
 
 ---
 

@@ -24,7 +24,7 @@ const AD_INCLUDE = {
 
 @Injectable()
 export class AdsService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async findOne(id: number) {
     const ad = await this.prisma.ad.findFirst({
@@ -114,7 +114,11 @@ export class AdsService {
     });
   }
 
-  async update(id: number, dto: UpdateAdDto, requestUser: { id: number; role: { rights: RightEnum[] } }) {
+  async update(
+    id: number,
+    dto: UpdateAdDto,
+    requestUser: { id: number; role: { rights: RightEnum[] } },
+  ) {
     await this.findOne(id);
     this.assertCanManageAd(requestUser);
 
@@ -125,7 +129,10 @@ export class AdsService {
     });
   }
 
-  async remove(id: number, requestUser: { id: number; role: { rights: RightEnum[] } }) {
+  async remove(
+    id: number,
+    requestUser: { id: number; role: { rights: RightEnum[] } },
+  ) {
     await this.findOne(id);
     this.assertCanManageAd(requestUser);
 
@@ -135,18 +142,26 @@ export class AdsService {
     });
   }
 
-  async hardRemove(id: number, requestUser: { id: number; role: { rights: RightEnum[] } }) {
+  async hardRemove(
+    id: number,
+    requestUser: { id: number; role: { rights: RightEnum[] } },
+  ) {
     const ad = await this.findOne(id);
 
     const isAdmin = requestUser.role.rights.includes(RightEnum.SUPER_ADMIN);
     if (!isAdmin) {
-      throw new ForbiddenException('Seul un super admin peut supprimer définitivement une annonce');
+      throw new ForbiddenException(
+        'Seul un super admin peut supprimer définitivement une annonce',
+      );
     }
 
     await this.prisma.ad.delete({ where: { id: ad.id } });
   }
 
-  async markAsSold(id: number, requestUser: { id: number; role: { rights: RightEnum[] } }) {
+  async markAsSold(
+    id: number,
+    requestUser: { id: number; role: { rights: RightEnum[] } },
+  ) {
     await this.findOne(id);
     this.assertCanManageAd(requestUser);
 
@@ -161,7 +176,9 @@ export class AdsService {
     const canManageGarageAds = user.role.rights.includes(RightEnum.CREATE_AD);
 
     if (!canManageGarageAds) {
-      throw new ForbiddenException("Vous n'êtes pas autorisé à modifier cette annonce");
+      throw new ForbiddenException(
+        "Vous n'êtes pas autorisé à modifier cette annonce",
+      );
     }
   }
 }

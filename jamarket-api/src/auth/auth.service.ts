@@ -22,10 +22,11 @@ const BCRYPT_ROUNDS = 10;
 const DEFAULT_CUSTOMER_ROLE_LABEL = 'Customer';
 /** Rôle Customer en base (seed) — seuls ces comptes peuvent utiliser l’app cliente. */
 const CUSTOMER_ROLE_ID = 3;
-const INVALID_CREDENTIALS_MESSAGE =
-  "L'email ou le mot de passe est incorrect.";
-const JWT_EXPIRES_IN = (process.env.JWT_EXPIRES_IN ?? '15m') as JwtSignOptions['expiresIn'];
-const JWT_REFRESH_EXPIRES_IN = (process.env.JWT_REFRESH_EXPIRES_IN ?? '7d') as JwtSignOptions['expiresIn'];
+const INVALID_CREDENTIALS_MESSAGE = "L'email ou le mot de passe est incorrect.";
+const JWT_EXPIRES_IN = (process.env.JWT_EXPIRES_IN ??
+  '15m') as JwtSignOptions['expiresIn'];
+const JWT_REFRESH_EXPIRES_IN = (process.env.JWT_REFRESH_EXPIRES_IN ??
+  '7d') as JwtSignOptions['expiresIn'];
 
 @Injectable()
 export class AuthService {
@@ -33,7 +34,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly imageProcessing: ImageProcessingService,
-  ) { }
+  ) {}
 
   async register(dto: RegisterDto) {
     const existing = await this.prisma.user.findUnique({
@@ -160,7 +161,10 @@ export class AuthService {
 
     this.assertBackOfficeAccess(user);
 
-    const passwordMatch = await bcrypt.compare(dto.currentPassword, user.password);
+    const passwordMatch = await bcrypt.compare(
+      dto.currentPassword,
+      user.password,
+    );
     if (!passwordMatch) {
       throw new BadRequestException('Le mot de passe actuel est incorrect');
     }
@@ -198,7 +202,10 @@ export class AuthService {
       }
     }
 
-    const processed = await this.imageProcessing.processAndSaveUserAvatar(userId, file);
+    const processed = await this.imageProcessing.processAndSaveUserAvatar(
+      userId,
+      file,
+    );
 
     return this.prisma.user.update({
       where: { id: userId },
@@ -356,7 +363,9 @@ export class AuthService {
     return this.buildTokens(user);
   }
 
-  private assertBackOfficeAccess(user: { role: { rights: RightEnum[] } }): void {
+  private assertBackOfficeAccess(user: {
+    role: { rights: RightEnum[] };
+  }): void {
     const canAccessBackOffice =
       user.role.rights.includes(RightEnum.ADMIN) ||
       user.role.rights.includes(RightEnum.CREATE_AD);

@@ -1,5 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsInt, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+} from 'class-validator';
 
 export class CreateAdDto {
   @ApiProperty({
@@ -12,7 +20,8 @@ export class CreateAdDto {
 
   @ApiProperty({
     description: 'Description commerciale détaillée',
-    example: 'Véhicule entretenu en garage, carnet à jour, premier propriétaire.',
+    example:
+      'Véhicule entretenu en garage, carnet à jour, premier propriétaire.',
   })
   @IsString()
   @IsNotEmpty({ message: 'La description est obligatoire' })
@@ -32,7 +41,8 @@ export class CreateAdDto {
   vehiculeId: number;
 
   @ApiPropertyOptional({
-    description: 'Publier immédiatement l’annonce (sinon brouillon / en attente selon le flux)',
+    description:
+      'Publier immédiatement l’annonce (sinon brouillon / en attente selon le flux)',
     example: true,
     default: true,
   })

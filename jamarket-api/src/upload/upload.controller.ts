@@ -46,7 +46,8 @@ export class UploadController {
         files: {
           type: 'array',
           items: { type: 'string', format: 'binary' },
-          description: 'Jusqu’à 10 images (JPEG/PNG/WebP), compression côté serveur',
+          description:
+            'Jusqu’à 10 images (JPEG/PNG/WebP), compression côté serveur',
         },
       },
     },
@@ -58,7 +59,11 @@ export class UploadController {
       'Les images sont stockées et associées au véhicule pour les galeries WebP du front-office. ' +
       'Requiert le droit CREATE_AD.',
   })
-  @ApiParam({ name: 'vehiculeId', description: 'Identifiant du véhicule', example: 42 })
+  @ApiParam({
+    name: 'vehiculeId',
+    description: 'Identifiant du véhicule',
+    example: 42,
+  })
   @ApiResponse({ status: 201, description: 'Images uploadées et liées' })
   @ApiResponse({ status: 400, description: 'Fichiers manquants ou invalides' })
   @ApiResponse({ status: 401, description: 'Non authentifié' })
@@ -80,8 +85,16 @@ export class UploadController {
       'Supprime une image précise d’une fiche véhicule (fichier + enregistrement BDD). ' +
       'Requiert le droit DELETE_AD.',
   })
-  @ApiParam({ name: 'vehiculeId', description: 'Identifiant du véhicule', example: 42 })
-  @ApiParam({ name: 'imageId', description: 'Identifiant de l’image', example: 7 })
+  @ApiParam({
+    name: 'vehiculeId',
+    description: 'Identifiant du véhicule',
+    example: 42,
+  })
+  @ApiParam({
+    name: 'imageId',
+    description: 'Identifiant de l’image',
+    example: 7,
+  })
   @ApiResponse({ status: 200, description: 'Image supprimée' })
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Droit DELETE_AD manquant' })

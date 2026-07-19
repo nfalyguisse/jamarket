@@ -230,7 +230,9 @@ export class SearchService {
       ...(params.kmMax !== undefined || params.mileageMin !== undefined
         ? {
             kilometer: {
-              ...(params.mileageMin !== undefined && { gte: params.mileageMin }),
+              ...(params.mileageMin !== undefined && {
+                gte: params.mileageMin,
+              }),
               ...(params.kmMax !== undefined && { lte: params.kmMax }),
             },
           }

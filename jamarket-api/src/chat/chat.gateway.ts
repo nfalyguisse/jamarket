@@ -24,15 +24,15 @@ type AuthenticatedSocket = Socket & {
 @WebSocketGateway({
   namespace: '/chat',
   cors: {
-    origin: (process.env.CORS_ORIGINS ?? 'http://localhost:4000,http://localhost:4200')
+    origin: (
+      process.env.CORS_ORIGINS ?? 'http://localhost:4000,http://localhost:4200'
+    )
       .split(',')
       .map((o) => o.trim()),
     credentials: true,
   },
 })
-export class ChatGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
-{
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
@@ -134,9 +134,7 @@ export class ChatGateway
         body?.text ?? '',
       );
 
-      this.server
-        .to(this.roomName(conversationId))
-        .emit('newMessage', message);
+      this.server.to(this.roomName(conversationId)).emit('newMessage', message);
 
       return { event: 'messageSent', data: message };
     } catch (error) {

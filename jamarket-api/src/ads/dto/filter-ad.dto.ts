@@ -1,5 +1,13 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsInt, IsNumber, IsOptional, IsPositive, IsString, Min } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+  Min,
+} from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { FuelType } from '../../../generated/prisma/client';
 
@@ -49,7 +57,10 @@ export class FilterAdDto {
   @IsOptional()
   color?: string;
 
-  @ApiPropertyOptional({ description: 'Identifiant du type de véhicule', example: 2 })
+  @ApiPropertyOptional({
+    description: 'Identifiant du type de véhicule',
+    example: 2,
+  })
   @IsInt()
   @Min(1)
   @IsOptional()

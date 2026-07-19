@@ -12,7 +12,7 @@ export class UploadService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly imageProcessing: ImageProcessingService,
-  ) { }
+  ) {}
 
   async uploadVehiculeImages(vehiculeId: number, files: Express.Multer.File[]) {
     if (!files?.length) {
@@ -44,7 +44,9 @@ export class UploadService {
     }
 
     const processed = await Promise.all(
-      files.map((file) => this.imageProcessing.processAndSave(vehiculeId, file)),
+      files.map((file) =>
+        this.imageProcessing.processAndSave(vehiculeId, file),
+      ),
     );
 
     const images = await Promise.all(

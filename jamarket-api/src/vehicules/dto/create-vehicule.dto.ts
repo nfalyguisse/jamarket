@@ -33,7 +33,10 @@ export class CreateVehiculeDto {
   @IsPositive({ message: 'Le nombre de portes doit être supérieur à 0' })
   doorsNumber: number;
 
-  @ApiProperty({ description: 'Puissance (libellé libre, ex. chevaux)', example: '110 ch' })
+  @ApiProperty({
+    description: 'Puissance (libellé libre, ex. chevaux)',
+    example: '110 ch',
+  })
   @IsString()
   @IsNotEmpty({ message: 'La puissance est obligatoire' })
   power: string;
@@ -43,7 +46,10 @@ export class CreateVehiculeDto {
     enum: FuelType,
     example: FuelType.diesel,
   })
-  @IsEnum(FuelType, { message: 'Type de carburant invalide (essence, diesel, electrique, hybride)' })
+  @IsEnum(FuelType, {
+    message:
+      'Type de carburant invalide (essence, diesel, electrique, hybride)',
+  })
   fuel: FuelType;
 
   @ApiProperty({ description: 'Couleur du véhicule', example: 'blanc' })
@@ -51,13 +57,17 @@ export class CreateVehiculeDto {
   @IsNotEmpty({ message: 'La couleur est obligatoire' })
   color: string;
 
-  @ApiProperty({ description: 'Identifiant du type de véhicule (berline, SUV…)', example: 1 })
+  @ApiProperty({
+    description: 'Identifiant du type de véhicule (berline, SUV…)',
+    example: 1,
+  })
   @IsInt({ message: "L'identifiant du type de véhicule doit être un entier" })
   @IsPositive()
   vehiculeTypeId: number;
 
   @ApiPropertyOptional({
-    description: 'URLs d’images déjà hébergées (optionnel si upload multipart ensuite)',
+    description:
+      'URLs d’images déjà hébergées (optionnel si upload multipart ensuite)',
     type: [String],
     example: ['https://cdn.example.com/vehicules/1.webp'],
   })

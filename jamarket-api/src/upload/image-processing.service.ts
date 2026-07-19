@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { extensionFromMime, UPLOAD_DIR, UPLOAD_URL_PREFIX } from './upload.constants';
+import {
+  extensionFromMime,
+  UPLOAD_DIR,
+  UPLOAD_URL_PREFIX,
+} from './upload.constants';
 
 export interface ProcessedImage {
   filename: string;

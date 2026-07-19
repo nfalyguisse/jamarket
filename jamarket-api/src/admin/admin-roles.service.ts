@@ -62,7 +62,9 @@ export class AdminRolesService {
       select: { id: true, rights: true },
     });
 
-    return roles.filter((role) => !isCustomerOnlyRole(role.rights)).map((role) => role.id);
+    return roles
+      .filter((role) => !isCustomerOnlyRole(role.rights))
+      .map((role) => role.id);
   }
 
   async create(dto: CreateRoleDto) {

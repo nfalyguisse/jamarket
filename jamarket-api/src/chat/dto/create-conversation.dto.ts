@@ -1,6 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, MaxLength, Min, MinLength } from 'class-validator';
+import {
+  IsInt,
+  IsOptional,
+  IsString,
+  MaxLength,
+  Min,
+  MinLength,
+} from 'class-validator';
 
 export class CreateConversationDto {
   @ApiProperty({
@@ -20,6 +27,8 @@ export class CreateConversationDto {
   @IsOptional()
   @IsString()
   @MinLength(1, { message: 'Le message ne peut pas être vide' })
-  @MaxLength(2000, { message: 'Le message ne peut pas dépasser 2000 caractères' })
+  @MaxLength(2000, {
+    message: 'Le message ne peut pas dépasser 2000 caractères',
+  })
   initialMessage?: string;
 }

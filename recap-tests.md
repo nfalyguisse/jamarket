@@ -118,9 +118,9 @@ expect(result).toEqual({
 |----------|-------------|--------|
 | Auth client register/login | `POST /api/auth/register`, `POST /api/auth/login` | OK |
 | Auth admin | `POST /api/auth/admin/login`, `GET /api/auth/admin/me` | OK |
-| Recherche filtrée | `GET /api/ads?brand=1&priceMin=1000` | OK |
-| Fiche annonce | `GET /api/ads/:id` | OK |
-| CRUD employé | `POST/PATCH/DELETE /api/ads` | OK |
+| Recherche filtrée | `GET /api/annonces?brand=1&priceMin=1000` | OK |
+| Fiche annonce | `GET /api/annonces/:id` | OK |
+| CRUD employé | `POST/PATCH/DELETE /api/annonces` | OK |
 | Accès refusé | sans token → 401 ; client → 401/403 | OK |
 
 **Preuve CLI :** `Test Files 2 passed — Tests 7 passed`

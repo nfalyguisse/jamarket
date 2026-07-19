@@ -22,7 +22,9 @@ async function bootstrap() {
     }),
   );
 
-  const allowedOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:4000,http://localhost:4200')
+  const allowedOrigins = (
+    process.env.CORS_ORIGINS ?? 'http://localhost:4000,http://localhost:4200'
+  )
     .split(',')
     .map((o) => o.trim());
 
@@ -61,7 +63,8 @@ async function bootstrap() {
           type: 'http',
           scheme: 'bearer',
           bearerFormat: 'JWT',
-          description: 'Access token JWT obtenu via /api/auth/login ou /api/auth/admin/login',
+          description:
+            'Access token JWT obtenu via /api/auth/login ou /api/auth/admin/login',
         },
         'access-token',
       )
