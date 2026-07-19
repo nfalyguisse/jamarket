@@ -46,6 +46,19 @@ export const routes: Routes = [
     title: 'Catalogue | Jamarket Auto',
   },
   {
+    path: 'favoris',
+    loadComponent: () =>
+      import('./features/favorites/pages/favorites-page/favorites-page.component').then(
+        (m) => m.FavoritesPageComponent,
+      ),
+    title: 'Mes favoris | Jamarket Auto',
+  },
+  {
+    path: 'favorites',
+    redirectTo: 'favoris',
+    pathMatch: 'full',
+  },
+  {
     path: 'annonces/:id',
     loadComponent: () =>
       import('./features/ads/pages/ad-detail-page/ad-detail-page.component').then(

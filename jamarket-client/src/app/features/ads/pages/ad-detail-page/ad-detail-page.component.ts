@@ -7,6 +7,7 @@ import {
   LucideCar,
   LucideFuel,
   LucideGauge,
+  LucideHeart,
   LucideMail,
   LucideMessageSquare,
   LucidePalette,
@@ -14,6 +15,7 @@ import {
   LucideZap,
 } from '@lucide/angular';
 import type { AdDetail, AdSpecItem } from '@core/models/ad-detail.model';
+import { FavoritesStateService } from '@core/services/favorites-state.service';
 import { logHttpError } from '@core/utils/http-error.util';
 import { SiteFooterComponent } from '@shared/layout/site-footer/site-footer.component';
 import { SiteHeaderComponent } from '@shared/layout/site-header/site-header.component';
@@ -39,6 +41,7 @@ import { AdDetailApiService } from '../../data/ad-detail-api.service';
     LucideMail,
     LucideMessageSquare,
     LucideUser,
+    LucideHeart,
   ],
   templateUrl: './ad-detail-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,6 +49,7 @@ import { AdDetailApiService } from '../../data/ad-detail-api.service';
 export class AdDetailPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly adDetailApi = inject(AdDetailApiService);
+  protected readonly favoritesState = inject(FavoritesStateService);
 
   protected readonly ad = signal<AdDetail | null>(null);
   protected readonly isLoading = signal(true);
@@ -82,6 +86,13 @@ export class AdDetailPageComponent implements OnInit {
     return !!detail && detail.isActive && !detail.isSold;
   });
 
+  protected readonly isFavorite = computed(() => {
+    const detail = this.ad();
+    // Re-read ids signal so the computed updates on toggle
+    this.favoritesState.ids();
+    return detail ? this.favoritesState.isFavorite(detail.id) : false;
+  });
+
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
@@ -106,4 +117,10 @@ export class AdDetailPageComponent implements OnInit {
       });
   }
 
+  protected onFavoriteToggle(): void {
+    const detail = this.ad();
+    if (detail) {
+      this.favoritesState.toggle(detail.id);
+    }
+  }
 }

@@ -127,6 +127,26 @@
             }
 
             <div class="mt-6 space-y-3">
+              <button
+                type="button"
+                class="flex w-full items-center justify-center gap-2 rounded-xl border py-3.5 text-label-md font-semibold transition hover:bg-surface-container"
+                [class.border-primary]="isFavorite()"
+                [class.bg-primary/5]="isFavorite()"
+                [class.text-primary]="isFavorite()"
+                [class.border-outline/25]="!isFavorite()"
+                [class.bg-surface]="!isFavorite()"
+                [class.text-on-background]="!isFavorite()"
+                [attr.aria-pressed]="isFavorite()"
+                (click)="onFavoriteToggle()"
+              >
+                <svg
+                  lucideHeart
+                  class="size-4"
+                  [class.fill-current]="isFavorite()"
+                  aria-hidden="true"
+                />
+                {{ isFavorite() ? 'Retirer des favoris' : 'Ajouter aux favoris' }}
+              </button>
               <a
                 routerLink="/contact"
                 class="flex w-full items-center justify-center rounded-xl bg-primary py-3.5 text-label-md font-bold uppercase tracking-wide text-on-primary transition hover:opacity-90 active:scale-[0.99]"

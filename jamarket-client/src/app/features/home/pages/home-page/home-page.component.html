@@ -189,7 +189,11 @@
         } @else {
           <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             @for (vehicle of vehicles(); track vehicle.id) {
-              <app-vehicle-card [vehicle]="vehicle" />
+              <app-vehicle-card
+                [vehicle]="vehicle"
+                [isFavorite]="favoritesState.isFavorite(vehicle.id)"
+                (favoriteToggle)="onFavoriteToggle($event)"
+              />
             }
           </div>
         }

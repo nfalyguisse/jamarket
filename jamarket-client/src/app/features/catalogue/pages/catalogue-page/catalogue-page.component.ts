@@ -29,9 +29,7 @@ import {
   filtersToQueryParams,
   parseFiltersFromParams,
 } from '../../data/catalogue-filters.util';
-import {
-  CatalogueSearchApiService,
-} from '../../data/catalogue-search-api.service';
+import { CatalogueSearchApiService } from '../../data/catalogue-search-api.service';
 import {
   EMPTY_FILTER_OPTIONS,
   EMPTY_SEARCH_RESULT,
@@ -46,6 +44,7 @@ import {
   CATALOGUE_SORT_OPTIONS,
   type CatalogueSortValue,
 } from '../../data/catalogue.mock';
+import { FavoritesStateService } from '@core/services/favorites-state.service';
 
 @Component({
   selector: 'app-catalogue-page',
@@ -68,6 +67,7 @@ export class CataloguePageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  protected readonly favoritesState = inject(FavoritesStateService);
 
   protected readonly sortOptions = CATALOGUE_SORT_OPTIONS;
   protected readonly pageSize = CATALOGUE_PAGE_SIZE;
@@ -225,7 +225,7 @@ export class CataloguePageComponent implements OnInit {
     this.filtersMobileOpen.set(open);
   }
 
-  protected onFavoriteToggle(_vehicleId: string): void {
-    // Favoris : branché dans une tâche dédiée
+  protected onFavoriteToggle(vehicleId: string): void {
+    this.favoritesState.toggle(vehicleId);
   }
 }

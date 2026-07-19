@@ -99,6 +99,7 @@
                 <li class="h-full">
                   <app-catalogue-vehicle-card
                     [vehicle]="vehicle"
+                    [isFavorite]="favoritesState.isFavorite(vehicle.id)"
                     (favoriteToggle)="onFavoriteToggle($event)"
                   />
                 </li>
