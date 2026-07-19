@@ -1,7 +1,7 @@
 <div class="flex min-h-screen flex-col bg-surface-container-low">
   <app-site-header />
 
-  <main class="flex-1 pt-24 pb-16">
+  <main id="main-content" tabindex="-1" class="flex-1 pt-24 pb-16 outline-none">
     <div class="container-jm space-y-6">
 
       @if (isLoading()) {
@@ -108,20 +108,26 @@
 
             <ul class="divide-y divide-outline/10" role="list">
               @for (msg of messages(); track msg.id) {
-                <li class="flex items-start gap-3 py-3">
-                  <div
-                    class="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary"
-                    aria-hidden="true"
+                <li>
+                  <button
+                    type="button"
+                    class="flex w-full items-start gap-3 py-3 text-left transition hover:bg-surface-container/50"
+                    (click)="openConversation(msg.id)"
                   >
-                    {{ msg.senderName[0] }}
-                  </div>
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center justify-between gap-2">
-                      <p class="text-label-md font-semibold text-on-background truncate">{{ msg.senderName }}</p>
-                      <span class="shrink-0 text-label-sm text-on-surface-variant">{{ msg.time }}</span>
+                    <div
+                      class="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary"
+                      aria-hidden="true"
+                    >
+                      {{ msg.senderName[0] }}
                     </div>
-                    <p class="mt-0.5 text-label-sm text-on-surface-variant line-clamp-1">{{ msg.preview }}</p>
-                  </div>
+                    <div class="min-w-0 flex-1">
+                      <div class="flex items-center justify-between gap-2">
+                        <p class="text-label-md font-semibold text-on-background truncate">{{ msg.senderName }}</p>
+                        <span class="shrink-0 text-label-sm text-on-surface-variant">{{ msg.time }}</span>
+                      </div>
+                      <p class="mt-0.5 text-label-sm text-on-surface-variant line-clamp-1">{{ msg.preview }}</p>
+                    </div>
+                  </button>
                 </li>
               } @empty {
                 <li class="py-6 text-center text-label-sm text-on-surface-variant">

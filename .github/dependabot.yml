@@ -1,0 +1,27 @@
+# Audit continu des dépendances (OWASP A06 — Vulnerable and Outdated Components)
+# Compétence C2.2.3 / C4.1.1 — Jamarket
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /jamarket-api
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+    commit-message:
+      prefix: chore(api-deps)
+
+  - package-ecosystem: npm
+    directory: /jamarket-client
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+    commit-message:
+      prefix: chore(client-deps)

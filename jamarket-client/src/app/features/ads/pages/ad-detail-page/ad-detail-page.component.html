@@ -1,7 +1,7 @@
 <div class="flex min-h-screen flex-col bg-surface-container-low">
   <app-site-header />
 
-  <main class="flex-1 pt-24 pb-16">
+  <main id="main-content" tabindex="-1" class="flex-1 pt-24 pb-16 outline-none">
     <div class="container-jm">
       @if (isLoading()) {
         <div class="animate-pulse space-y-8">
@@ -149,22 +149,24 @@
               </button>
               <a
                 routerLink="/contact"
-                class="flex w-full items-center justify-center rounded-xl bg-primary py-3.5 text-label-md font-bold uppercase tracking-wide text-on-primary transition hover:opacity-90 active:scale-[0.99]"
+                class="flex w-full items-center justify-center rounded-xl border border-outline/25 bg-surface py-3.5 text-label-md font-semibold text-on-background transition hover:bg-surface-container"
               >
                 Prendre rendez-vous
               </a>
-              <a
-                routerLink="/contact"
-                class="flex w-full items-center justify-center gap-2 rounded-xl border border-outline/25 bg-surface py-3.5 text-label-md font-semibold text-on-background transition hover:bg-surface-container"
+              <button
+                type="button"
+                class="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-label-md font-bold uppercase tracking-wide text-on-primary transition hover:opacity-90 active:scale-[0.99] disabled:opacity-60"
+                (click)="contactSeller()"
+                [disabled]="isContacting() || !isAvailable()"
               >
                 <svg lucideMessageSquare class="size-4" aria-hidden="true" />
-                Nous contacter
-              </a>
+                {{ isContacting() ? 'Ouverture…' : 'Contacter le vendeur' }}
+              </button>
             </div>
 
             <p class="mt-6 flex items-start gap-2 text-label-sm text-on-surface-variant">
               <svg lucideMail class="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
-              Notre équipe vous répond rapidement pour organiser une visite ou un essai.
+              Échangez directement avec le garage pour organiser une visite ou un essai.
             </p>
           </aside>
         </div>
