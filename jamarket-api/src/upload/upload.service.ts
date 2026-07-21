@@ -75,11 +75,7 @@ export class UploadService {
       );
     }
 
-    const absolutePath = this.imageProcessing.urlToAbsolutePath(image.url);
-    if (absolutePath) {
-      await this.imageProcessing.deleteFile(absolutePath);
-    }
-
+    await this.imageProcessing.deleteByUrl(image.url);
     await this.prisma.image.delete({ where: { id: imageId } });
 
     return { deleted: true, imageId };
@@ -89,12 +85,7 @@ export class UploadService {
     const images = await this.prisma.image.findMany({ where: { vehiculeId } });
 
     await Promise.all(
-      images.map(async (image) => {
-        const absolutePath = this.imageProcessing.urlToAbsolutePath(image.url);
-        if (absolutePath) {
-          await this.imageProcessing.deleteFile(absolutePath);
-        }
-      }),
+      images.map((image) => this.imageProcessing.deleteByUrl(image.url)),
     );
 
     await this.prisma.image.deleteMany({ where: { vehiculeId } });

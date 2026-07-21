@@ -4,10 +4,8 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
-import { join } from 'path';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-import { UPLOAD_DIR, UPLOAD_URL_PREFIX } from './upload/upload.constants';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -45,10 +43,6 @@ async function bootstrap() {
 
   app.useGlobalFilters(new HttpExceptionFilter());
   app.setGlobalPrefix('api');
-
-  app.useStaticAssets(join(process.cwd(), UPLOAD_DIR), {
-    prefix: UPLOAD_URL_PREFIX,
-  });
 
   if (process.env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()
