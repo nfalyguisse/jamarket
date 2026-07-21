@@ -27,10 +27,9 @@ Doc d’écart déjà rédigée : [`ecart-architecture-deploiement.md`](./ecart-
 - **Output** : `dist/jamarket-client/browser` (Angular 17+)
 - Fichier `jamarket-client/vercel.json` : `outputDirectory` + rewrite SPA → `index.html`
 - Les fichiers `environment*.ts` sont **générés** au build via `scripts/generate-env.mjs` (`postinstall` / `prebuild`), **non commités** (gitignore)
-- Variables Vercel (Environment = **Production**, puis **Redeploy**) :
-  - `API_URL` = `https://jamarket-api.onrender.com/api` ← aussi utilisée pour Socket.IO `/chat`
-  - `CDN_URL` = `https://jamarket-api.onrender.com` (origine API ; pas de CDN objet pour l’instant)
-  - Sans ces vars au build, le front tombe sur `localhost:3000` → WS cassé en prod
+- Variables Vercel :
+  - `API_URL` = `https://jamarket-api.onrender.com/api`
+  - `CDN_URL` = `https://res.cloudinary.com/<CLOUDINARY_CLOUD_NAME>` (CDN images)
 - SSR Angular **ignoré** volontairement (trop fragile / coûteux sur Vercel)
 - Routes API annonces : préfixe **`/api/annonces`** (pas `/api/ads` — bloqué par adblockers : `ERR_BLOCKED_BY_CLIENT`)
 
@@ -54,6 +53,9 @@ Doc d’écart déjà rédigée : [`ecart-architecture-deploiement.md`](./ecart-
 | `JWT_EXPIRES_IN` / `JWT_REFRESH_EXPIRES_IN` | ex. `15m` / `7d` |
 | `CORS_ORIGINS` | URLs Vercel exactes (`https://jamarket-kappa.vercel.app`, etc.) |
 | `NODE_ENV` | `production` |
+| `CLOUDINARY_CLOUD_NAME` | Nom du cloud Cloudinary (upload images local + prod) |
+| `CLOUDINARY_API_KEY` | Clé API Cloudinary |
+| `CLOUDINARY_API_SECRET` | Secret API Cloudinary |
 | `SEED_SUPERADMIN_EMAIL` / `SEED_SUPERADMIN_PASSWORD` | Pour le seed |
 
 ---
@@ -136,14 +138,25 @@ npm run prisma:reset          # ou : npx prisma db seed
 
 ---
 
-## Front — images sans CDN
+## Front — images (Cloudinary)
 
-`resolveMediaUrl()` : si l’URL est déjà `http(s)://`, on ne préfixe pas.
+`resolveMediaUrl()` : si l’URL est déjà `http(s)://`, on ne préfixe pas (Cloudinary, Unsplash).
 
-Corrigé :
+- Uploads admin → NestJS → Cloudinary → `Image.url` = `https://res.cloudinary.com/...`
+- Même parcours en **local** et en **prod** (clés dans `jamarket-api/.env` + Render)
+- `DISABLE_REMOTE_MEDIA = false` (médias distants actifs)
+
+Corrigé historiquement :
 
 - `catalogue-vehicle-card` (avant : `cdnUrl + url` cassait les URLs Unsplash)
 - `ad-image-gallery` (idem)
+
+### Test local avant prod
+
+1. Compte Cloudinary free → renseigner `CLOUDINARY_*` dans `jamarket-api/.env`
+2. Démarrer API + front
+3. Upload une image véhicule / avatar admin → vérifier l’URL Cloudinary en BDD et l’affichage
+4. Puis copier les mêmes `CLOUDINARY_*` sur Render et redéployer
 
 ---
 
@@ -156,11 +169,11 @@ Corrigé :
 
 ## Points d’attention restants
 
-- Uploads locaux sur Render = **éphémères** (pas de R2/S3 encore)
+- Images : **Cloudinary** (plus de disque local API). Anciennes URLs `/api/uploads/...` en BDD = fichiers perdus → re-upload
 - Free tier DB Render : expiration / sleep possibles
 - Plusieurs URLs Vercel → toutes dans `CORS_ORIGINS`
 - Branche déployée typiquement `production` / `dev` selon config Git
-- Ne jamais committer `.env` (secrets JWT, DB, seed)
+- Ne jamais committer `.env` (secrets JWT, DB, seed, Cloudinary)
 
 ---
 

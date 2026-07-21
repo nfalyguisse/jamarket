@@ -196,10 +196,7 @@ export class AuthService {
     this.assertBackOfficeAccess(user);
 
     if (user.avatarUrl) {
-      const oldPath = this.imageProcessing.urlToAbsolutePath(user.avatarUrl);
-      if (oldPath) {
-        await this.imageProcessing.deleteFile(oldPath);
-      }
+      await this.imageProcessing.deleteByUrl(user.avatarUrl);
     }
 
     const processed = await this.imageProcessing.processAndSaveUserAvatar(
@@ -228,10 +225,7 @@ export class AuthService {
     this.assertBackOfficeAccess(user);
 
     if (user.avatarUrl) {
-      const oldPath = this.imageProcessing.urlToAbsolutePath(user.avatarUrl);
-      if (oldPath) {
-        await this.imageProcessing.deleteFile(oldPath);
-      }
+      await this.imageProcessing.deleteByUrl(user.avatarUrl);
     }
 
     return this.prisma.user.update({
