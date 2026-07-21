@@ -25,7 +25,7 @@
 | Front Angular | **Vercel** (build static / CSR, repo Git lié, root `jamarket-client`) | Gratuit / économique, CDN, CI/CD Git |
 | API NestJS | Hébergeur **free / freemium** type **Render** ou **Fly.io** (Node long-running + Postgres) | Pas de coût VPS mensuel Infomaniak |
 | Base PostgreSQL | Postgres managé free (ex. Render Postgres, **Neon**, Supabase) | Découplé du VPS |
-| Médias (uploads) | Disque local API en MVP ; cible souhaitable **object storage** (ex. Cloudflare R2) | Disque éphémère sur free tiers |
+| Médias (uploads) | **Cloudinary** (CDN + WebP) — local et prod | Disque Render éphémère ; free tier adapté RNCP |
 
 **Front déjà en place** : projet Vercel relié au dépôt Git, variables d’environnement `API_URL` / `CDN_URL` injectées au build (`scripts/generate-env.mjs`).
 
@@ -54,7 +54,7 @@
 | Limite | Impact | Mitigation / discours |
 |--------|--------|------------------------|
 | Sleep / cold start (free tier API) | 1er appel lent après inactivité | Acceptable en démo RNCP ; upgrade possible en prod |
-| Disque non persistant (uploads) | Images perdues au redeploy | MVP : local ; prod : R2/S3 + `CDN_URL` |
+| Disque non persistant (uploads historiques) | Anciennes images locales perdues au redeploy | **Mitigé** : Cloudinary + `CDN_URL` ; re-upload si URLs `/api/uploads/...` restantes |
 | Deux fournisseurs (Vercel + Render/Fly) | CORS + env à synchroniser | `CORS_ORIGINS` = URL Vercel ; `API_URL` côté client |
 | Écart vs plan Infomaniak | Non conformité stricte au plan initial | Justifié par contrainte budgétaire, réversible |
 
@@ -69,8 +69,8 @@
 ## 7. Points à brancher côté rédaction (checklist agent)
 
 - [ ] Schéma « prévu » vs schéma « réalisé » (2 diagrammes ou 1 avec légende d’écart)
-- [ ] Tableau des services (Vercel, PaaS API, Postgres, éventuel R2)
-- [ ] Variables d’environnement critiques (`API_URL`, `CDN_URL`, `DATABASE_URL`, `CORS_ORIGINS`, JWT)
+- [ ] Tableau des services (Vercel, PaaS API, Postgres, Cloudinary)
+- [ ] Variables d’environnement critiques (`API_URL`, `CDN_URL`, `DATABASE_URL`, `CORS_ORIGINS`, JWT, `CLOUDINARY_*`)
 - [ ] Lien avec les compétences déploiement / DevOps du référentiel (choix d’hébergement, CI/CD Git)
 - [ ] Phrase d’ouverture sur la **contrainte budgétaire** + phrase de **réversibilité** Docker/VPS
 
