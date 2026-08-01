@@ -5,6 +5,8 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
+import { captureServerException } from '../common/sentry';
+import { MetricsService } from '../metrics/metrics.service';
 
 export interface CloudinaryUploadResult {
   publicId: string;
@@ -16,6 +18,8 @@ export interface CloudinaryUploadResult {
 @Injectable()
 export class CloudinaryService implements OnModuleInit {
   private readonly logger = new Logger(CloudinaryService.name);
+
+  constructor(private readonly metrics: MetricsService) {}
 
   onModuleInit(): void {
     const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
@@ -64,6 +68,7 @@ export class CloudinaryService implements OnModuleInit {
         stream.end(buffer);
       });
 
+      this.metrics.recordCloudinaryUpload('success');
       return {
         publicId: result.public_id,
         secureUrl: result.secure_url,
@@ -71,7 +76,12 @@ export class CloudinaryService implements OnModuleInit {
         format: result.format,
       };
     } catch (error) {
+      this.metrics.recordCloudinaryUpload('error');
       this.logger.error('Échec upload Cloudinary', error);
+      captureServerException(error, {
+        feature: 'upload',
+        tags: { provider: 'cloudinary' },
+      });
       throw new InternalServerErrorException(
         'Impossible d’uploader l’image vers Cloudinary',
       );
@@ -85,6 +95,10 @@ export class CloudinaryService implements OnModuleInit {
       });
     } catch (error) {
       this.logger.warn(`Échec suppression Cloudinary (${publicId})`, error);
+      captureServerException(error, {
+        feature: 'upload',
+        tags: { provider: 'cloudinary', action: 'destroy' },
+      });
     }
   }
 

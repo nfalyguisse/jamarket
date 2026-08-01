@@ -9,6 +9,7 @@
 | Front | https://jamarket-kappa.vercel.app |
 | API | https://jamarket-api.onrender.com |
 | Health | https://jamarket-api.onrender.com/api/health |
+| Metrics | https://jamarket-api.onrender.com/api/metrics |
 
 Détails techniques (env, commandes, écarts) : [`handoff-mise-en-prod.md`](./handoff-mise-en-prod.md).  
 CI avant merge : [`protocole-integration-continue.md`](./protocole-integration-continue.md).
@@ -91,7 +92,7 @@ Cocher / dater une copie (Notion, ce fichier, ou capture) pour la preuve dossier
 | 1 | Ouvrir le front prod | Page d’accueil charge sans erreur bloquante | ☐ |
 | 2 | `GET /api/health` | JSON `status: "ok"`, `services.database: "ok"` (tenir compte du cold start Render ~30–50 s) | ☐ |
 | 3 | Catalogue / liste d’annonces | Liste affichée (ou message vide cohérent si DB sans seed) | ☐ |
-| 4 | Fiche annonce | Détail + images (ou placeholder si images désactivées) | ☐ |
+| 4 | Fiche annonce | Détail + images Cloudinary (CDN) | ☐ |
 | 5 | Inscription ou connexion | Session OK ; logout fonctionne | ☐ |
 | 6 | Parcours métier clé | Favori **ou** « Contacter le vendeur » / messages selon le périmètre de la release | ☐ |
 | 7 | Console navigateur | Pas d’`ERR_BLOCKED_BY_CLIENT` sur les appels API (`/api/annonces`, pas `/api/ads`) | ☐ |

@@ -56,6 +56,7 @@ Doc d’écart déjà rédigée : [`ecart-architecture-deploiement.md`](./ecart-
 | `CLOUDINARY_CLOUD_NAME` | Nom du cloud Cloudinary (upload images local + prod) |
 | `CLOUDINARY_API_KEY` | Clé API Cloudinary |
 | `CLOUDINARY_API_SECRET` | Secret API Cloudinary |
+| `SENTRY_DSN` | Collecte d’anomalies (C4.2.1) — optionnel en local, recommandé en prod |
 | `SEED_SUPERADMIN_EMAIL` / `SEED_SUPERADMIN_PASSWORD` | Pour le seed |
 
 ---

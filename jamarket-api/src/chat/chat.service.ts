@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { RightEnum } from '../../generated/prisma/client';
+import { MetricsService } from '../metrics/metrics.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 
@@ -83,77 +84,89 @@ export type AuthUser = {
 
 @Injectable()
 export class ChatService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly metrics: MetricsService,
+  ) {}
 
   async createConversation(user: AuthUser, dto: CreateConversationDto) {
-    this.assertCustomer(user);
+    try {
+      this.assertCustomer(user);
 
-    const ad = await this.prisma.ad.findFirst({
-      where: {
-        id: dto.adId,
-        deletedAt: null,
-        isActive: true,
-        isArchived: false,
-      },
-    });
+      const ad = await this.prisma.ad.findFirst({
+        where: {
+          id: dto.adId,
+          deletedAt: null,
+          isActive: true,
+          isArchived: false,
+        },
+      });
 
-    if (!ad) {
-      throw new NotFoundException('Annonce introuvable');
-    }
+      if (!ad) {
+        throw new NotFoundException('Annonce introuvable');
+      }
 
-    if (!ad.sellerId) {
-      throw new BadRequestException(
-        'Cette annonce n’a pas de vendeur associé. Impossible d’ouvrir une conversation.',
-      );
-    }
+      if (!ad.sellerId) {
+        throw new BadRequestException(
+          'Cette annonce n’a pas de vendeur associé. Impossible d’ouvrir une conversation.',
+        );
+      }
 
-    if (ad.sellerId === user.id) {
-      throw new BadRequestException(
-        'Vous ne pouvez pas contacter votre propre annonce.',
-      );
-    }
+      if (ad.sellerId === user.id) {
+        throw new BadRequestException(
+          'Vous ne pouvez pas contacter votre propre annonce.',
+        );
+      }
 
-    const existing = await this.prisma.conversation.findUnique({
-      where: {
-        adId_customerId: {
+      const existing = await this.prisma.conversation.findUnique({
+        where: {
+          adId_customerId: {
+            adId: ad.id,
+            customerId: user.id,
+          },
+        },
+      });
+
+      if (existing) {
+        if (dto.initialMessage?.trim()) {
+          await this.prisma.message.create({
+            data: {
+              text: dto.initialMessage.trim(),
+              conversationId: existing.id,
+              senderId: user.id,
+            },
+          });
+        }
+        const reopened = await this.getConversationForUser(user, existing.id);
+        this.metrics.recordChatConversation('success');
+        return reopened;
+      }
+
+      const conversation = await this.prisma.conversation.create({
+        data: {
           adId: ad.id,
           customerId: user.id,
-        },
-      },
-    });
-
-    if (existing) {
-      if (dto.initialMessage?.trim()) {
-        await this.prisma.message.create({
-          data: {
-            text: dto.initialMessage.trim(),
-            conversationId: existing.id,
-            senderId: user.id,
-          },
-        });
-      }
-      return this.getConversationForUser(user, existing.id);
-    }
-
-    const conversation = await this.prisma.conversation.create({
-      data: {
-        adId: ad.id,
-        customerId: user.id,
-        adminId: ad.sellerId,
-        ...(dto.initialMessage?.trim()
-          ? {
-              messages: {
-                create: {
-                  text: dto.initialMessage.trim(),
-                  senderId: user.id,
+          adminId: ad.sellerId,
+          ...(dto.initialMessage?.trim()
+            ? {
+                messages: {
+                  create: {
+                    text: dto.initialMessage.trim(),
+                    senderId: user.id,
+                  },
                 },
-              },
-            }
-          : {}),
-      },
-    });
+              }
+            : {}),
+        },
+      });
 
-    return this.getConversationForUser(user, conversation.id);
+      const created = await this.getConversationForUser(user, conversation.id);
+      this.metrics.recordChatConversation('success');
+      return created;
+    } catch (error) {
+      this.metrics.recordChatConversation('error');
+      throw error;
+    }
   }
 
   async listConversations(user: AuthUser) {
