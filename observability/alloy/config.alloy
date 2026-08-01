@@ -1,0 +1,58 @@
+// Grafana Alloy — Jamarket
+// Scrape /api/metrics → Grafana Cloud Prometheus
+//
+// Lancement (PowerShell) :
+//   cd jamarket\observability\alloy
+//   $env:GRAFANA_CLOUD_USER = "2374545"
+//   $env:GRAFANA_CLOUD_TOKEN = "glc_..."
+//   alloy run .\config.alloy
+
+logging {
+  level  = "info"
+  format = "logfmt"
+}
+
+prometheus.remote_write "metrics_hosted_prometheus" {
+  endpoint {
+    name = "hosted-prometheus"
+    url  = "https://prometheus-prod-24-prod-eu-west-2.grafana.net/api/prom/push"
+
+    basic_auth {
+      username = env("GRAFANA_CLOUD_USER")
+      password = env("GRAFANA_CLOUD_TOKEN")
+    }
+  }
+}
+
+// Prod Render
+prometheus.scrape "jamarket_api" {
+  targets = [
+    {
+      __address__ = "jamarket-api.onrender.com",
+      job         = "jamarket-api",
+      env         = "production",
+    },
+  ]
+
+  scheme          = "https"
+  metrics_path    = "/api/metrics"
+  scrape_interval = "60s"
+  scrape_timeout  = "30s"
+
+  forward_to = [prometheus.remote_write.metrics_hosted_prometheus.receiver]
+}
+
+// Local (npm run start:dev) — décommenter si besoin :
+// prometheus.scrape "jamarket_api_local" {
+//   targets = [
+//     {
+//       __address__ = "localhost:3000",
+//       job         = "jamarket-api",
+//       env         = "local",
+//     },
+//   ]
+//   scheme          = "http"
+//   metrics_path    = "/api/metrics"
+//   scrape_interval = "15s"
+//   forward_to = [prometheus.remote_write.metrics_hosted_prometheus.receiver]
+// }

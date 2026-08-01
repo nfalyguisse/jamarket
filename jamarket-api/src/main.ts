@@ -6,8 +6,11 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { initSentry } from './common/sentry';
 
 async function bootstrap() {
+  initSentry();
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const isProduction = process.env.NODE_ENV === 'production';
 

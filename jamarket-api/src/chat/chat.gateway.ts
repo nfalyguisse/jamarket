@@ -9,8 +9,15 @@ import {
   WsException,
 } from '@nestjs/websockets';
 import { JwtService } from '@nestjs/jwt';
-import { Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
+import { captureServerException } from '../common/sentry';
+import { MetricsService } from '../metrics/metrics.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtPayload } from '../auth/strategies/jwt.strategy';
 import { ChatService } from './chat.service';
@@ -42,6 +49,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
     private readonly chatService: ChatService,
+    private readonly metrics: MetricsService,
   ) {}
 
   async handleConnection(client: AuthenticatedSocket) {
@@ -65,8 +73,22 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
 
       client.data.userId = user.id;
+      this.metrics.recordWsConnection('success');
       this.logger.debug(`WS connecté: user=${user.id} sid=${client.id}`);
     } catch (error) {
+      this.metrics.recordWsConnection('error');
+      const isExpectedAuthFailure =
+        error instanceof WsException ||
+        (error instanceof Error &&
+          /jwt|token|unauthorized/i.test(error.message));
+
+      if (!isExpectedAuthFailure) {
+        captureServerException(error, {
+          feature: 'chat',
+          tags: { transport: 'websocket', event: 'connection' },
+        });
+      }
+
       this.logger.warn(`WS connexion refusée: ${String(error)}`);
       client.emit('error', { message: 'Authentification WebSocket échouée' });
       client.disconnect(true);
@@ -138,6 +160,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       return { event: 'messageSent', data: message };
     } catch (error) {
+      const isBusinessError =
+        error instanceof ForbiddenException ||
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException ||
+        (error instanceof Error &&
+          /accès|introuvable|invalide|vide/i.test(error.message));
+
+      if (!isBusinessError) {
+        captureServerException(error, {
+          feature: 'chat',
+          tags: { transport: 'websocket', event: 'message' },
+        });
+      }
+
       const message =
         error instanceof Error ? error.message : 'Envoi du message impossible';
       throw new WsException(message);

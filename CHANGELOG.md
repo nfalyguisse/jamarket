@@ -3,6 +3,14 @@
 Toutes les versions notables de Jamarket sont documentées ici.
 Format des tags Git : `vMAJOR.MINOR.PATCH` (voir [`docs/processus-deploiement.md`](./docs/processus-deploiement.md)).
 
+## [Unreleased]
+
+### Ajouté
+
+- Supervision Prometheus : `GET /api/metrics` (`prom-client`), gauges santé/runtime, compteurs HTTP et métier (auth, annonces, Cloudinary, chat)
+- Collecte d’anomalies Sentry (`SENTRY_DSN`) sur 5xx, uploads Cloudinary et erreurs WebSocket inattendues
+- Documentation : `docs/supervision-alerting.md`, `docs/collecte-anomalies.md`, `docs/grafana-cloud-setup.md`
+
 ## [0.2.0] — 2026-07-19
 
 Première mise en production (Vercel + Render). Tag Git : `v0.2.0`.

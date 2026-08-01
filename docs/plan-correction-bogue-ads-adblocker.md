@@ -147,24 +147,26 @@ Le détail ci-dessus porte sur **BUG-PROD-001** (cas d’étude C2.3.2). Les ano
 | ID | Anomalie | Sévérité | Statut | Plan de correctif (synthèse) |
 |----|----------|----------|--------|------------------------------|
 | BUG-PROD-001 | Adblockers bloquent `/api/ads` (`ERR_BLOCKED_BY_CLIENT`) | Bloquant | **Corrigé** | Renommer le préfixe REST → `/api/annonces` (voir §4). |
-| BUG-PROD-002 | Images uploadées perdues / indisponibles en prod | Majeur | Ouvert | Remplacer le disque local Multer par un **stockage objet persistant** (Cloudflare R2, AWS S3 ou équivalent) ; exposer des URLs publiques stables ; brancher `CDN_URL` / `resolveMediaUrl()` ; réactiver les médias front (`DISABLE_REMOTE_MEDIA = false`). |
-| BUG-PROD-003 | Médias distants volontairement masqués côté client | Mineur | Workaround actif | Conséquence de BUG-PROD-002 : flag `DISABLE_REMOTE_MEDIA` force un placeholder SVG. À lever **après** mise en place du stockage objet. |
+| BUG-PROD-002 | Images uploadées perdues / indisponibles en prod | Majeur | **Corrigé** | Externaliser vers **Cloudinary** (CDN + WebP) ; Multer en mémoire → `upload_stream` ; URL HTTPS en BDD ; `CDN_URL` / `resolveMediaUrl()` ; `DISABLE_REMOTE_MEDIA = false`. Voir [`medias-cloudinary.md`](./medias-cloudinary.md). |
+| BUG-PROD-003 | Médias distants volontairement masqués côté client | Mineur | **Corrigé** | Flag `DISABLE_REMOTE_MEDIA` levé après Cloudinary ; galeries affichent les URLs CDN. |
 | BUG-PROD-004 | Pas de confirmation de compte par email à l’inscription | Majeur | Ouvert | Intégrer un fournisseur d’email transactionnel (Resend, SendGrid, SMTP) ; token de vérification + champs `emailVerified` ; parcours front « confirmer mon email » avant activation complète du compte. |
 | BUG-PROD-005 | Pas de « mot de passe oublié » (reset uniquement via super-admin API) | Majeur | Ouvert | Dépend de BUG-PROD-004 : endpoint public + email de reset à usage unique ; UI « Mot de passe oublié ». |
 | BUG-PROD-006 | Cold start / sleep API (free tier Render) | Mineur | Accepté (MVP) | Documenté comme limite d’hébergement ; mitigation future : plan payant ou keep-alive, hors correctif applicatif urgent. |
 
-### 6.1 Précision technique — images (BUG-PROD-002)
+### 6.1 Précision technique — images (BUG-PROD-002) — corrigé
 
-Ce n’est **pas** un problème de type MIME (JPEG/PNG/WebP sont déjà validés à l’upload). La cause est l’**hébergement** : sur Render (free), le système de fichiers de l’instance est **éphémère** — les fichiers écrits via Multer dans `uploads/` disparaissent au redeploy / redémarrage.
+Ce n’était **pas** un problème de type MIME (JPEG/PNG/WebP déjà validés à l’upload). La cause était l’**hébergement** : sur Render (free), le système de fichiers de l’instance est **éphémère** — les fichiers écrits via Multer dans `uploads/` disparaissaient au redeploy / redémarrage.
+
+**Correctif livré** : stockage **Cloudinary** (free tier). L’API reçoit le fichier en mémoire, l’envoie à Cloudinary (`format: webp`, `quality: auto`), et ne persiste en PostgreSQL que l’URL HTTPS. Même chemin en local et en prod. Détail : [`medias-cloudinary.md`](./medias-cloudinary.md).
 
 | Approche | Rôle |
 |----------|------|
-| **Stockage objet (R2 / S3)** | **Correctif principal** — persistance des fichiers + URL publique |
-| **CDN** | Optimisation de livraison (cache, perf) ; souvent inclus avec R2/Cloudinary, **pas suffisant seul** |
+| **Cloudinary (retenu)** | Persistance + CDN + conversion WebP |
+| Cloudflare R2 / AWS S3 | Alternative object storage (écartée pour le MVP : plus de config, pas de WebP natif) |
 | Servir depuis l’API (`/uploads`) | OK en local / VPS avec disque persistant ; **inadapté** au free tier Render |
 
 ---
 
 ## 7. Synthèse pour le jury (C2.3.2)
 
-Ce cas illustre une anomalie **détectée en recette production**, **qualifiée bloquante**, **analysée** (élimination SSR/CORS, identification adblocker), **corrigée** par un changement d’API contractuel, puis **vérifiée**. Le **registre §6** montre que d’autres anomalies (médias, emails) sont **identifiées, priorisées et planifiées**, ce qui complète le cycle de traitement des bogues au-delà du seul correctif détaillé. Un `HttpErrorResponse` à `status: 0` ne doit pas être interprété mécaniquement comme un défaut d’infrastructure cloud : la preuve Network (`ERR_BLOCKED_BY_CLIENT`) oriente vers le client.
+Ce cas illustre une anomalie **détectée en recette**, **qualifiée bloquante**, **analysée** (élimination SSR/CORS, identification adblocker), **corrigée** par un changement d’API contractuel, puis **vérifiée**. Le **registre §6** montre que les anomalies médias (BUG-PROD-002/003) ont ensuite été **corrigées** via Cloudinary, tandis que les emails transactionnels restent **identifiés et planifiés**. Un `HttpErrorResponse` à `status: 0` ne doit pas être interprété mécaniquement comme un défaut d’infrastructure cloud : la preuve Network (`ERR_BLOCKED_BY_CLIENT`) oriente vers le client.
