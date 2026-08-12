@@ -1,1 +1,0 @@
-Jamarket auto est un petit garage qui achète répare et vends des véhicules d'occasions. L'activité du garage tourne déjà cependant, Afin de capté plus de monde l'entreprise souhaiterai avoir un site web qui permettrai de mettre en lignes leurs annonces, et de facilité la communication avec leurs clients via un systeme de messagerie.

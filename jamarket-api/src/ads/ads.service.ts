@@ -5,10 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { RightEnum } from '../../generated/prisma/client';
-import {
-  AdsMutationAction,
-  MetricsService,
-} from '../metrics/metrics.service';
+import { AdsMutationAction, MetricsService } from '../metrics/metrics.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAdDto } from './dto/create-ad.dto';
 import { UpdateAdDto } from './dto/update-ad.dto';
@@ -206,7 +203,8 @@ export class AdsService {
     }
   }
 
-  private assertCanManageAd(user: { role: { rights: RightEnum[] } }) {    const canManageGarageAds = user.role.rights.includes(RightEnum.CREATE_AD);
+  private assertCanManageAd(user: { role: { rights: RightEnum[] } }) {
+    const canManageGarageAds = user.role.rights.includes(RightEnum.CREATE_AD);
 
     if (!canManageGarageAds) {
       throw new ForbiddenException(

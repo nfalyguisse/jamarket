@@ -30,7 +30,6 @@
     "prisma:deploy": "npx prisma migrate deploy && npx prisma db seed"
   },
   "dependencies": {
-    "@nestjs/cli": "^10.0.0",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^10.0.0",
@@ -64,10 +63,17 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.1.3"
   },
+  "overrides": {
+    "multer": "^2.2.0",
+    "js-yaml": "^4.3.1",
+    "lodash": "^4.18.1",
+    "brace-expansion": "^2.1.4"
+  },
   "prisma": {
     "seed": "ts-node --project tsconfig.json prisma/seed.ts"
   },
   "devDependencies": {
+    "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.0.0",
     "@swc/core": "^1.15.43",
@@ -77,10 +83,10 @@
     "@types/node": "^20.3.1",
     "@types/passport-jwt": "^4.0.1",
     "@types/supertest": "^2.0.12",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.67.0",
+    "@typescript-eslint/parser": "^8.67.0",
     "@vitest/coverage-v8": "^4.1.10",
-    "eslint": "^8.42.0",
+    "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
     "prettier": "^3.0.0",
