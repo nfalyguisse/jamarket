@@ -14,10 +14,7 @@ describe('MetricsService', () => {
     prisma.ping.mockResolvedValue(undefined);
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        MetricsService,
-        { provide: PrismaService, useValue: prisma },
-      ],
+      providers: [MetricsService, { provide: PrismaService, useValue: prisma }],
     }).compile();
 
     metrics = module.get(MetricsService);

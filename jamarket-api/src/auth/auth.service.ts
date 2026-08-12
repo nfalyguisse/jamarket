@@ -10,10 +10,7 @@ import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { ImageProcessingService } from '../upload/image-processing.service';
-import {
-  AuthFailureFlow,
-  MetricsService,
-} from '../metrics/metrics.service';
+import { AuthFailureFlow, MetricsService } from '../metrics/metrics.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ChangeAdminPasswordDto } from './dto/change-admin-password.dto';
