@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { captureServerException } from '../sentry';
 
 interface ErrorResponse {
   statusCode: number;
@@ -40,6 +41,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
         `[${request.method}] ${request.url} → ${statusCode}`,
         exception instanceof Error ? exception.stack : String(exception),
       );
+      captureServerException(exception, {
+        method: request.method,
+        path: request.url,
+        statusCode,
+      });
     } else {
       this.logger.warn(
         `[${request.method}] ${request.url} → ${statusCode}: ${JSON.stringify(message)}`,

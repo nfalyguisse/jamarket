@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PrismaService } from '../prisma/prisma.service';
 import { ImageProcessingService } from '../upload/image-processing.service';
+import { MetricsService } from '../metrics/metrics.service';
 import { AuthService } from './auth.service';
 
 vi.mock('bcrypt', () => ({
@@ -30,6 +31,10 @@ describe('AuthService', () => {
   };
 
   const imageProcessing = {};
+
+  const metrics = {
+    recordAuthFailure: vi.fn(),
+  };
 
   const customerRole = { id: 3, label: 'Customer' };
 
@@ -61,6 +66,7 @@ describe('AuthService', () => {
         { provide: PrismaService, useValue: prisma },
         { provide: JwtService, useValue: jwtService },
         { provide: ImageProcessingService, useValue: imageProcessing },
+        { provide: MetricsService, useValue: metrics },
       ],
     }).compile();
 
