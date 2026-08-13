@@ -9,8 +9,23 @@ import { join } from 'node:path';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
+/** Hôtes autorisés pour la validation SSR (anti-SSRF). Voir angular.json → security.allowedHosts */
+const DEV_ALLOWED_HOSTS = [
+  'localhost',
+  'localhost:4000',
+  'localhost:4200',
+  '127.0.0.1',
+  '127.0.0.1:4000',
+  '127.0.0.1:4200',
+] as const;
+
+// Variable d'environnement officielle Angular SSR (voir angular.dev → SSR security)
+process.env['NG_ALLOWED_HOSTS'] ??= DEV_ALLOWED_HOSTS.join(',');
+
 const app = express();
-const angularApp = new AngularNodeAppEngine();
+const angularApp = new AngularNodeAppEngine({
+  allowedHosts: [...DEV_ALLOWED_HOSTS],
+});
 
 /**
  * Example Express Rest API endpoints can be defined here.

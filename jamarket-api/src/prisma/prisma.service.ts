@@ -1,6 +1,27 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
 import { PrismaClient } from '../../generated/prisma/client';
+
+function createPgAdapter() {
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error('DATABASE_URL is required');
+  }
+
+  const needsSsl =
+    /sslmode=require/i.test(connectionString) ||
+    /render\.com/i.test(connectionString) ||
+    process.env.PGSSLMODE === 'require';
+
+  const pool = new Pool({
+    connectionString,
+    ssl: needsSsl ? { rejectUnauthorized: false } : undefined,
+    connectionTimeoutMillis: 20_000,
+  });
+
+  return new PrismaPg(pool);
+}
 
 @Injectable()
 export class PrismaService implements OnModuleInit, OnModuleDestroy {
@@ -8,10 +29,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   private readonly client: any;
 
   constructor() {
-    const adapter = new PrismaPg({
-      connectionString: process.env.DATABASE_URL,
-    });
-    this.client = new PrismaClient({ adapter });
+    this.client = new PrismaClient({ adapter: createPgAdapter() });
   }
 
   get role() {
@@ -55,6 +73,11 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   }
   get theme() {
     return this.client.theme;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async $transaction<T>(fn: (tx: any) => Promise<T>): Promise<T> {
+    return this.client.$transaction(fn);
   }
 
   async ping(): Promise<void> {

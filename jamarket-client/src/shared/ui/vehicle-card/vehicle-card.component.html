@@ -1,0 +1,71 @@
+<article
+  class="group relative overflow-hidden rounded-3xl border border-outline/5 bg-surface-container-lowest shadow-sm transition-all hover:shadow-xl"
+>
+  <a
+    [routerLink]="['/annonces', vehicle().id]"
+    class="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+    [attr.aria-label]="'Voir la fiche de ' + vehicle().title"
+  >
+    <div class="relative h-64 overflow-hidden">
+      <img
+        [src]="imageSrc()"
+        [alt]="vehicle().imageAlt"
+        class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+        loading="lazy"
+        width="640"
+        height="256"
+      />
+      @if (vehicle().badge) {
+        <span
+          class="absolute left-4 top-4 rounded-full bg-primary px-3 py-1 text-label-sm font-bold uppercase text-on-primary"
+        >
+          {{ vehicle().badge }}
+        </span>
+      }
+    </div>
+    <div class="p-6">
+      <h3 class="mb-2 truncate font-headline-md" [title]="vehicle().title">
+        {{ vehicle().title }}
+      </h3>
+      <div class="mb-4 flex flex-wrap gap-4 text-label-sm text-on-surface-variant">
+        <span class="inline-flex items-center gap-1">
+          <svg lucideGauge class="size-4" aria-hidden="true" />
+          {{ vehicle().mileageKm | number }} km
+        </span>
+        <span class="inline-flex items-center gap-1">
+          <svg lucideCalendar class="size-4" aria-hidden="true" />
+          {{ vehicle().year }}
+        </span>
+        <span class="inline-flex items-center gap-1">
+          <svg lucideSettings class="size-4" aria-hidden="true" />
+          {{ vehicle().transmission }}
+        </span>
+      </div>
+      <div class="border-t border-outline/10 pt-4">
+        <span class="text-2xl font-bold text-on-background">
+          {{ vehicle().price | currency: 'EUR' : 'symbol' : '1.0-0' : 'fr' }}
+        </span>
+      </div>
+    </div>
+  </a>
+  <button
+    type="button"
+    class="absolute right-3 top-3 z-10 flex size-9 items-center justify-center rounded-full bg-white/90 shadow-sm transition hover:bg-white"
+    [class.text-primary]="isFavorite()"
+    [class.text-on-surface-variant]="!isFavorite()"
+    [attr.aria-pressed]="isFavorite()"
+    [attr.aria-label]="
+      isFavorite()
+        ? 'Retirer ' + vehicle().title + ' des favoris'
+        : 'Ajouter ' + vehicle().title + ' aux favoris'
+    "
+    (click)="onFavoriteClick($event)"
+  >
+    <svg
+      lucideHeart
+      class="size-4"
+      [class.fill-current]="isFavorite()"
+      aria-hidden="true"
+    />
+  </button>
+</article>

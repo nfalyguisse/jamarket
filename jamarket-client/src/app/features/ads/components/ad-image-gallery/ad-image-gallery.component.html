@@ -1,0 +1,59 @@
+@if (displayImages().length > 0 && selectedImage(); as current) {
+<div class="space-y-3">
+  <div class="overflow-hidden rounded-2xl border border-outline/10 bg-surface-container-low">
+    <img
+      [src]="mediaUrl(current.url)"
+      [alt]="altPrefix() + ' — vue principale'"
+      class="aspect-[16/10] w-full object-cover"
+      width="960"
+      height="600"
+      fetchpriority="high"
+      decoding="async"
+    />
+  </div>
+
+  @if (displayImages().length > 1) {
+  <ul class="grid grid-cols-4 gap-3" role="list">
+    @for (image of visibleThumbnails(); track image.id; let i = $index) {
+    <li>
+      <button
+        type="button"
+        class="relative w-full overflow-hidden rounded-xl border-2 transition"
+        [class.border-primary]="selectedIndex() === i"
+        [class.border-transparent]="selectedIndex() !== i"
+        [attr.aria-label]="'Afficher la photo ' + (i + 1)"
+        [attr.aria-current]="selectedIndex() === i ? 'true' : null"
+        (click)="onThumbnailClick(i)"
+      >
+        <img
+          [src]="mediaUrl(image.url)"
+          [alt]="altPrefix() + ' — miniature ' + (i + 1)"
+          class="aspect-[4/3] w-full object-cover"
+          width="200"
+          height="150"
+          loading="lazy"
+          decoding="async"
+        />
+        @if (isLastVisibleThumbnail(i)) {
+        <span
+          class="absolute inset-0 flex items-center justify-center bg-black/45 text-sm font-bold uppercase tracking-wide text-white"
+          aria-hidden="true"
+        >
+          +{{ hiddenCount() }} photo{{ hiddenCount() > 1 ? 's' : '' }}
+        </span>
+        }
+      </button>
+    </li>
+    }
+  </ul>
+  }
+</div>
+} @else {
+<div
+  class="flex aspect-[16/10] items-center justify-center rounded-2xl border border-dashed border-outline/20 bg-surface-container-low text-on-surface-variant"
+  role="img"
+  aria-label="Aucune photo disponible"
+>
+  Aucune photo disponible
+</div>
+}

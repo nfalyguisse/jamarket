@@ -1,0 +1,148 @@
+<header
+  class="fixed inset-x-0 top-0 z-50 border-b border-outline/5 shadow-[0_20px_40px_rgba(15,28,44,0.05)] backdrop-blur-xl"
+  style="background-color: var(--jm-color-nav-bg)"
+>
+  <nav
+    class="container-jm flex items-center gap-3 py-4 md:gap-4 md:py-6 lg:gap-6"
+    aria-label="Navigation principale"
+  >
+    <a
+      routerLink="/"
+      class="shrink-0 font-headline-md text-lg font-black uppercase tracking-tighter"
+      style="color: var(--jm-color-nav-text)"
+      (click)="closeMobileMenu()"
+    >
+      Jamarket Auto
+    </a>
+
+    <div class="hidden flex-1 items-center justify-center gap-8 lg:flex">
+      @for (link of navLinks; track link.path) {
+        <a
+          [routerLink]="link.path"
+          routerLinkActive="font-bold !text-[var(--jm-color-nav-text)] border-b-2"
+          [routerLinkActiveOptions]="{ exact: false }"
+          class="border-transparent text-label-md uppercase tracking-tight transition-colors duration-300"
+          style="color: var(--jm-color-nav-muted); border-color: var(--jm-color-nav-text)"
+        >
+          {{ link.label }}
+        </a>
+      }
+    </div>
+
+    <form
+      class="relative hidden min-w-0 flex-1 md:block lg:max-w-xs xl:max-w-sm"
+      role="search"
+      (submit)="onSearchSubmit($event)"
+    >
+      <label for="header-search" class="sr-only">Rechercher un véhicule</label>
+      <svg
+        lucideSearch
+        class="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2"
+        style="color: var(--jm-color-nav-muted)"
+        aria-hidden="true"
+      />
+      <input
+        id="header-search"
+        type="search"
+        name="q"
+        class="w-full rounded-full border border-outline/10 py-2.5 pl-11 pr-4 text-body-md transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+        style="background-color: color-mix(in srgb, var(--jm-color-nav-text) 6%, transparent); color: var(--jm-color-nav-text)"
+        placeholder="Rechercher…"
+        autocomplete="off"
+        [value]="searchQuery()"
+        (input)="onSearchInput($event)"
+      />
+    </form>
+
+    <div class="ml-auto flex shrink-0 items-center gap-3 md:gap-6">
+      <button
+        type="button"
+        class="rounded-full p-1 transition-opacity hover:opacity-80 md:hidden"
+        [attr.aria-expanded]="mobileMenuOpen()"
+        aria-controls="mobile-nav-menu"
+        [attr.aria-label]="mobileMenuOpen() ? 'Fermer le menu' : 'Ouvrir le menu'"
+        (click)="toggleMobileMenu()"
+      >
+        @if (mobileMenuOpen()) {
+          <svg lucideX class="size-7" style="color: var(--jm-color-nav-text)" aria-hidden="true" />
+        } @else {
+          <svg lucideMenu class="size-7" style="color: var(--jm-color-nav-text)" aria-hidden="true" />
+        }
+      </button>
+
+      <a
+        [routerLink]="authState.profileRoute()"
+        class="rounded-full p-1 transition-opacity hover:opacity-80"
+        [attr.aria-label]="authState.isLoggedIn() ? 'Mon profil' : 'Se connecter'"
+        (click)="closeMobileMenu()"
+      >
+        <svg lucideCircleUser class="size-7" style="color: var(--jm-color-nav-text)" aria-hidden="true" />
+      </a>
+
+     
+    </div>
+  </nav>
+
+  @if (mobileMenuOpen()) {
+    <button
+      type="button"
+      class="fixed inset-0 top-16 z-40 bg-black/30 backdrop-blur-[2px] md:hidden"
+      aria-label="Fermer le menu"
+      (click)="closeMobileMenu()"
+    ></button>
+
+    <nav
+      id="mobile-nav-menu"
+      class="relative z-50 border-t border-outline/5 px-6 py-5 shadow-lg md:hidden"
+      style="background-color: var(--jm-color-nav-bg)"
+      aria-label="Menu mobile"
+    >
+      <form class="relative mb-4" role="search" (submit)="onSearchSubmit($event)">
+        <label for="header-search-mobile" class="sr-only">Rechercher un véhicule</label>
+        <svg
+          lucideSearch
+          class="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2"
+          style="color: var(--jm-color-nav-muted)"
+          aria-hidden="true"
+        />
+        <input
+          id="header-search-mobile"
+          type="search"
+          name="q"
+          class="w-full rounded-full border border-outline/10 py-3 pl-11 pr-4 text-body-md transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+          style="background-color: color-mix(in srgb, var(--jm-color-nav-text) 6%, transparent); color: var(--jm-color-nav-text)"
+          placeholder="Rechercher…"
+          autocomplete="off"
+          [value]="searchQuery()"
+          (input)="onSearchInput($event)"
+        />
+      </form>
+
+      <ul class="flex flex-col gap-1">
+        @for (link of navLinks; track link.path) {
+          <li>
+            <a
+              [routerLink]="link.path"
+              routerLinkActive="bg-primary-container/10 font-bold !text-[var(--jm-color-nav-text)]"
+              [routerLinkActiveOptions]="{ exact: false }"
+              class="block rounded-lg px-3 py-3 text-label-md uppercase tracking-tight transition-colors"
+              style="color: var(--jm-color-nav-muted)"
+              (click)="closeMobileMenu()"
+            >
+              {{ link.label }}
+            </a>
+          </li>
+        }
+        <li class="mt-2 border-t border-outline/10 pt-3">
+          <a
+            routerLink="/contact"
+            class="inline-flex w-full items-center justify-center rounded-full bg-primary-container px-5 py-3 text-label-md font-bold uppercase text-on-primary-container transition-all hover:opacity-90 active:scale-95"
+            (click)="closeMobileMenu()"
+          >
+            Nous contacter
+          </a>
+        </li>
+      </ul>
+    </nav>
+  }
+</header>

@@ -1,0 +1,202 @@
+<div class="flex h-screen overflow-hidden bg-gray-50">
+
+  <!-- Overlay mobile -->
+  @if (sidebarOpen()) {
+    <div
+      class="fixed inset-0 z-20 bg-black/50 lg:hidden"
+      (click)="closeSidebar()"
+      aria-hidden="true"
+    ></div>
+  }
+
+  <!-- Sidebar -->
+  <aside
+    class="fixed inset-y-0 left-0 z-30 flex w-64 flex-col bg-[#1a2332] text-white transition-transform duration-300 lg:static lg:translate-x-0"
+    [class.-translate-x-full]="!sidebarOpen()"
+    [class.translate-x-0]="sidebarOpen()"
+    aria-label="Navigation principale du back office"
+  >
+    <!-- Logo -->
+    <div class="flex gap-5 h-16 items-center border-b border-white/10 px-6">
+        <!-- Avatar -->
+        <a
+          routerLink="/admin/parametres"
+          class="flex h-9 w-9 items-center justify-center overflow-hidden rounded-md bg-emerald-600 text-sm font-semibold text-white"
+          [attr.aria-label]="'Mon profil — ' + adminFullName"
+          title="Mon profil"
+        >
+          @if (adminAvatarUrl; as src) {
+            <img [src]="src" alt="" class="h-full w-full object-cover" />
+          } @else {
+            {{ adminInitials }}
+          }
+        </a>
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-semibold tracking-wide">Jamarket Back office</span>
+      </div>
+    </div>
+
+    <!-- Navigation principale -->
+    <nav class="flex-1 overflow-y-auto px-4 py-6" aria-label="Menu admin">
+      <ul class="space-y-1" role="list">
+
+        <li>
+          <a
+            routerLink="/admin/dashboard"
+            routerLinkActive="bg-white/10 !text-white"
+            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+            (click)="closeSidebar()"
+          >
+            <svg lucideLayoutDashboard class="h-[18px] w-[18px] flex-shrink-0" aria-hidden="true"></svg>
+            Dashboard
+          </a>
+        </li>
+
+        <li>
+          <a
+            routerLink="/admin/annonces"
+            routerLinkActive="bg-white/10 !text-white"
+            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+            (click)="closeSidebar()"
+          >
+            <svg lucideMegaphone class="h-[18px] w-[18px] flex-shrink-0" aria-hidden="true"></svg>
+            Annonces
+          </a>
+        </li>
+
+        <li>
+          <a
+            routerLink="/admin/messages"
+            routerLinkActive="bg-white/10 !text-white"
+            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+            (click)="closeSidebar()"
+          >
+            <svg lucideMessageSquare class="h-[18px] w-[18px] flex-shrink-0" aria-hidden="true"></svg>
+            Messages
+          </a>
+        </li>
+
+        @if (canManageUsers) {
+          <li>
+            <a
+              routerLink="/admin/utilisateurs"
+              routerLinkActive="bg-white/10 !text-white"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+              (click)="closeSidebar()"
+            >
+              <svg lucideUsers class="h-[18px] w-[18px] flex-shrink-0" aria-hidden="true"></svg>
+              Utilisateurs
+            </a>
+          </li>
+          <li>
+            <a
+              routerLink="/admin/roles"
+              routerLinkActive="bg-white/10 !text-white"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+              (click)="closeSidebar()"
+            >
+              <svg lucideKeyRound class="h-[18px] w-[18px] flex-shrink-0" aria-hidden="true"></svg>
+              Gestion des rôles
+            </a>
+          </li>
+        }
+
+      </ul>
+    </nav>
+
+    <!-- Paramètres en bas -->
+    <div class="border-t border-white/10 px-4 py-4">
+      <a
+        routerLink="/admin/parametres"
+        routerLinkActive="bg-white/10 !text-white"
+        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+        (click)="closeSidebar()"
+      >
+        <svg lucideSettings class="h-[18px] w-[18px] flex-shrink-0" aria-hidden="true"></svg>
+        Paramètres
+      </a>
+    </div>
+  </aside>
+
+  <!-- Zone principale -->
+  <div class="flex flex-1 flex-col overflow-hidden">
+
+    <!-- Header top -->
+    <header class="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:px-6">
+
+      <!-- Bouton burger (mobile) -->
+      <button
+        type="button"
+        class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden"
+        (click)="toggleSidebar()"
+        [attr.aria-label]="sidebarOpen() ? 'Fermer le menu' : 'Ouvrir le menu'"
+      >
+        @if (sidebarOpen()) {
+          <svg lucideX class="h-5 w-5" aria-hidden="true"></svg>
+        } @else {
+          <svg lucideMenu class="h-5 w-5" aria-hidden="true"></svg>
+        }
+      </button>
+
+      <div class="hidden lg:block" aria-hidden="true"></div>
+
+      <!-- Actions header droite -->
+      <div class="flex items-center gap-3">
+
+        <!-- Notification -->
+        <button
+          type="button"
+          class="relative rounded-lg p-2 text-gray-500 hover:bg-gray-100"
+          aria-label="Notifications"
+        >
+          <svg lucideBell class="h-5 w-5" aria-hidden="true"></svg>
+          <span
+            class="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-emerald-500"
+            aria-label="Nouvelles notifications"
+          ></span>
+        </button>
+
+        <!-- Bouton Nouveau -->
+        <a
+          routerLink="/admin/annonces/nouvelle"
+          class="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+        >
+          <svg lucidePlus class="h-4 w-4" aria-hidden="true"></svg>
+          Nouveau
+        </a>
+
+        <!-- Avatar + initiales -->
+        <a
+          routerLink="/admin/parametres"
+          class="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-emerald-600 text-sm font-semibold text-white select-none transition hover:ring-2 hover:ring-emerald-300"
+          [title]="adminFullName"
+          [attr.aria-label]="'Mon profil — ' + adminFullName"
+        >
+          @if (adminAvatarUrl; as src) {
+            <img [src]="src" alt="" class="h-full w-full object-cover" />
+          } @else {
+            {{ adminInitials }}
+          }
+        </a>
+
+        <!-- Déconnexion -->
+        <button
+          type="button"
+          (click)="logout()"
+          class="rounded-lg p-2 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600"
+          aria-label="Se déconnecter"
+          title="Se déconnecter"
+        >
+          <svg lucideLogOut class="h-5 w-5" aria-hidden="true"></svg>
+        </button>
+
+      </div>
+    </header>
+
+    <!-- Contenu de la page -->
+    <main id="main-content" tabindex="-1" class="flex-1 overflow-y-auto outline-none">
+      <router-outlet />
+    </main>
+
+  </div>
+</div>

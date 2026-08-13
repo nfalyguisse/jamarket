@@ -1,0 +1,178 @@
+<div class="flex min-h-screen flex-col bg-surface-container-low">
+  <app-site-header />
+
+  <main id="main-content" tabindex="-1" class="flex-1 pt-24 pb-16 outline-none">
+    <div class="container-jm">
+      <!-- Fil d'Ariane -->
+      <nav aria-label="Fil d'Ariane" class="mb-8">
+        <ol class="flex flex-wrap items-center gap-2 text-label-md text-on-surface-variant">
+          <li>
+            <a routerLink="/" class="transition hover:text-primary">Accueil</a>
+          </li>
+          <li aria-hidden="true" class="text-on-surface-variant/50">/</li>
+          <li>
+            <span class="font-semibold text-on-background" aria-current="page">Catalogue</span>
+          </li>
+        </ol>
+      </nav>
+
+      <div class="flex flex-col gap-8 lg:flex-row lg:items-start">
+        <div class="w-full shrink-0 lg:w-72 xl:w-80">
+          <app-catalogue-filters
+            [filters]="filters()"
+            [brandOptions]="brandOptions()"
+            [modelOptions]="modelOptions()"
+            [fuelOptions]="fuelOptions()"
+            [priceBounds]="priceBounds()"
+            [mobileOpen]="filtersMobileOpen()"
+            (filtersChange)="onFiltersChange($event)"
+            (clearAll)="onClearFilters()"
+            (mobileOpenChange)="onFiltersMobileOpenChange($event)"
+          />
+        </div>
+
+        <!-- Contenu principal -->
+        <section class="min-w-0 flex-1" aria-labelledby="catalogue-heading">
+          <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h1 id="catalogue-heading" class="font-headline-xl text-on-background">
+                Catalogue
+              </h1>
+              <p class="mt-2 text-body-lg text-on-surface-variant">
+                @if (isLoading()) {
+                  Chargement des véhicules…
+                } @else if (filters().query.trim()) {
+                  {{ totalResults() }} résultat{{ totalResults() > 1 ? 's' : '' }} pour « {{ filters().query.trim() }} »
+                } @else if (totalResults() === 0) {
+                  Aucun véhicule ne correspond à vos critères.
+                } @else {
+                  {{ totalResults() }} véhicule{{ totalResults() > 1 ? 's' : '' }} disponible{{ totalResults() > 1 ? 's' : '' }} en stock.
+                }
+              </p>
+            </div>
+
+            <div class="relative w-full sm:w-auto sm:min-w-[240px]">
+              <label for="catalogue-sort" class="sr-only">Trier les véhicules</label>
+              <select
+                id="catalogue-sort"
+                [value]="selectedSort()"
+                (change)="onSortChange($event)"
+                class="w-full appearance-none rounded-xl border border-outline/20 bg-surface-container-lowest py-3 pl-4 pr-10 text-label-md font-semibold text-on-background shadow-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              >
+                @for (option of sortOptions; track option.value) {
+                  <option [value]="option.value">Trier par : {{ option.label }}</option>
+                }
+              </select>
+              <svg
+                lucideChevronDown
+                class="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-on-surface-variant"
+                aria-hidden="true"
+              />
+            </div>
+          </div>
+
+          @if (isLoading()) {
+            <!-- Squelette de chargement -->
+            <ul
+              class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3"
+              aria-label="Chargement des véhicules"
+              role="list"
+            >
+              @for (_ of [1, 2, 3, 4, 5, 6]; track $index) {
+                <li class="overflow-hidden rounded-2xl border border-outline/10 bg-surface-container-lowest">
+                  <div class="aspect-[4/3] animate-pulse bg-outline/10"></div>
+                  <div class="p-5 space-y-3">
+                    <div class="h-4 w-3/4 animate-pulse rounded bg-outline/10"></div>
+                    <div class="h-5 w-1/3 animate-pulse rounded bg-outline/10"></div>
+                    <div class="h-3 w-full animate-pulse rounded bg-outline/10"></div>
+                    <div class="mt-4 h-10 animate-pulse rounded-xl bg-outline/10"></div>
+                  </div>
+                </li>
+              }
+            </ul>
+          } @else if (vehicles().length > 0) {
+            <ul
+              class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3"
+              role="list"
+            >
+              @for (vehicle of vehicles(); track vehicle.id) {
+                <li class="h-full">
+                  <app-catalogue-vehicle-card
+                    [vehicle]="vehicle"
+                    [isFavorite]="favoritesState.isFavorite(vehicle.id)"
+                    (favoriteToggle)="onFavoriteToggle($event)"
+                  />
+                </li>
+              }
+            </ul>
+
+            <!-- Pagination -->
+            @if (totalPages() > 1) {
+              <nav
+                class="mt-12 flex items-center justify-center gap-2"
+                aria-label="Pagination du catalogue"
+              >
+                <button
+                  type="button"
+                  class="flex size-10 items-center justify-center rounded-lg border border-outline/20 bg-surface-container-lowest text-on-surface-variant transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+                  [disabled]="currentPage() === 1"
+                  (click)="goToPage(currentPage() - 1)"
+                  aria-label="Page précédente"
+                >
+                  <svg lucideChevronLeft class="size-4" aria-hidden="true" />
+                </button>
+
+                @for (page of pageNumbers(); track page) {
+                  <button
+                    type="button"
+                    class="flex size-10 items-center justify-center rounded-lg border text-label-md font-semibold transition"
+                    [class.border-primary]="page === currentPage()"
+                    [class.bg-primary]="page === currentPage()"
+                    [class.text-on-primary]="page === currentPage()"
+                    [class.border-outline/20]="page !== currentPage()"
+                    [class.bg-surface-container-lowest]="page !== currentPage()"
+                    [class.text-on-background]="page !== currentPage()"
+                    [attr.aria-current]="page === currentPage() ? 'page' : null"
+                    (click)="goToPage(page)"
+                  >
+                    {{ page }}
+                  </button>
+                }
+
+                <button
+                  type="button"
+                  class="flex size-10 items-center justify-center rounded-lg border border-outline/20 bg-surface-container-lowest text-on-surface-variant transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+                  [disabled]="currentPage() === totalPages()"
+                  (click)="goToPage(currentPage() + 1)"
+                  aria-label="Page suivante"
+                >
+                  <svg lucideChevronRight class="size-4" aria-hidden="true" />
+                </button>
+              </nav>
+            }
+          } @else {
+            <div
+              class="flex flex-col items-center justify-center rounded-2xl border border-outline/10 bg-surface-container-lowest py-20 text-center"
+            >
+              <p class="font-headline-md text-on-surface-variant">
+                Aucun véhicule ne correspond à vos critères
+              </p>
+              <p class="mt-2 max-w-md text-body-md text-on-surface-variant/70">
+                Essayez d'élargir vos filtres ou de réinitialiser la recherche pour voir tout le stock du garage.
+              </p>
+              <button
+                type="button"
+                class="mt-6 inline-flex items-center rounded-xl border border-primary px-6 py-3 text-label-md font-semibold text-primary transition hover:bg-primary/10"
+                (click)="onClearFilters()"
+              >
+                Réinitialiser les filtres
+              </button>
+            </div>
+          }
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <app-site-footer />
+</div>

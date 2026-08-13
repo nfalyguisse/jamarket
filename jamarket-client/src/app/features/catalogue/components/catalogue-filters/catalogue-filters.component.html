@@ -1,0 +1,217 @@
+<div class="lg:contents">
+  <!-- Bouton mobile -->
+  <button
+    type="button"
+    class="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-outline/20 bg-surface-container-lowest px-4 py-3 text-label-md font-semibold text-on-background shadow-sm transition hover:border-primary lg:hidden"
+    [attr.aria-expanded]="mobileOpen()"
+    aria-controls="catalogue-filters-panel"
+    (click)="toggleMobilePanel()"
+  >
+    <svg lucideSlidersHorizontal class="size-4" aria-hidden="true" />
+    Filtres
+    @if (hasActiveFilters()) {
+      <span
+        class="inline-flex size-5 items-center justify-center rounded-full bg-primary text-label-sm font-bold text-on-primary"
+        aria-label="Filtres actifs"
+      >
+        !
+      </span>
+    }
+  </button>
+
+  <aside
+    id="catalogue-filters-panel"
+    class="rounded-2xl border border-outline/10 bg-surface-container-lowest p-6 shadow-sm lg:sticky lg:top-28 lg:block"
+    [class.hidden]="!mobileOpen()"
+    aria-label="Filtres de recherche"
+  >
+    <div class="mb-6 flex items-center justify-between gap-4">
+      <h2 class="text-label-sm font-bold uppercase tracking-[0.12em] text-on-background">
+        Filtres
+      </h2>
+      @if (hasActiveFilters()) {
+        <button
+          type="button"
+          class="text-label-sm font-semibold uppercase tracking-wide text-primary transition hover:opacity-80"
+          (click)="onClearAll()"
+        >
+          Tout effacer
+        </button>
+      }
+    </div>
+
+    <div class="space-y-6">
+      <!-- Marque -->
+      <div class="space-y-2">
+        <label
+          for="catalogue-brand-filter"
+          class="text-label-sm font-bold uppercase tracking-[0.1em] text-on-surface-variant"
+        >
+          Marque
+        </label>
+        <div class="relative">
+          <select
+            id="catalogue-brand-filter"
+            class="w-full appearance-none rounded-xl border border-outline/20 bg-surface-container-low px-4 py-3 text-body-md text-on-background transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            [value]="filters().brandId ?? ''"
+            (change)="onBrandChange($event)"
+          >
+            <option value="">Toutes les marques</option>
+            @for (brand of brandOptions(); track brand.id) {
+              <option [value]="brand.id">{{ brand.label }}</option>
+            }
+          </select>
+          <svg
+            lucideChevronDown
+            class="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-on-surface-variant"
+            aria-hidden="true"
+          />
+        </div>
+      </div>
+
+      <!-- Modèle -->
+      <div class="space-y-2">
+        <label
+          for="catalogue-model-filter"
+          class="text-label-sm font-bold uppercase tracking-[0.1em] text-on-surface-variant"
+        >
+          Modèle
+        </label>
+        <div class="relative">
+          <select
+            id="catalogue-model-filter"
+            class="w-full appearance-none rounded-xl border border-outline/20 bg-surface-container-low px-4 py-3 text-body-md text-on-background transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50"
+            [value]="filters().modelId ?? ''"
+            [disabled]="modelOptions().length === 0"
+            (change)="onModelChange($event)"
+          >
+            <option value="">Tous les modèles</option>
+            @for (model of modelOptions(); track model.id) {
+              <option [value]="model.id">{{ model.label }}</option>
+            }
+          </select>
+          <svg
+            lucideChevronDown
+            class="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-on-surface-variant"
+            aria-hidden="true"
+          />
+        </div>
+      </div>
+
+      <!-- Fourchette de prix -->
+      <fieldset class="space-y-3">
+        <legend class="text-label-sm font-bold uppercase tracking-[0.1em] text-on-surface-variant">
+          Fourchette de prix
+        </legend>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="catalogue-price-min" class="sr-only">Prix minimum</label>
+            <input
+              id="catalogue-price-min"
+              type="number"
+              inputmode="numeric"
+              min="0"
+              step="500"
+              placeholder="Min €"
+              class="w-full rounded-xl border border-outline/20 bg-surface-container-low px-3 py-2.5 text-body-md text-on-background transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              [value]="filters().priceMin ?? ''"
+              (change)="onPriceMinChange($event)"
+            />
+          </div>
+          <div>
+            <label for="catalogue-price-max" class="sr-only">Prix maximum</label>
+            <input
+              id="catalogue-price-max"
+              type="number"
+              inputmode="numeric"
+              min="0"
+              step="500"
+              placeholder="Max €"
+              class="w-full rounded-xl border border-outline/20 bg-surface-container-low px-3 py-2.5 text-body-md text-on-background transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              [value]="filters().priceMax ?? ''"
+              (change)="onPriceMaxChange($event)"
+            />
+          </div>
+        </div>
+        <input
+          type="range"
+          class="h-2 w-full cursor-pointer appearance-none rounded-lg accent-primary bg-outline/20"
+          [min]="sliderMin()"
+          [max]="sliderMax()"
+          step="500"
+          [value]="displayPriceMax()"
+          [attr.aria-valuemin]="sliderMin()"
+          [attr.aria-valuemax]="sliderMax()"
+          [attr.aria-valuenow]="displayPriceMax()"
+          aria-label="Ajuster le prix maximum"
+          (input)="onPriceSliderInput($event)"
+          (change)="onPriceSliderChange($event)"
+        />
+        <div class="flex justify-between text-label-sm text-on-surface-variant">
+          <span>{{ sliderMin() | number: '1.0-0' : 'fr' }} €</span>
+          <span
+            class="font-semibold"
+            [class.text-primary]="filters().priceMax !== null || localPriceMax() !== null"
+          >
+            {{ displayPriceMax() | number: '1.0-0' : 'fr' }} €
+          </span>
+        </div>
+      </fieldset>
+
+      <!-- Année -->
+      <fieldset class="space-y-3">
+        <legend class="text-label-sm font-bold uppercase tracking-[0.1em] text-on-surface-variant">
+          Année
+        </legend>
+        <div class="grid grid-cols-2 gap-2">
+          @for (option of yearRangeOptions; track option.value) {
+            <button
+              type="button"
+              class="rounded-xl border px-3 py-2.5 text-label-sm font-semibold transition"
+              [class.border-primary]="filters().yearRange === option.value"
+              [class.bg-primary/10]="filters().yearRange === option.value"
+              [class.text-primary]="filters().yearRange === option.value"
+              [class.border-outline/20]="filters().yearRange !== option.value"
+              [class.bg-surface-container-low]="filters().yearRange !== option.value"
+              [class.text-on-background]="filters().yearRange !== option.value"
+              [attr.aria-pressed]="filters().yearRange === option.value"
+              (click)="onYearRangeSelect(option.value)"
+            >
+              {{ option.label }}
+            </button>
+          }
+        </div>
+      </fieldset>
+
+      <!-- Type de carburant -->
+      @if (fuelOptions().length > 0) {
+        <div class="space-y-2">
+          <label
+            for="catalogue-fuel-filter"
+            class="text-label-sm font-bold uppercase tracking-[0.1em] text-on-surface-variant"
+          >
+            Carburant
+          </label>
+          <div class="relative">
+            <select
+              id="catalogue-fuel-filter"
+              class="w-full appearance-none rounded-xl border border-outline/20 bg-surface-container-low px-4 py-3 text-body-md text-on-background transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              [value]="filters().fuel ?? ''"
+              (change)="onFuelChange($event)"
+            >
+              <option value="">Tous les carburants</option>
+              @for (fuel of fuelOptions(); track fuel) {
+                <option [value]="fuel">{{ fuelDisplayLabels[fuel] || fuel }}</option>
+              }
+            </select>
+            <svg
+              lucideChevronDown
+              class="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-on-surface-variant"
+              aria-hidden="true"
+            />
+          </div>
+        </div>
+      }
+    </div>
+  </aside>
+</div>

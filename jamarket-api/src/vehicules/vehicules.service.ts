@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { UploadService } from '../upload/upload.service';
 import { CreateVehiculeDto } from './dto/create-vehicule.dto';
 import { FilterVehiculeDto } from './dto/filter-vehicule.dto';
 import { UpdateVehiculeDto } from './dto/update-vehicule.dto';
@@ -14,13 +15,22 @@ const VEHICULE_INCLUDE = {
   vehiculeType: true,
   images: true,
   ad: {
-    select: { id: true, label: true, price: true, isActive: true, isSold: true },
+    select: {
+      id: true,
+      label: true,
+      price: true,
+      isActive: true,
+      isSold: true,
+    },
   },
 } as const;
 
 @Injectable()
 export class VehiculesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly uploadService: UploadService,
+  ) {}
 
   async findAll(filters: FilterVehiculeDto) {
     const {
@@ -92,7 +102,9 @@ export class VehiculesService {
   async create(dto: CreateVehiculeDto) {
     const { imageUrls, year, ...vehiculeData } = dto;
 
-    const model = await this.prisma.model.findUnique({ where: { id: dto.modelId } });
+    const model = await this.prisma.model.findUnique({
+      where: { id: dto.modelId },
+    });
     if (!model) {
       throw new NotFoundException(`Modèle #${dto.modelId} introuvable`);
     }
@@ -101,7 +113,9 @@ export class VehiculesService {
       where: { id: dto.vehiculeTypeId },
     });
     if (!vehiculeType) {
-      throw new NotFoundException(`Type de véhicule #${dto.vehiculeTypeId} introuvable`);
+      throw new NotFoundException(
+        `Type de véhicule #${dto.vehiculeTypeId} introuvable`,
+      );
     }
 
     return this.prisma.vehicule.create({
@@ -123,8 +137,11 @@ export class VehiculesService {
     const { imageUrls, year, ...vehiculeData } = dto;
 
     if (dto.modelId) {
-      const model = await this.prisma.model.findUnique({ where: { id: dto.modelId } });
-      if (!model) throw new NotFoundException(`Modèle #${dto.modelId} introuvable`);
+      const model = await this.prisma.model.findUnique({
+        where: { id: dto.modelId },
+      });
+      if (!model)
+        throw new NotFoundException(`Modèle #${dto.modelId} introuvable`);
     }
 
     if (dto.vehiculeTypeId) {
@@ -132,7 +149,9 @@ export class VehiculesService {
         where: { id: dto.vehiculeTypeId },
       });
       if (!vehiculeType) {
-        throw new NotFoundException(`Type de véhicule #${dto.vehiculeTypeId} introuvable`);
+        throw new NotFoundException(
+          `Type de véhicule #${dto.vehiculeTypeId} introuvable`,
+        );
       }
     }
 
@@ -159,7 +178,7 @@ export class VehiculesService {
 
     if (vehicule.ad) {
       throw new BadRequestException(
-        'Ce véhicule est lié à une annonce active. Supprimez d\'abord l\'annonce.',
+        "Ce véhicule est lié à une annonce active. Supprimez d'abord l'annonce.",
       );
     }
 
@@ -174,11 +193,11 @@ export class VehiculesService {
 
     if (vehicule.ad) {
       throw new ConflictException(
-        'Ce véhicule est lié à une annonce. Supprimez définitivement l\'annonce avant de supprimer le véhicule.',
+        "Ce véhicule est lié à une annonce. Supprimez définitivement l'annonce avant de supprimer le véhicule.",
       );
     }
 
-    await this.prisma.image.deleteMany({ where: { vehiculeId: id } });
+    await this.uploadService.deleteAllVehiculeImages(id);
     await this.prisma.vehicule.delete({ where: { id } });
   }
 }
