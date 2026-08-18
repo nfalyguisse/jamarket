@@ -21,7 +21,7 @@ export const sentryHttpInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: unknown) => {
-      if (error instanceof HttpErrorResponse && error.status === 0) {
+      if (error instanceof HttpErrorResponse) {
         captureClientHttpError(error, {
           feature: resolveFeature(req.url),
           url: req.url,

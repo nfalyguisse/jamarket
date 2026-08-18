@@ -55,6 +55,23 @@ function isLikelyBlockedByClient(error: HttpErrorResponse): boolean {
   );
 }
 
+function resolveHttpCategory(error: HttpErrorResponse): string {
+  if (error.status === 0) {
+    return 'network';
+  }
+  if (error.status >= 500) {
+    return 'server';
+  }
+  if (error.status >= 400) {
+    return 'client';
+  }
+  return 'http';
+}
+
+function shouldIgnoreHttpError(error: HttpErrorResponse): boolean {
+  return error.status >= 400 && error.status < 500;
+}
+
 export function captureClientHttpError(
   error: unknown,
   context: ClientSentryContext,
@@ -65,11 +82,18 @@ export function captureClientHttpError(
 
   const requestUrl = context.url ?? error.url ?? undefined;
   const blockedByClient = isLikelyBlockedByClient(error);
+  if (shouldIgnoreHttpError(error) && !blockedByClient) {
+    return;
+  }
+  const category = resolveHttpCategory(error);
 
   Sentry.withScope((scope) => {
     scope.setTag('platform', 'browser');
     scope.setTag('feature', context.feature);
     scope.setTag('httpStatus', String(error.status));
+    scope.setTag('errorCategory', category);
+    scope.setExtra('statusText', error.statusText);
+    scope.setExtra('httpMessage', error.message);
 
     if (requestUrl) {
       scope.setTag('url', requestUrl);
@@ -106,9 +130,14 @@ export function captureClientHttpError(
       return;
     }
 
-    Sentry.captureException(
-      error.error instanceof Error ? error.error : new Error(error.message || 'HTTP error'),
-    );
+    const exception =
+      error.error instanceof Error
+        ? error.error
+        : new Error(
+            `[HTTP ${error.status}] ${requestUrl ?? 'URL inconnue'} — ${error.message || 'HTTP error'}`,
+          );
+
+    Sentry.captureException(exception);
   });
 }
 
