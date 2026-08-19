@@ -38,7 +38,7 @@ interface AuthRequest {
 }
 
 @ApiTags('Annonces')
-@Controller('ads')
+@Controller('annonces')
 export class AdsController {
   constructor(
     private readonly adsService: AdsService,

@@ -3,6 +3,23 @@
 Toutes les versions notables de Jamarket sont documentées ici.
 Format des tags Git : `vMAJOR.MINOR.PATCH` (voir [`docs/processus-deploiement.md`](./docs/processus-deploiement.md)).
 
+## [0.3.1] — 2026-08-19
+
+Preuves correctif adblocker + monitoring client Sentry (Bloc 4 — C4.2.2 / C4.3.2). Tag Git : `v0.3.1`.
+
+### Correctif documenté
+
+- **BUG-PROD-001 / ANOM-2026-002** : routes `/api/ads` → `/api/annonces` (contournement des bloqueurs publicitaires — `ERR_BLOCKED_BY_CLIENT`)
+- Preuves de reproduction (CAP-BUG-01/02), correctif (CAP-BUG-03/04), CI/CD (CAP-CICD-01/02) et vérification post-déploiement — dossier Bloc 4
+
+### Ajouté
+
+- Intégration Sentry browser (`@sentry/angular`) : interceptor HTTP, `ErrorHandler`, tags `blocked_by_client` / `BUG-PROD-001` / `ANOM-2026-002`
+- Filtrage volontaire des `4xx` attendues pour éviter le bruit dans les Issues Sentry
+- Documentation limite connue : bloqueurs filtrent aussi `*.ingest.sentry.io` ; solution tunnel documentée
+
+---
+
 ## [0.3.0] — 2026-08-10
 
 Release d’observabilité (Bloc 4 — MCO). Tag Git prévu : `v0.3.0` (après smoke prod OK).
