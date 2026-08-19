@@ -10,6 +10,7 @@ import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { ImageProcessingService } from '../upload/image-processing.service';
+import { AuthFailureFlow, MetricsService } from '../metrics/metrics.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ChangeAdminPasswordDto } from './dto/change-admin-password.dto';
@@ -22,10 +23,11 @@ const BCRYPT_ROUNDS = 10;
 const DEFAULT_CUSTOMER_ROLE_LABEL = 'Customer';
 /** Rôle Customer en base (seed) — seuls ces comptes peuvent utiliser l’app cliente. */
 const CUSTOMER_ROLE_ID = 3;
-const INVALID_CREDENTIALS_MESSAGE =
-  "L'email ou le mot de passe est incorrect.";
-const JWT_EXPIRES_IN = (process.env.JWT_EXPIRES_IN ?? '15m') as JwtSignOptions['expiresIn'];
-const JWT_REFRESH_EXPIRES_IN = (process.env.JWT_REFRESH_EXPIRES_IN ?? '7d') as JwtSignOptions['expiresIn'];
+const INVALID_CREDENTIALS_MESSAGE = "L'email ou le mot de passe est incorrect.";
+const JWT_EXPIRES_IN = (process.env.JWT_EXPIRES_IN ??
+  '15m') as JwtSignOptions['expiresIn'];
+const JWT_REFRESH_EXPIRES_IN = (process.env.JWT_REFRESH_EXPIRES_IN ??
+  '7d') as JwtSignOptions['expiresIn'];
 
 @Injectable()
 export class AuthService {
@@ -33,79 +35,95 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly imageProcessing: ImageProcessingService,
-  ) { }
+    private readonly metrics: MetricsService,
+  ) {}
 
   async register(dto: RegisterDto) {
-    const existing = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
+    try {
+      const existing = await this.prisma.user.findUnique({
+        where: { email: dto.email },
+      });
 
-    if (existing) {
-      throw new ConflictException('Cet email est déjà utilisé');
+      if (existing) {
+        throw new ConflictException('Cet email est déjà utilisé');
+      }
+
+      const customerRole = await this.prisma.role.findFirst({
+        where: { label: DEFAULT_CUSTOMER_ROLE_LABEL },
+      });
+
+      if (!customerRole) {
+        throw new UnauthorizedException('Rôle par défaut introuvable');
+      }
+
+      const hashedPassword = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
+
+      const user = await this.prisma.user.create({
+        data: {
+          name: dto.name,
+          lastName: dto.lastName,
+          email: dto.email,
+          password: hashedPassword,
+          roleId: customerRole.id,
+        },
+        include: { role: true },
+      });
+
+      return this.buildTokens(user);
+    } catch (error) {
+      this.recordAuthFailureIfRelevant('register', error);
+      throw error;
     }
-
-    const customerRole = await this.prisma.role.findFirst({
-      where: { label: DEFAULT_CUSTOMER_ROLE_LABEL },
-    });
-
-    if (!customerRole) {
-      throw new UnauthorizedException('Rôle par défaut introuvable');
-    }
-
-    const hashedPassword = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
-
-    const user = await this.prisma.user.create({
-      data: {
-        name: dto.name,
-        lastName: dto.lastName,
-        email: dto.email,
-        password: hashedPassword,
-        roleId: customerRole.id,
-      },
-      include: { role: true },
-    });
-
-    return this.buildTokens(user);
   }
 
   async login(dto: LoginDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-      include: { role: true },
-    });
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { email: dto.email },
+        include: { role: true },
+      });
 
-    if (!user || user.deletedAt || !user.isActive) {
-      throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
+      if (!user || user.deletedAt || !user.isActive) {
+        throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
+      }
+
+      const passwordMatch = await bcrypt.compare(dto.password, user.password);
+      if (!passwordMatch) {
+        throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
+      }
+
+      this.assertClientCustomer(user);
+
+      return this.buildTokens(user);
+    } catch (error) {
+      this.recordAuthFailureIfRelevant('login', error);
+      throw error;
     }
-
-    const passwordMatch = await bcrypt.compare(dto.password, user.password);
-    if (!passwordMatch) {
-      throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
-    }
-
-    this.assertClientCustomer(user);
-
-    return this.buildTokens(user);
   }
 
   async adminLogin(dto: LoginDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-      include: { role: true },
-    });
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { email: dto.email },
+        include: { role: true },
+      });
 
-    if (!user || user.deletedAt || !user.isActive) {
-      throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
+      if (!user || user.deletedAt || !user.isActive) {
+        throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
+      }
+
+      const passwordMatch = await bcrypt.compare(dto.password, user.password);
+      if (!passwordMatch) {
+        throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
+      }
+
+      this.assertBackOfficeAccess(user);
+
+      return this.buildTokens(user);
+    } catch (error) {
+      this.recordAuthFailureIfRelevant('admin_login', error);
+      throw error;
     }
-
-    const passwordMatch = await bcrypt.compare(dto.password, user.password);
-    if (!passwordMatch) {
-      throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
-    }
-
-    this.assertBackOfficeAccess(user);
-
-    return this.buildTokens(user);
   }
 
   async getAdminProfile(userId: number) {
@@ -160,7 +178,10 @@ export class AuthService {
 
     this.assertBackOfficeAccess(user);
 
-    const passwordMatch = await bcrypt.compare(dto.currentPassword, user.password);
+    const passwordMatch = await bcrypt.compare(
+      dto.currentPassword,
+      user.password,
+    );
     if (!passwordMatch) {
       throw new BadRequestException('Le mot de passe actuel est incorrect');
     }
@@ -192,13 +213,13 @@ export class AuthService {
     this.assertBackOfficeAccess(user);
 
     if (user.avatarUrl) {
-      const oldPath = this.imageProcessing.urlToAbsolutePath(user.avatarUrl);
-      if (oldPath) {
-        await this.imageProcessing.deleteFile(oldPath);
-      }
+      await this.imageProcessing.deleteByUrl(user.avatarUrl);
     }
 
-    const processed = await this.imageProcessing.processAndSaveUserAvatar(userId, file);
+    const processed = await this.imageProcessing.processAndSaveUserAvatar(
+      userId,
+      file,
+    );
 
     return this.prisma.user.update({
       where: { id: userId },
@@ -221,10 +242,7 @@ export class AuthService {
     this.assertBackOfficeAccess(user);
 
     if (user.avatarUrl) {
-      const oldPath = this.imageProcessing.urlToAbsolutePath(user.avatarUrl);
-      if (oldPath) {
-        await this.imageProcessing.deleteFile(oldPath);
-      }
+      await this.imageProcessing.deleteByUrl(user.avatarUrl);
     }
 
     return this.prisma.user.update({
@@ -356,7 +374,9 @@ export class AuthService {
     return this.buildTokens(user);
   }
 
-  private assertBackOfficeAccess(user: { role: { rights: RightEnum[] } }): void {
+  private assertBackOfficeAccess(user: {
+    role: { rights: RightEnum[] };
+  }): void {
     const canAccessBackOffice =
       user.role.rights.includes(RightEnum.ADMIN) ||
       user.role.rights.includes(RightEnum.CREATE_AD);
@@ -365,6 +385,19 @@ export class AuthService {
       throw new ForbiddenException(
         "Vous n'avez pas les droits d'accès au back office.",
       );
+    }
+  }
+
+  private recordAuthFailureIfRelevant(
+    flow: AuthFailureFlow,
+    error: unknown,
+  ): void {
+    if (
+      error instanceof UnauthorizedException ||
+      error instanceof ConflictException ||
+      error instanceof ForbiddenException
+    ) {
+      this.metrics.recordAuthFailure(flow);
     }
   }
 

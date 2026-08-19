@@ -43,14 +43,17 @@ export class ChatController {
       'avec le vendeur de l’annonce (adminId = sellerId), ou réouvre le fil existant.',
   })
   @ApiResponse({ status: 201, description: 'Conversation créée ou réouverte' })
-  @ApiResponse({ status: 400, description: 'Annonce sans vendeur ou message invalide' })
+  @ApiResponse({
+    status: 400,
+    description: 'Annonce sans vendeur ou message invalide',
+  })
   @ApiResponse({ status: 401, description: 'Non authentifié' })
-  @ApiResponse({ status: 403, description: 'Seuls les clients peuvent créer une conversation' })
+  @ApiResponse({
+    status: 403,
+    description: 'Seuls les clients peuvent créer une conversation',
+  })
   @ApiResponse({ status: 404, description: 'Annonce introuvable' })
-  create(
-    @Body() dto: CreateConversationDto,
-    @Request() req: AuthRequest,
-  ) {
+  create(@Body() dto: CreateConversationDto, @Request() req: AuthRequest) {
     return this.chatService.createConversation(req.user, dto);
   }
 

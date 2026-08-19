@@ -1,38 +1,36 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import { extensionFromMime, UPLOAD_DIR, UPLOAD_URL_PREFIX } from './upload.constants';
+import { CloudinaryService } from './cloudinary.service';
 
 export interface ProcessedImage {
   filename: string;
   url: string;
-  absolutePath: string;
+  publicId: string;
   sizeBytes: number;
 }
 
 @Injectable()
 export class ImageProcessingService {
+  constructor(private readonly cloudinary: CloudinaryService) {}
+
   async processAndSave(
     vehiculeId: number,
     file: Express.Multer.File,
   ): Promise<ProcessedImage> {
-    const vehiculeDir = path.join(UPLOAD_DIR, 'vehicules', String(vehiculeId));
-    await fs.mkdir(vehiculeDir, { recursive: true });
+    const publicId = randomUUID();
+    const folder = `jamarket/vehicules/${vehiculeId}`;
 
-    const ext = extensionFromMime(file.mimetype, file.originalname);
-    const filename = `${randomUUID()}${ext}`;
-    const absolutePath = path.join(vehiculeDir, filename);
-
-    await fs.writeFile(absolutePath, file.buffer);
-
-    const url = `${UPLOAD_URL_PREFIX}/vehicules/${vehiculeId}/${filename}`;
+    const uploaded = await this.cloudinary.uploadBuffer(
+      file.buffer,
+      folder,
+      publicId,
+    );
 
     return {
-      filename,
-      url,
-      absolutePath,
-      sizeBytes: file.size,
+      filename: publicId,
+      url: uploaded.secureUrl,
+      publicId: uploaded.publicId,
+      sizeBytes: uploaded.bytes,
     };
   }
 
@@ -40,39 +38,27 @@ export class ImageProcessingService {
     userId: number,
     file: Express.Multer.File,
   ): Promise<ProcessedImage> {
-    const userDir = path.join(UPLOAD_DIR, 'users', String(userId));
-    await fs.mkdir(userDir, { recursive: true });
+    const publicId = randomUUID();
+    const folder = `jamarket/users/${userId}`;
 
-    const ext = extensionFromMime(file.mimetype, file.originalname);
-    const filename = `${randomUUID()}${ext}`;
-    const absolutePath = path.join(userDir, filename);
-
-    await fs.writeFile(absolutePath, file.buffer);
-
-    const url = `${UPLOAD_URL_PREFIX}/users/${userId}/${filename}`;
+    const uploaded = await this.cloudinary.uploadBuffer(
+      file.buffer,
+      folder,
+      publicId,
+    );
 
     return {
-      filename,
-      url,
-      absolutePath,
-      sizeBytes: file.size,
+      filename: publicId,
+      url: uploaded.secureUrl,
+      publicId: uploaded.publicId,
+      sizeBytes: uploaded.bytes,
     };
   }
 
-  async deleteFile(absolutePath: string): Promise<void> {
-    try {
-      await fs.unlink(absolutePath);
-    } catch {
-      // Fichier déjà absent — ignoré
+  async deleteByUrl(url: string): Promise<void> {
+    const publicId = this.cloudinary.extractPublicIdFromUrl(url);
+    if (publicId) {
+      await this.cloudinary.destroy(publicId);
     }
-  }
-
-  urlToAbsolutePath(url: string): string | null {
-    const prefix = `${UPLOAD_URL_PREFIX}/`;
-    if (!url.startsWith(prefix)) {
-      return null;
-    }
-    const relative = url.slice(prefix.length);
-    return path.join(UPLOAD_DIR, relative);
   }
 }

@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { RightEnum } from '../../generated/prisma/client';
+import { AdsMutationAction, MetricsService } from '../metrics/metrics.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAdDto } from './dto/create-ad.dto';
 import { UpdateAdDto } from './dto/update-ad.dto';
@@ -24,7 +25,10 @@ const AD_INCLUDE = {
 
 @Injectable()
 export class AdsService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly metrics: MetricsService,
+  ) {}
 
   async findOne(id: number) {
     const ad = await this.prisma.ad.findFirst({
@@ -85,47 +89,65 @@ export class AdsService {
   }
 
   async create(dto: CreateAdDto, sellerId: number) {
-    const vehicule = await this.prisma.vehicule.findUnique({
-      where: { id: dto.vehiculeId },
-    });
+    try {
+      const vehicule = await this.prisma.vehicule.findUnique({
+        where: { id: dto.vehiculeId },
+      });
 
-    if (!vehicule) {
-      throw new NotFoundException(`Véhicule #${dto.vehiculeId} introuvable`);
+      if (!vehicule) {
+        throw new NotFoundException(`Véhicule #${dto.vehiculeId} introuvable`);
+      }
+
+      const existingAd = await this.prisma.ad.findUnique({
+        where: { vehiculeId: dto.vehiculeId },
+      });
+
+      if (existingAd) {
+        throw new ConflictException(
+          'Ce véhicule est déjà associé à une annonce',
+        );
+      }
+
+      const created = await this.prisma.ad.create({
+        data: {
+          label: dto.label,
+          description: dto.description,
+          price: dto.price,
+          vehiculeId: dto.vehiculeId,
+          sellerId,
+          isActive: dto.isActive ?? true,
+        },
+        include: AD_INCLUDE,
+      });
+      this.metrics.recordAdsMutation('create', 'success');
+      return created;
+    } catch (error) {
+      this.metrics.recordAdsMutation('create', 'error');
+      throw error;
     }
+  }
 
-    const existingAd = await this.prisma.ad.findUnique({
-      where: { vehiculeId: dto.vehiculeId },
-    });
+  async update(
+    id: number,
+    dto: UpdateAdDto,
+    requestUser: { id: number; role: { rights: RightEnum[] } },
+  ) {
+    return this.runAdsMutation('update', async () => {
+      await this.findOne(id);
+      this.assertCanManageAd(requestUser);
 
-    if (existingAd) {
-      throw new ConflictException('Ce véhicule est déjà associé à une annonce');
-    }
-
-    return this.prisma.ad.create({
-      data: {
-        label: dto.label,
-        description: dto.description,
-        price: dto.price,
-        vehiculeId: dto.vehiculeId,
-        sellerId,
-        isActive: dto.isActive ?? true,
-      },
-      include: AD_INCLUDE,
+      return this.prisma.ad.update({
+        where: { id },
+        data: { ...dto },
+        include: AD_INCLUDE,
+      });
     });
   }
 
-  async update(id: number, dto: UpdateAdDto, requestUser: { id: number; role: { rights: RightEnum[] } }) {
-    await this.findOne(id);
-    this.assertCanManageAd(requestUser);
-
-    return this.prisma.ad.update({
-      where: { id },
-      data: { ...dto },
-      include: AD_INCLUDE,
-    });
-  }
-
-  async remove(id: number, requestUser: { id: number; role: { rights: RightEnum[] } }) {
+  async remove(
+    id: number,
+    requestUser: { id: number; role: { rights: RightEnum[] } },
+  ) {
     await this.findOne(id);
     this.assertCanManageAd(requestUser);
 
@@ -135,33 +157,59 @@ export class AdsService {
     });
   }
 
-  async hardRemove(id: number, requestUser: { id: number; role: { rights: RightEnum[] } }) {
+  async hardRemove(
+    id: number,
+    requestUser: { id: number; role: { rights: RightEnum[] } },
+  ) {
     const ad = await this.findOne(id);
 
     const isAdmin = requestUser.role.rights.includes(RightEnum.SUPER_ADMIN);
     if (!isAdmin) {
-      throw new ForbiddenException('Seul un super admin peut supprimer définitivement une annonce');
+      throw new ForbiddenException(
+        'Seul un super admin peut supprimer définitivement une annonce',
+      );
     }
 
     await this.prisma.ad.delete({ where: { id: ad.id } });
   }
 
-  async markAsSold(id: number, requestUser: { id: number; role: { rights: RightEnum[] } }) {
-    await this.findOne(id);
-    this.assertCanManageAd(requestUser);
+  async markAsSold(
+    id: number,
+    requestUser: { id: number; role: { rights: RightEnum[] } },
+  ) {
+    return this.runAdsMutation('sold', async () => {
+      await this.findOne(id);
+      this.assertCanManageAd(requestUser);
 
-    return this.prisma.ad.update({
-      where: { id },
-      data: { isSold: true, isActive: false },
-      include: AD_INCLUDE,
+      return this.prisma.ad.update({
+        where: { id },
+        data: { isSold: true, isActive: false },
+        include: AD_INCLUDE,
+      });
     });
+  }
+
+  private async runAdsMutation<T>(
+    action: AdsMutationAction,
+    fn: () => Promise<T>,
+  ): Promise<T> {
+    try {
+      const result = await fn();
+      this.metrics.recordAdsMutation(action, 'success');
+      return result;
+    } catch (error) {
+      this.metrics.recordAdsMutation(action, 'error');
+      throw error;
+    }
   }
 
   private assertCanManageAd(user: { role: { rights: RightEnum[] } }) {
     const canManageGarageAds = user.role.rights.includes(RightEnum.CREATE_AD);
 
     if (!canManageGarageAds) {
-      throw new ForbiddenException("Vous n'êtes pas autorisé à modifier cette annonce");
+      throw new ForbiddenException(
+        "Vous n'êtes pas autorisé à modifier cette annonce",
+      );
     }
   }
 }

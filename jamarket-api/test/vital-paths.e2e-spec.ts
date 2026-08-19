@@ -4,11 +4,7 @@
  */
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PrismaService } from 'src/prisma/prisma.service';
-import {
-  apiRequest,
-  createE2eApp,
-  type E2eContext,
-} from './helpers/e2e-app';
+import { apiRequest, createE2eApp, type E2eContext } from './helpers/e2e-app';
 
 const SEED_PASSWORD = 'Password123!';
 const CLIENT_EMAIL = 'client@example.fr';
@@ -31,7 +27,9 @@ describe('Parcours vitaux (e2e)', () => {
       orderBy: { id: 'asc' },
     });
     if (!ad) {
-      throw new Error('Seed requis : aucune annonce active dans jamarket_test_db');
+      throw new Error(
+        'Seed requis : aucune annonce active dans jamarket_test_db',
+      );
     }
     publicAdId = ad.id;
 
@@ -53,9 +51,13 @@ describe('Parcours vitaux (e2e)', () => {
 
   afterAll(async () => {
     if (createdAdId) {
-      await prisma.ad.deleteMany({ where: { id: createdAdId } }).catch(() => undefined);
+      await prisma.ad
+        .deleteMany({ where: { id: createdAdId } })
+        .catch(() => undefined);
     }
-    await prisma.vehicule.deleteMany({ where: { id: freeVehiculeId } }).catch(() => undefined);
+    await prisma.vehicule
+      .deleteMany({ where: { id: freeVehiculeId } })
+      .catch(() => undefined);
     await ctx.app.close();
   });
 
@@ -107,7 +109,7 @@ describe('Parcours vitaux (e2e)', () => {
     const search = await apiRequest(
       ctx.baseUrl,
       'GET',
-      '/ads?brand=1&priceMin=1000',
+      '/annonces?brand=1&priceMin=1000',
     );
     expect(search.status).toBe(200);
     const payload = search.json as {
@@ -122,7 +124,11 @@ describe('Parcours vitaux (e2e)', () => {
   });
 
   it('consultation fiche annonce', async () => {
-    const detail = await apiRequest(ctx.baseUrl, 'GET', `/ads/${publicAdId}`);
+    const detail = await apiRequest(
+      ctx.baseUrl,
+      'GET',
+      `/annonces/${publicAdId}`,
+    );
     expect(detail.status).toBe(200);
     expect(detail.json).toMatchObject({
       id: publicAdId,
@@ -138,7 +144,7 @@ describe('Parcours vitaux (e2e)', () => {
     expect(login.status).toBe(200);
     const token = (login.json as { accessToken: string }).accessToken;
 
-    const created = await apiRequest(ctx.baseUrl, 'POST', '/ads', {
+    const created = await apiRequest(ctx.baseUrl, 'POST', '/annonces', {
       token,
       body: {
         label: 'E2E Annonce test Vitest',
@@ -152,21 +158,31 @@ describe('Parcours vitaux (e2e)', () => {
     createdAdId = (created.json as { id: number }).id;
     expect(createdAdId).toEqual(expect.any(Number));
 
-    const updated = await apiRequest(ctx.baseUrl, 'PATCH', `/ads/${createdAdId}`, {
-      token,
-      body: { price: 12222 },
-    });
+    const updated = await apiRequest(
+      ctx.baseUrl,
+      'PATCH',
+      `/annonces/${createdAdId}`,
+      {
+        token,
+        body: { price: 12222 },
+      },
+    );
     expect(updated.status).toBe(200);
     expect(updated.json).toMatchObject({ id: createdAdId, price: 12222 });
 
-    const removed = await apiRequest(ctx.baseUrl, 'DELETE', `/ads/${createdAdId}`, {
-      token,
-    });
+    const removed = await apiRequest(
+      ctx.baseUrl,
+      'DELETE',
+      `/annonces/${createdAdId}`,
+      {
+        token,
+      },
+    );
     expect(removed.status).toBe(204);
   });
 
   it('accès refusé sans token / droits insuffisants', async () => {
-    const withoutToken = await apiRequest(ctx.baseUrl, 'POST', '/ads', {
+    const withoutToken = await apiRequest(ctx.baseUrl, 'POST', '/annonces', {
       body: {
         label: 'Interdit',
         description: 'Sans token',
@@ -180,9 +196,10 @@ describe('Parcours vitaux (e2e)', () => {
       body: { email: CLIENT_EMAIL, password: SEED_PASSWORD },
     });
     expect(clientLogin.status).toBe(200);
-    const clientToken = (clientLogin.json as { accessToken: string }).accessToken;
+    const clientToken = (clientLogin.json as { accessToken: string })
+      .accessToken;
 
-    const forbidden = await apiRequest(ctx.baseUrl, 'POST', '/ads', {
+    const forbidden = await apiRequest(ctx.baseUrl, 'POST', '/annonces', {
       token: clientToken,
       body: {
         label: 'Interdit client',

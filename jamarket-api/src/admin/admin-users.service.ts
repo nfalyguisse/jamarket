@@ -29,7 +29,8 @@ const USER_SELECT = {
 
 const BCRYPT_ROUNDS = 10;
 const TEMP_PASSWORD_LENGTH = 8;
-const TEMP_PASSWORD_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+const TEMP_PASSWORD_CHARS =
+  'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
 
 @Injectable()
 export class AdminUsersService {
@@ -39,7 +40,14 @@ export class AdminUsersService {
   ) {}
 
   async findAll(filters: FilterUsersDto) {
-    const { search, roleId, garageOnly, isActive, page = 1, limit = 20 } = filters;
+    const {
+      search,
+      roleId,
+      garageOnly,
+      isActive,
+      page = 1,
+      limit = 20,
+    } = filters;
     const skip = (page - 1) * limit;
     const garageRoleIds = garageOnly
       ? await this.adminRolesService.getGarageRoleIds()
@@ -138,10 +146,12 @@ export class AdminUsersService {
     this.assertIsSuperAdmin(requestUser);
 
     if (targetId === requestUser.id) {
-      throw new BadRequestException('Vous ne pouvez pas désactiver votre propre compte');
+      throw new BadRequestException(
+        'Vous ne pouvez pas désactiver votre propre compte',
+      );
     }
 
-    const user = await this.findActiveUser(targetId);
+    await this.findActiveUser(targetId);
 
     return this.prisma.user.update({
       where: { id: targetId },
@@ -158,7 +168,9 @@ export class AdminUsersService {
     this.assertIsSuperAdmin(requestUser);
 
     if (targetId === requestUser.id) {
-      throw new BadRequestException('Vous ne pouvez pas modifier votre propre rôle');
+      throw new BadRequestException(
+        'Vous ne pouvez pas modifier votre propre rôle',
+      );
     }
 
     const user = await this.findActiveUser(targetId);
@@ -228,7 +240,9 @@ export class AdminUsersService {
 
   private assertIsSuperAdmin(requestUser: { role: { rights: RightEnum[] } }) {
     if (!requestUser.role.rights.includes(RightEnum.SUPER_ADMIN)) {
-      throw new ForbiddenException('Seul un super administrateur peut gérer les utilisateurs');
+      throw new ForbiddenException(
+        'Seul un super administrateur peut gérer les utilisateurs',
+      );
     }
   }
 

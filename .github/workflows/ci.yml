@@ -1,0 +1,86 @@
+# Intégration continue Jamarket (C2.1.2)
+# Séquence : checkout → install → lint → build → Vitest → rapport
+name: CI
+
+on:
+  push:
+    branches: [main, dev, production]
+  pull_request:
+    branches: [main, dev, production]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api:
+    name: API (lint · build · Vitest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: jamarket-api
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: jamarket-api/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+        env:
+          # prisma generate n'ouvre pas de connexion ; URL factice suffisante
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/jamarket_ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Unit tests (Vitest)
+        run: npm run test:cov
+
+      - name: Upload Vitest coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vitest-coverage-api
+          path: jamarket-api/coverage
+          if-no-files-found: ignore
+          retention-days: 14
+
+  client:
+    name: Client (install · build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: jamarket-client
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: jamarket-client/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          API_URL: https://example.com/api
+          CDN_URL: https://example.com

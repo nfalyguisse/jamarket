@@ -1,5 +1,12 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { ArrayMinSize, IsArray, IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsEnum,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 import { RightEnum } from '../../../generated/prisma/client';
 
 export class UpdateRoleDto {
@@ -10,7 +17,9 @@ export class UpdateRoleDto {
   })
   @IsString()
   @IsOptional()
-  @MaxLength(80, { message: 'Le nom du rôle ne peut pas dépasser 80 caractères' })
+  @MaxLength(80, {
+    message: 'Le nom du rôle ne peut pas dépasser 80 caractères',
+  })
   label?: string;
 
   @ApiPropertyOptional({

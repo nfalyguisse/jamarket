@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty, IsPositive, IsString, MaxLength } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsPositive,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateModelDto {
   @ApiProperty({
@@ -9,7 +15,9 @@ export class CreateModelDto {
   })
   @IsString()
   @IsNotEmpty({ message: 'Le nom du modèle est obligatoire' })
-  @MaxLength(80, { message: 'Le nom du modèle ne peut pas dépasser 80 caractères' })
+  @MaxLength(80, {
+    message: 'Le nom du modèle ne peut pas dépasser 80 caractères',
+  })
   label: string;
 
   @ApiProperty({

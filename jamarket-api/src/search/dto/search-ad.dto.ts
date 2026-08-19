@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
   IsEnum,
@@ -47,7 +47,10 @@ export class SearchAdDto {
   @Type(() => Number)
   priceMax?: number;
 
-  @ApiPropertyOptional({ description: 'Kilométrage exact (filtre legacy)', example: 80000 })
+  @ApiPropertyOptional({
+    description: 'Kilométrage exact (filtre legacy)',
+    example: 80000,
+  })
   @IsInt()
   @Min(0)
   @IsOptional()
@@ -80,7 +83,10 @@ export class SearchAdDto {
   @IsOptional()
   color?: string;
 
-  @ApiPropertyOptional({ description: 'Identifiant du type de véhicule', example: 2 })
+  @ApiPropertyOptional({
+    description: 'Identifiant du type de véhicule',
+    example: 2,
+  })
   @IsInt()
   @Min(1)
   @IsOptional()
@@ -118,14 +124,22 @@ export class SearchAdDto {
   @IsOptional()
   sort?: SearchSort;
 
-  @ApiPropertyOptional({ description: 'Numéro de page (pagination)', example: 1, default: 1 })
+  @ApiPropertyOptional({
+    description: 'Numéro de page (pagination)',
+    example: 1,
+    default: 1,
+  })
   @IsInt()
   @Min(1)
   @IsOptional()
   @Transform(({ value }: { value: string }) => parseInt(value, 10))
   page?: number;
 
-  @ApiPropertyOptional({ description: 'Nombre d’éléments par page', example: 12, default: 12 })
+  @ApiPropertyOptional({
+    description: 'Nombre d’éléments par page',
+    example: 12,
+    default: 12,
+  })
   @IsInt()
   @Min(1)
   @IsOptional()
@@ -133,21 +147,30 @@ export class SearchAdDto {
   limit?: number;
 
   /** Alias rétrocompatibilité */
-  @ApiPropertyOptional({ description: 'Alias de brand (rétrocompatibilité)', example: 1 })
+  @ApiPropertyOptional({
+    description: 'Alias de brand (rétrocompatibilité)',
+    example: 1,
+  })
   @IsInt()
   @Min(1)
   @IsOptional()
   @Type(() => Number)
   brandId?: number;
 
-  @ApiPropertyOptional({ description: 'Alias de model (rétrocompatibilité)', example: 3 })
+  @ApiPropertyOptional({
+    description: 'Alias de model (rétrocompatibilité)',
+    example: 3,
+  })
   @IsInt()
   @Min(1)
   @IsOptional()
   @Type(() => Number)
   modelId?: number;
 
-  @ApiPropertyOptional({ description: 'Kilométrage maximum (alias)', example: 120000 })
+  @ApiPropertyOptional({
+    description: 'Kilométrage maximum (alias)',
+    example: 120000,
+  })
   @IsInt()
   @Min(0)
   @IsOptional()

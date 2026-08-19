@@ -118,7 +118,11 @@ export class AdsController {
       'Retourne la fiche détaillée d’une annonce (prix, description, véhicule, images). ' +
       'Accessible sans authentification pour le parcours acheteur.',
   })
-  @ApiParam({ name: 'id', description: 'Identifiant de l’annonce', example: 12 })
+  @ApiParam({
+    name: 'id',
+    description: 'Identifiant de l’annonce',
+    example: 12,
+  })
   @ApiResponse({ status: 200, description: 'Détail de l’annonce' })
   @ApiResponse({ status: 404, description: 'Annonce introuvable' })
   findOne(@Param('id', ParseIntPipe) id: number) {
@@ -155,7 +159,11 @@ export class AdsController {
       'Met à jour partiellement titre, description, prix ou statuts (actif / vendu). ' +
       'L’auteur ou un admin autorisé peut modifier ; sinon 403.',
   })
-  @ApiParam({ name: 'id', description: 'Identifiant de l’annonce', example: 12 })
+  @ApiParam({
+    name: 'id',
+    description: 'Identifiant de l’annonce',
+    example: 12,
+  })
   @ApiResponse({ status: 200, description: 'Annonce mise à jour' })
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
@@ -178,7 +186,11 @@ export class AdsController {
       'Marque l’annonce comme supprimée (soft-delete) sans effacer définitivement les données. ' +
       'Elle disparaît du catalogue public mais reste traçable en base.',
   })
-  @ApiParam({ name: 'id', description: 'Identifiant de l’annonce', example: 12 })
+  @ApiParam({
+    name: 'id',
+    description: 'Identifiant de l’annonce',
+    example: 12,
+  })
   @ApiResponse({ status: 204, description: 'Annonce soft-deleted' })
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
@@ -198,12 +210,19 @@ export class AdsController {
       'Efface définitivement l’annonce en base. Réservé au SUPER_ADMIN. ' +
       'À utiliser avec précaution (irréversible).',
   })
-  @ApiParam({ name: 'id', description: 'Identifiant de l’annonce', example: 12 })
+  @ApiParam({
+    name: 'id',
+    description: 'Identifiant de l’annonce',
+    example: 12,
+  })
   @ApiResponse({ status: 204, description: 'Annonce supprimée définitivement' })
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Droit SUPER_ADMIN manquant' })
   @ApiResponse({ status: 404, description: 'Annonce introuvable' })
-  hardRemove(@Param('id', ParseIntPipe) id: number, @Request() req: AuthRequest) {
+  hardRemove(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: AuthRequest,
+  ) {
     return this.adsService.hardRemove(id, req.user);
   }
 
@@ -216,12 +235,19 @@ export class AdsController {
       'Passe l’annonce en statut vendu pour le dashboard stock du garage. ' +
       'L’annonce quitte typiquement le catalogue « Live ».',
   })
-  @ApiParam({ name: 'id', description: 'Identifiant de l’annonce', example: 12 })
+  @ApiParam({
+    name: 'id',
+    description: 'Identifiant de l’annonce',
+    example: 12,
+  })
   @ApiResponse({ status: 200, description: 'Annonce marquée vendue' })
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
   @ApiResponse({ status: 404, description: 'Annonce introuvable' })
-  markAsSold(@Param('id', ParseIntPipe) id: number, @Request() req: AuthRequest) {
+  markAsSold(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: AuthRequest,
+  ) {
     return this.adsService.markAsSold(id, req.user);
   }
 }

@@ -2,8 +2,8 @@ import { environment } from '../../environments/environment';
 
 const API_ORIGIN = environment.apiUrl.replace(/\/api\/?$/, '');
 
-/** Temporaire : médias distants désactivés (CDN / Render). Remettre à `false` pour réactiver. */
-export const DISABLE_REMOTE_MEDIA = true;
+/** Médias distants (Cloudinary, Unsplash seed) activés. */
+export const DISABLE_REMOTE_MEDIA = false;
 
 export const VEHICLE_IMAGE_PLACEHOLDER = '/assets/images/vehicle-placeholder.svg';
 

@@ -36,7 +36,8 @@ export class ChatSocketService {
 
     this.disconnect();
 
-    const wsUrl = environment.cdnUrl.replace(/\/$/, '');
+    // Origine de l'API (sans /api) — pas CDN_URL, qui peut pointer vers un stockage objet.
+    const wsUrl = environment.apiUrl.replace(/\/api\/?$/, '').replace(/\/$/, '');
 
     this.socket = io(`${wsUrl}/chat`, {
       auth: { token },

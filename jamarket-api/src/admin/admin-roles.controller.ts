@@ -119,7 +119,10 @@ export class AdminRolesController {
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Droit SUPER_ADMIN manquant' })
   @ApiResponse({ status: 404, description: 'Rôle introuvable' })
-  @ApiResponse({ status: 409, description: 'Rôle encore assigné à des utilisateurs' })
+  @ApiResponse({
+    status: 409,
+    description: 'Rôle encore assigné à des utilisateurs',
+  })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.adminRolesService.remove(id);
   }

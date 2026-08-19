@@ -70,7 +70,10 @@ export class AuthController {
   })
   @ApiResponse({ status: 200, description: 'Tokens JWT délivrés' })
   @ApiResponse({ status: 400, description: 'Données invalides' })
-  @ApiResponse({ status: 401, description: 'Identifiants incorrects ou accès non autorisé' })
+  @ApiResponse({
+    status: 401,
+    description: 'Identifiants incorrects ou accès non autorisé',
+  })
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
@@ -86,7 +89,10 @@ export class AuthController {
       'Utilisé par le dashboard vendeur et la console super-admin.',
   })
   @ApiResponse({ status: 200, description: 'Tokens JWT back-office délivrés' })
-  @ApiResponse({ status: 401, description: 'Identifiants incorrects ou droits insuffisants' })
+  @ApiResponse({
+    status: 401,
+    description: 'Identifiants incorrects ou droits insuffisants',
+  })
   adminLogin(@Body() dto: LoginDto) {
     return this.authService.adminLogin(dto);
   }
@@ -138,7 +144,10 @@ export class AuthController {
   })
   @ApiResponse({ status: 200, description: 'Mot de passe changé' })
   @ApiResponse({ status: 400, description: 'Données invalides' })
-  @ApiResponse({ status: 401, description: 'Mot de passe actuel incorrect ou non authentifié' })
+  @ApiResponse({
+    status: 401,
+    description: 'Mot de passe actuel incorrect ou non authentifié',
+  })
   changeAdminPassword(
     @Request() req: { user: { id: number } },
     @Body() dto: ChangeAdminPasswordDto,

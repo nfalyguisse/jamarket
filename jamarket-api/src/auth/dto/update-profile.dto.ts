@@ -8,7 +8,10 @@ export class UpdateProfileDto {
   @IsOptional()
   name?: string;
 
-  @ApiPropertyOptional({ description: 'Nouveau nom de famille', example: 'Martin' })
+  @ApiPropertyOptional({
+    description: 'Nouveau nom de famille',
+    example: 'Martin',
+  })
   @IsString()
   @IsNotEmpty({ message: 'Le nom est obligatoire' })
   @IsOptional()
@@ -21,7 +24,9 @@ export class UpdateProfileDto {
     format: 'password',
   })
   @IsString()
-  @MinLength(8, { message: 'Le mot de passe doit contenir au moins 8 caractères' })
+  @MinLength(8, {
+    message: 'Le mot de passe doit contenir au moins 8 caractères',
+  })
   @IsOptional()
   password?: string;
 }
