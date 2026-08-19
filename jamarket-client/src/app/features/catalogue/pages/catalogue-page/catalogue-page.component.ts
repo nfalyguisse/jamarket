@@ -116,6 +116,9 @@ export class CataloguePageComponent implements OnInit {
       untracked(() => this.loadFilterOptions(brandId ?? undefined));
     });
   }
+  public throwTestError(): void {
+    throw new Error("Sentry Test Error");
+  }
 
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) {

@@ -8,7 +8,7 @@ import { type ApiAdResponse, mapAdToDetail } from './ad-api.mapper';
 @Injectable({ providedIn: 'root' })
 export class AdDetailApiService {
   private readonly http = inject(HttpClient);
-  private readonly adsUrl = `${environment.apiUrl}/annonces`;
+  private readonly adsUrl = `${environment.apiUrl}/ads`;
 
   getById(id: string): Observable<AdDetail> {
     return this.http.get<ApiAdResponse>(`${this.adsUrl}/${id}`).pipe(

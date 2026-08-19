@@ -46,12 +46,17 @@ function escapeTsString(value) {
   return value.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
 
-function writeEnvironment(fileName, { production, apiUrl, cdnUrl }) {
+function writeEnvironment(fileName, { production, apiUrl, cdnUrl, sentryDsn }) {
+  const sentryDsnField = sentryDsn
+    ? `sentryDsn: '${escapeTsString(sentryDsn)}',`
+    : 'sentryDsn: undefined,';
+
   const content = `/** Fichier généré par scripts/generate-env.mjs — ne pas éditer ni committer. */
 export const environment = {
   production: ${production},
   apiUrl: '${escapeTsString(apiUrl)}',
   cdnUrl: '${escapeTsString(cdnUrl)}',
+  ${sentryDsnField}
 };
 `;
   writeFileSync(join(outDir, fileName), content, 'utf8');
@@ -70,6 +75,8 @@ const stagingApiUrl =
 const stagingCdnUrl =
   pick('STAGING_CDN_URL', 'CDN_URL', 'NG_APP_CDN_URL') ?? 'http://localhost:3000';
 
+const sentryDsn = pick('SENTRY_DSN', 'NG_APP_SENTRY_DSN') ?? '';
+
 const onVercel = process.env.VERCEL === '1';
 const missingProd = !pick('API_URL', 'NG_APP_API_URL') || !pick('CDN_URL', 'NG_APP_CDN_URL');
 
@@ -80,28 +87,35 @@ if (onVercel && missingProd) {
   process.exit(1);
 }
 
+const envPayload = { sentryDsn };
+
 writeEnvironment('environment.ts', {
   production: false,
   apiUrl: devApiUrl,
   cdnUrl: devCdnUrl,
+  ...envPayload,
 });
 writeEnvironment('environment.development.ts', {
   production: false,
   apiUrl: devApiUrl,
   cdnUrl: devCdnUrl,
+  ...envPayload,
 });
 writeEnvironment('environment.staging.ts', {
   production: false,
   apiUrl: stagingApiUrl,
   cdnUrl: stagingCdnUrl,
+  ...envPayload,
 });
 writeEnvironment('environment.production.ts', {
   production: true,
   apiUrl: prodApiUrl,
   cdnUrl: prodCdnUrl,
+  ...envPayload,
 });
 
 console.log('[generate-env] Fichiers d’environnement générés dans src/environments/');
 console.log(`  development → ${devApiUrl}`);
 console.log(`  staging     → ${stagingApiUrl}`);
 console.log(`  production  → ${prodApiUrl}`);
+console.log(`  sentryDsn   → ${sentryDsn ? '(configuré)' : '(absent — no-op)'}`);
