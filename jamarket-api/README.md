@@ -1,73 +1,139 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Jamarket API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API NestJS de **Jamarket Auto** — plateforme d’annonces de véhicules d’occasion pour un garage.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Déployée en production sur **Render** (`https://jamarket-api.onrender.com`).  
+Fait partie d’un **monorepo Git** avec le client Angular (`jamarket-client`).
 
-## Description
+## Stack
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+
+| Couche        | Techno                                              |
+| ------------- | --------------------------------------------------- |
+| Framework     | NestJS 10                                           |
+| ORM / BDD     | Prisma 7 + PostgreSQL                               |
+| Auth          | JWT (access + refresh) + Passport                   |
+| Temps réel    | Socket.IO (`/chat`)                                 |
+| Médias        | Cloudinary                                          |
+| Observabilité | Prometheus (`prom-client`), Sentry (`@sentry/node`) |
+| Docs API      | Swagger                                             |
+| Tests         | Vitest                                              |
+
+
+
+
+## Prérequis
+
+- Node.js 20+
+- PostgreSQL local (ou une URL External Render)
+- Compte Cloudinary (uploads)
+
+
 
 ## Installation
 
 ```bash
-$ npm install
+cd jamarket-api
+cp .env.example .env
+# Éditer .env (DATABASE_URL, JWT_*, Cloudinary, seed…)
+
+npm install
+npm run prisma:generate
+npm run prisma:migrate
+npm run prisma:seed
 ```
 
-## Running the app
+
+
+## Démarrage
 
 ```bash
-# development
-$ npm run start
+# Développement (watch)
+npm run start:dev
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+# Production (après build)
+npm run build
+npm run start:prod
 ```
 
-## Test
+L’API écoute par défaut sur `http://localhost:3000` avec le préfixe global `/api`.  
+Swagger : `http://localhost:3000/api` (selon config Swagger du projet).
 
-```bash
-# unit tests
-$ npm run test
+## Scripts utiles
 
-# e2e tests
-$ npm run test:e2e
 
-# test coverage
-$ npm run test:cov
-```
+| Script                   | Description                                  |
+| ------------------------ | -------------------------------------------- |
+| `npm run start:dev`      | API en mode watch                            |
+| `npm run build`          | Compilation Nest                             |
+| `npm run lint`           | ESLint                                       |
+| `npm run test`           | Tests unitaires Vitest                       |
+| `npm run test:e2e`       | Tests e2e Vitest                             |
+| `npm run audit:deps`     | `npm audit --omit=dev` (dépendances runtime) |
+| `npm run prisma:migrate` | Migrations en dev                            |
+| `npm run prisma:deploy`  | `migrate deploy` + seed (Render pre-deploy)  |
+| `npm run prisma:seed`    | Seed (rôles, catalogue, admin, démo)         |
+| `npm run prisma:wipe`    | Vide les tables                              |
+| `npm run prisma:reset`   | Wipe + seed                                  |
+| `npm run prisma:studio`  | UI Prisma                                    |
 
-## Support
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
 
-## Stay in touch
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Variables d’environnement
 
-## License
+Voir `.env.example`. Principales clés :
 
-Nest is [MIT licensed](LICENSE).
+
+| Variable                            | Rôle                                        |
+| ----------------------------------- | ------------------------------------------- |
+| `DATABASE_URL`                      | Connexion PostgreSQL                        |
+| `PORT`                              | Port HTTP (défaut `3000`)                   |
+| `CORS_ORIGINS`                      | Origines autorisées (client local / Vercel) |
+| `JWT_SECRET` / `JWT_REFRESH_SECRET` | Secrets JWT                                 |
+| `CLOUDINARY_*`                      | Uploads images                              |
+| `SENTRY_DSN`                        | Error tracking (optionnel en local)         |
+| `SEED_SUPERADMIN_*`                 | Compte admin créé au seed                   |
+
+
+
+
+## Domaines métier (modules)
+
+- **Auth** — inscription, login, refresh, profil
+- **Annonces** — CRUD `/api/annonces` (ex-`/api/ads`, renommé pour éviter les adblockers)
+- **Catalogue / Search** — filtres et recherche véhicules
+- **Véhicules / Upload** — médias Cloudinary
+- **Favorites** — favoris utilisateur
+- **Chat** — conversations REST + WebSocket Socket.IO
+- **Admin** — utilisateurs et rôles
+- **Metrics / Health** — `/api/metrics`, `/api/health`
+
+
+
+## Observabilité
+
+
+| Endpoint           | Usage                                                       |
+| ------------------ | ----------------------------------------------------------- |
+| `GET /api/health`  | Disponibilité API + ping PostgreSQL                         |
+| `GET /api/metrics` | Métriques Prometheus (scrape Grafana Alloy → Grafana Cloud) |
+
+
+Sentry capture les erreurs serveur (filtre HTTP 5xx, Cloudinary, WebSocket).  
+Les 4xx attendues ne génèrent pas d’Issue (éviter le bruit).
+
+## Déploiement (Render)
+
+1. Build : `npm install && npm run build`
+2. Pre-deploy : `npm run prisma:deploy`
+3. Start : `npm run start:prod`
+4. Variables d’environnement Render alignées sur `.env.example` (prod)
+
+
+
+## Documentation liée
+
+- `docs/` (racine monorepo) — processus de déploiement, supervision, anomalies
+- `CHANGELOG.md` — versions SemVer (`v0.2.0`, `v0.3.0`, `v0.3.1`…)
+
