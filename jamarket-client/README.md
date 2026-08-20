@@ -1,59 +1,142 @@
-# JamarketClient
+# Jamarket Client
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.8.
+Front Angular de **Jamarket Auto** — plateforme d’annonces de véhicules d’occasion pour un garage.
 
-## Development server
+Déployé en production sur **Vercel** (`https://jamarket-kappa.vercel.app`).  
+Fait partie d’un **monorepo Git** avec l’API NestJS (`jamarket-api`).
 
-To start a local development server, run:
+## Stack
 
-```bash
-ng serve
-```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+| Couche        | Techno                               |
+| ------------- | ------------------------------------ |
+| Framework     | Angular 20                           |
+| Styles        | Tailwind CSS 4                       |
+| Temps réel    | Socket.IO client (messagerie)        |
+| Observabilité | Sentry (`@sentry/angular`)           |
+| UI            | Lucide icons, SweetAlert2            |
+| Build         | Angular CLI / Vite (builder Angular) |
 
-## Code scaffolding
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Prérequis
 
-```bash
-ng generate component component-name
-```
+- Node.js 20+
+- API `jamarket-api` démarrée (ou URL Render)
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
 
-```bash
-ng generate --help
-```
 
-## Building
-
-To build the project run:
+## Installation
 
 ```bash
-ng build
+cd jamarket-client
+cp .env.example .env
+# Éditer .env (API_URL, CDN_URL, éventuellement SENTRY_DSN)
+
+npm install
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Au `postinstall` / `prestart` / `prebuild`, le script `scripts/generate-env.mjs` génère automatiquement `src/environments/*.ts` à partir de `.env` (ou des variables Vercel). **Ne pas éditer ni committer** ces fichiers générés.
 
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+## Démarrage
 
 ```bash
-ng test
+# Développement (http://localhost:4200)
+npm start
+
+# Staging
+npm run start:staging
 ```
 
-## Running end-to-end tests
 
-For end-to-end (e2e) testing, run:
+
+## Build
 
 ```bash
-ng e2e
+npm run build                 # config development / défaut
+npm run build:staging
+npm run build:production      # build Vercel / prod
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Artefacts dans `dist/`.
 
-## Additional Resources
+## Scripts utiles
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+| Script                     | Description                         |
+| -------------------------- | ----------------------------------- |
+| `npm start`                | `ng serve` + génération env         |
+| `npm run build:production` | Build production                    |
+| `npm run env:generate`     | Régénère les fichiers `environment` |
+| `npm test`                 | Tests unitaires (Karma / Jasmine)   |
+
+
+
+
+## Variables d’environnement
+
+Voir `.env.example`. Principales clés :
+
+
+| Variable     | Rôle                                                                |
+| ------------ | ------------------------------------------------------------------- |
+| `API_URL`    | Base URL de l’API **avec** `/api` (ex. `http://localhost:3000/api`) |
+| `CDN_URL`    | Origine médias / API **sans** `/api`                                |
+| `SENTRY_DSN` | Error tracking browser (optionnel en local)                         |
+
+
+Sur **Vercel** : définir `API_URL` et `CDN_URL` dans *Project → Settings → Environment Variables* (pas de fichier `.env` sur le serveur).
+
+Exemple production :
+
+```env
+API_URL=https://jamarket-api.onrender.com/api
+CDN_URL=https://jamarket-api.onrender.com
+```
+
+
+
+## Fonctionnalités (features)
+
+
+| Feature       | Description                              |
+| ------------- | ---------------------------------------- |
+| **Home**      | Page d’accueil                           |
+| **Catalogue** | Liste + filtres / recherche              |
+| **Annonces**  | Fiche détail (`/annonces/:id`)           |
+| **Auth**      | Login / register                         |
+| **Profil**    | Consultation et édition                  |
+| **Favoris**   | Annonces favorites                       |
+| **Messages**  | Chat client ↔ vendeur (REST + WebSocket) |
+
+
+> Note : les routes API métier utilisent `/api/annonces` (et non `/api/ads`) pour éviter le blocage `ERR_BLOCKED_BY_CLIENT` des adblockers.
+
+
+
+## Observabilité (Sentry)
+
+Le SDK `@sentry/angular` est branché via :
+
+- initialisation dans la config Angular ;
+- intercepteur HTTP (`sentryHttpInterceptor`) pour les erreurs réseau / 5xx ;
+- `ErrorHandler` pour les exceptions front non gérées.
+
+Les 4xx attendues (login, validation) ne sont pas remontées.  
+Les bloqueurs publicitaires peuvent encore filtrer `*.ingest.sentry.io` ; un tunnel via l’API est prévu en amélioration.
+
+## Déploiement (Vercel)
+
+1. Build command : `npm run build:production` (ou équivalent projet)
+2. Variables `API_URL`, `CDN_URL`, `SENTRY_DSN`
+3. Déploiement automatique à chaque merge sur la branche suivie
+
+
+
+## Documentation liée
+
+- `jamarket-api/README.md` — API Nest
+- `docs/` (racine monorepo) — déploiement, supervision, anomalies
+- `CHANGELOG.md` — versions SemVer
+
+
+
