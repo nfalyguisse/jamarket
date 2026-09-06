@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { mapAdToVehicleCard, type ApiAdResponse } from '../../ads/data/ad-api.mapper';
-import type { CatalogueFiltersState, CatalogueYearRange } from './catalogue-filters.model';
+import type { CatalogueFiltersState } from './catalogue-filters.model';
 import {
   type ApiFilterOptions,
   type SearchPageResult,
@@ -24,24 +24,6 @@ export interface CatalogueSearchParams {
   sort: string;
   page: number;
   limit: number;
-}
-
-function yearRangeToApiParams(range: CatalogueYearRange | null): {
-  yearMin?: number;
-  yearMax?: number;
-} {
-  switch (range) {
-    case '2020+':
-      return { yearMin: 2020 };
-    case '2015-2019':
-      return { yearMin: 2015, yearMax: 2019 };
-    case '2010-2014':
-      return { yearMin: 2010, yearMax: 2014 };
-    case 'classic':
-      return { yearMax: 2009 };
-    default:
-      return {};
-  }
 }
 
 @Injectable({ providedIn: 'root' })
@@ -73,13 +55,11 @@ export class CatalogueSearchApiService {
     if (filters.fuel) {
       params = params.set('fuel', filters.fuel);
     }
-
-    const yearParams = yearRangeToApiParams(filters.yearRange);
-    if (yearParams.yearMin !== undefined) {
-      params = params.set('yearMin', yearParams.yearMin);
+    if (filters.yearMin !== null) {
+      params = params.set('yearMin', filters.yearMin);
     }
-    if (yearParams.yearMax !== undefined) {
-      params = params.set('yearMax', yearParams.yearMax);
+    if (filters.yearMax !== null) {
+      params = params.set('yearMax', filters.yearMax);
     }
 
     return this.http
