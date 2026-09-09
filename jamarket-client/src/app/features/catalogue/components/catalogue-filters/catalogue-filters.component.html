@@ -163,23 +163,37 @@
         <legend class="text-label-sm font-bold uppercase tracking-[0.1em] text-on-surface-variant">
           Année
         </legend>
-        <div class="grid grid-cols-2 gap-2">
-          @for (option of yearRangeOptions; track option.value) {
-            <button
-              type="button"
-              class="rounded-xl border px-3 py-2.5 text-label-sm font-semibold transition"
-              [class.border-primary]="filters().yearRange === option.value"
-              [class.bg-primary/10]="filters().yearRange === option.value"
-              [class.text-primary]="filters().yearRange === option.value"
-              [class.border-outline/20]="filters().yearRange !== option.value"
-              [class.bg-surface-container-low]="filters().yearRange !== option.value"
-              [class.text-on-background]="filters().yearRange !== option.value"
-              [attr.aria-pressed]="filters().yearRange === option.value"
-              (click)="onYearRangeSelect(option.value)"
-            >
-              {{ option.label }}
-            </button>
-          }
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="catalogue-year-min" class="sr-only">Année minimum</label>
+            <input
+              id="catalogue-year-min"
+              type="number"
+              inputmode="numeric"
+              [min]="yearInputMin"
+              [max]="yearInputMax"
+              step="1"
+              placeholder="De"
+              class="w-full rounded-xl border border-outline/20 bg-surface-container-low px-3 py-2.5 text-body-md text-on-background transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              [value]="filters().yearMin ?? ''"
+              (change)="onYearMinChange($event)"
+            />
+          </div>
+          <div>
+            <label for="catalogue-year-max" class="sr-only">Année maximum</label>
+            <input
+              id="catalogue-year-max"
+              type="number"
+              inputmode="numeric"
+              [min]="yearInputMin"
+              [max]="yearInputMax"
+              step="1"
+              placeholder="À"
+              class="w-full rounded-xl border border-outline/20 bg-surface-container-low px-3 py-2.5 text-body-md text-on-background transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              [value]="filters().yearMax ?? ''"
+              (change)="onYearMaxChange($event)"
+            />
+          </div>
         </div>
       </fieldset>
 
