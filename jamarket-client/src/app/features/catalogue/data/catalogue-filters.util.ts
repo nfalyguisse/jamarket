@@ -2,15 +2,7 @@ import type { ParamMap } from '@angular/router';
 import {
   DEFAULT_CATALOGUE_FILTERS,
   type CatalogueFiltersState,
-  type CatalogueYearRange,
 } from './catalogue-filters.model';
-
-const VALID_YEAR_RANGES: ReadonlyArray<CatalogueYearRange> = [
-  '2020+',
-  '2015-2019',
-  '2010-2014',
-  'classic',
-];
 
 function parseIntOrNull(value: string | null): number | null {
   if (!value) {
@@ -29,19 +21,14 @@ function parseNumberOrNull(value: string | null): number | null {
 }
 
 export function parseFiltersFromParams(params: ParamMap): CatalogueFiltersState {
-  const yearRaw = params.get('year');
-  const yearRange =
-    yearRaw && (VALID_YEAR_RANGES as string[]).includes(yearRaw)
-      ? (yearRaw as CatalogueYearRange)
-      : null;
-
   return {
     query: params.get('q') ?? '',
     brandId: parseIntOrNull(params.get('brand')),
     modelId: parseIntOrNull(params.get('model')),
     priceMin: parseNumberOrNull(params.get('priceMin')),
     priceMax: parseNumberOrNull(params.get('priceMax')),
-    yearRange,
+    yearMin: parseIntOrNull(params.get('yearMin')),
+    yearMax: parseIntOrNull(params.get('yearMax')),
     fuel: params.get('fuel') ?? null,
   };
 }
@@ -58,7 +45,8 @@ export function filtersToQueryParams(
     model: filters.modelId !== null ? String(filters.modelId) : null,
     priceMin: filters.priceMin !== null ? String(filters.priceMin) : null,
     priceMax: filters.priceMax !== null ? String(filters.priceMax) : null,
-    year: filters.yearRange ?? null,
+    yearMin: filters.yearMin !== null ? String(filters.yearMin) : null,
+    yearMax: filters.yearMax !== null ? String(filters.yearMax) : null,
     fuel: filters.fuel ?? null,
     sort: sort !== defaultSort ? sort : null,
     page: page > 1 ? String(page) : null,
@@ -72,7 +60,8 @@ export function hasActiveFilters(filters: CatalogueFiltersState): boolean {
     filters.modelId !== null ||
     filters.priceMin !== null ||
     filters.priceMax !== null ||
-    filters.yearRange !== null ||
+    filters.yearMin !== null ||
+    filters.yearMax !== null ||
     filters.fuel !== null
   );
 }
@@ -87,7 +76,8 @@ export function filtersEqual(
     a.modelId === b.modelId &&
     a.priceMin === b.priceMin &&
     a.priceMax === b.priceMax &&
-    a.yearRange === b.yearRange &&
+    a.yearMin === b.yearMin &&
+    a.yearMax === b.yearMax &&
     a.fuel === b.fuel
   );
 }
