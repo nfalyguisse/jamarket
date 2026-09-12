@@ -9,11 +9,9 @@ import {
 } from '@angular/core';
 import { LucideChevronDown, LucideSlidersHorizontal } from '@lucide/angular';
 import {
-  CATALOGUE_YEAR_RANGE_OPTIONS,
   FUEL_DISPLAY_LABELS,
   type CatalogueFiltersState,
   type CataloguePriceBounds,
-  type CatalogueYearRange,
 } from '../../data/catalogue-filters.model';
 import { hasActiveFilters } from '../../data/catalogue-filters.util';
 import type { ApiFilterBrand, ApiFilterModel } from '../../data/catalogue-search.model';
@@ -25,8 +23,9 @@ import type { ApiFilterBrand, ApiFilterModel } from '../../data/catalogue-search
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CatalogueFiltersComponent {
-  protected readonly yearRangeOptions = CATALOGUE_YEAR_RANGE_OPTIONS;
   protected readonly fuelDisplayLabels = FUEL_DISPLAY_LABELS;
+  protected readonly yearInputMin = 1900;
+  protected readonly yearInputMax = new Date().getFullYear() + 1;
 
   readonly filters = input.required<CatalogueFiltersState>();
   readonly brandOptions = input.required<ApiFilterBrand[]>();
@@ -91,9 +90,20 @@ export class CatalogueFiltersComponent {
     this.filtersChange.emit({ priceMax: value });
   }
 
-  protected onYearRangeSelect(range: CatalogueYearRange): void {
-    const current = this.filters().yearRange;
-    this.filtersChange.emit({ yearRange: current === range ? null : range });
+  protected onYearMinChange(event: Event): void {
+    const raw = (event.target as HTMLInputElement).value;
+    const parsed = raw === '' ? null : Number(raw);
+    this.filtersChange.emit({
+      yearMin: Number.isFinite(parsed) ? (parsed as number) : null,
+    });
+  }
+
+  protected onYearMaxChange(event: Event): void {
+    const raw = (event.target as HTMLInputElement).value;
+    const parsed = raw === '' ? null : Number(raw);
+    this.filtersChange.emit({
+      yearMax: Number.isFinite(parsed) ? (parsed as number) : null,
+    });
   }
 
   protected onFuelChange(event: Event): void {
