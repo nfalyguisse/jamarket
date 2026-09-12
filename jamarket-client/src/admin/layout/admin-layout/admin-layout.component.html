@@ -1,4 +1,4 @@
-<div class="flex h-screen overflow-hidden bg-gray-50">
+<div class="fixed inset-0 flex overflow-hidden bg-gray-50">
 
   <!-- Overlay mobile -->
   @if (sidebarOpen()) {
@@ -119,10 +119,10 @@
   </aside>
 
   <!-- Zone principale -->
-  <div class="flex flex-1 flex-col overflow-hidden">
+  <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
 
     <!-- Header top -->
-    <header class="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:px-6">
+    <header class="flex h-16 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 md:px-6">
 
       <!-- Bouton burger (mobile) -->
       <button
@@ -194,7 +194,7 @@
     </header>
 
     <!-- Contenu de la page -->
-    <main id="main-content" tabindex="-1" class="flex-1 overflow-y-auto outline-none">
+    <main id="main-content" tabindex="-1" class="min-h-0 flex-1 overflow-y-auto outline-none">
       <router-outlet />
     </main>
 

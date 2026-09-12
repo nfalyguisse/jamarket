@@ -262,7 +262,7 @@
             <p class="mt-1 text-sm text-gray-500">Jusqu’à 10 images (JPEG, PNG, WebP). Max 5 Mo par fichier.</p>
           </div>
           <label
-            class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+            class="relative inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
           >
             <svg lucideUpload class="h-4 w-4" aria-hidden="true"></svg>
             Ajouter des photos
@@ -270,7 +270,7 @@
               type="file"
               accept="image/jpeg,image/png,image/webp,image/gif"
               multiple
-              class="sr-only"
+              class="absolute inset-0 cursor-pointer opacity-0"
               (change)="onFilesSelected($event)"
             />
           </label>
@@ -286,11 +286,15 @@
         } @else {
           <div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             @for (image of existingImages(); track image.id) {
-              <div class="group relative aspect-[4/3] w-full overflow-hidden rounded-xl border border-gray-200">
+              <div
+                class="group relative min-h-0 min-w-0 overflow-hidden rounded-xl border border-gray-200 bg-gray-100"
+              >
                 <img
                   [src]="resolveImage(image.url)"
                   alt="Photo existante du véhicule"
-                  class="absolute inset-0 h-full w-full object-cover"
+                  width="400"
+                  height="300"
+                  class="block aspect-[4/3] h-auto w-full object-cover"
                 />
                 <button
                   type="button"
@@ -309,11 +313,15 @@
             }
 
             @for (image of pendingImages(); track image.previewUrl; let i = $index) {
-              <div class="group relative aspect-[4/3] w-full overflow-hidden rounded-xl border border-emerald-200">
+              <div
+                class="group relative min-h-0 min-w-0 overflow-hidden rounded-xl border border-emerald-200 bg-gray-100"
+              >
                 <img
                   [src]="image.previewUrl"
                   alt="Nouvelle photo à téléverser"
-                  class="absolute inset-0 h-full w-full object-cover"
+                  width="400"
+                  height="300"
+                  class="block aspect-[4/3] h-auto w-full object-cover"
                 />
                 <button
                   type="button"

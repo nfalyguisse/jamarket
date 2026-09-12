@@ -1,8 +1,7 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Injectable, PLATFORM_ID, computed, effect, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
 import { EMPTY, catchError, finalize, map, of } from 'rxjs';
-import Swal from 'sweetalert2';
+import { AuthPromptService } from '@core/services/auth-prompt.service';
 import { AuthStateService } from '@core/services/auth-state.service';
 import { logHttpError } from '@core/utils/http-error.util';
 import { FavoritesApiService } from '../../app/features/favorites/data/favorites-api.service';
@@ -11,7 +10,7 @@ import { FavoritesApiService } from '../../app/features/favorites/data/favorites
 export class FavoritesStateService {
   private readonly api = inject(FavoritesApiService);
   private readonly authState = inject(AuthStateService);
-  private readonly router = inject(Router);
+  private readonly authPrompt = inject(AuthPromptService);
   private readonly platformId = inject(PLATFORM_ID);
 
   private readonly _ids = signal<Set<number>>(new Set());
@@ -77,7 +76,10 @@ export class FavoritesStateService {
     }
 
     if (!this.authState.isLoggedIn()) {
-      void this.promptLoginToFavorite();
+      void this.authPrompt.promptLogin({
+        text: 'Connectez-vous pour ajouter des véhicules à vos favoris et les retrouver plus tard.',
+        returnUrl: this.currentPath(),
+      });
       return false;
     }
 
@@ -109,22 +111,11 @@ export class FavoritesStateService {
     return true;
   }
 
-  private async promptLoginToFavorite(): Promise<void> {
-    const result = await Swal.fire({
-      icon: 'info',
-      title: 'Connexion requise',
-      text: 'Connectez-vous pour ajouter des véhicules à vos favoris et les retrouver plus tard.',
-      showCancelButton: true,
-      confirmButtonText: 'Se connecter',
-      cancelButtonText: 'Annuler',
-      confirmButtonColor: '#006b5e',
-      cancelButtonColor: '#6b7280',
-      reverseButtons: true,
-    });
-
-    if (result.isConfirmed) {
-      void this.router.navigateByUrl('/connexion');
+  private currentPath(): string {
+    if (!isPlatformBrowser(this.platformId)) {
+      return '/';
     }
+    return `${window.location.pathname}${window.location.search}`;
   }
 
   private setFavoriteLocal(adId: number, favorite: boolean): void {

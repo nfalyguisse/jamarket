@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { resolveUserFacingError } from '@core/utils/http-error.util';
 import { AuthApiService } from '../../data/auth-api.service';
@@ -15,6 +15,7 @@ export class LoginPageComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authApiService = inject(AuthApiService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly isSubmitting = signal(false);
   protected readonly serverError = signal('');
@@ -41,11 +42,19 @@ export class LoginPageComponent {
       .pipe(finalize(() => this.isSubmitting.set(false)))
       .subscribe({
         next: () => {
-          void this.router.navigateByUrl('/');
+          void this.router.navigateByUrl(this.resolveReturnUrl());
         },
         error: (error: unknown) => {
           this.serverError.set(resolveUserFacingError(error, 'login'));
         },
       });
+  }
+
+  private resolveReturnUrl(): string {
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    if (!returnUrl || !returnUrl.startsWith('/') || returnUrl.startsWith('//')) {
+      return '/';
+    }
+    return returnUrl;
   }
 }

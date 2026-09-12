@@ -20,7 +20,7 @@
         <a
           [routerLink]="link.path"
           routerLinkActive="font-bold !text-[var(--jm-color-nav-text)] border-b-2"
-          [routerLinkActiveOptions]="{ exact: false }"
+          [routerLinkActiveOptions]="{ exact: link.exact }"
           class="border-transparent text-label-md uppercase tracking-tight transition-colors duration-300"
           style="color: var(--jm-color-nav-muted); border-color: var(--jm-color-nav-text)"
         >
@@ -70,14 +70,26 @@
         }
       </button>
 
-      <a
-        [routerLink]="authState.profileRoute()"
-        class="rounded-full p-1 transition-opacity hover:opacity-80"
-        [attr.aria-label]="authState.isLoggedIn() ? 'Mon profil' : 'Se connecter'"
-        (click)="closeMobileMenu()"
-      >
-        <svg lucideCircleUser class="size-7" style="color: var(--jm-color-nav-text)" aria-hidden="true" />
-      </a>
+      @if (authState.clientInitials(); as initials) {
+        <a
+          [routerLink]="authState.profileRoute()"
+          class="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-emerald-600 text-sm font-semibold text-white select-none transition hover:ring-2 hover:ring-emerald-300"
+          [title]="authState.clientFullName() ?? 'Mon profil'"
+          [attr.aria-label]="'Mon profil — ' + (authState.clientFullName() ?? 'Mon compte')"
+          (click)="closeMobileMenu()"
+        >
+          {{ initials }}
+        </a>
+      } @else {
+        <a
+          [routerLink]="authState.profileRoute()"
+          class="rounded-full p-1 transition-opacity hover:opacity-80"
+          [attr.aria-label]="authState.isLoggedIn() ? 'Mon profil' : 'Se connecter'"
+          (click)="closeMobileMenu()"
+        >
+          <svg lucideCircleUser class="size-7" style="color: var(--jm-color-nav-text)" aria-hidden="true" />
+        </a>
+      }
 
      
     </div>
@@ -124,7 +136,7 @@
             <a
               [routerLink]="link.path"
               routerLinkActive="bg-primary-container/10 font-bold !text-[var(--jm-color-nav-text)]"
-              [routerLinkActiveOptions]="{ exact: false }"
+              [routerLinkActiveOptions]="{ exact: link.exact }"
               class="block rounded-lg px-3 py-3 text-label-md uppercase tracking-tight transition-colors"
               style="color: var(--jm-color-nav-muted)"
               (click)="closeMobileMenu()"
