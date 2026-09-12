@@ -13,6 +13,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { LucideCircleUser, LucideMenu, LucideSearch, LucideX } from '@lucide/angular';
+import { AuthApiService } from '../../../app/features/auth/data/auth-api.service';
 import { AuthStateService } from '@core/services/auth-state.service';
 import { CATALOGUE_SEARCH_QUERY_PARAM } from '@core/constants/catalogue-search.constants';
 
@@ -24,6 +25,7 @@ import { CATALOGUE_SEARCH_QUERY_PARAM } from '@core/constants/catalogue-search.c
 })
 export class SiteHeaderComponent implements OnInit {
   protected readonly authState = inject(AuthStateService);
+  private readonly authApi = inject(AuthApiService);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly document = inject(DOCUMENT);
   private readonly router = inject(Router);
@@ -33,12 +35,13 @@ export class SiteHeaderComponent implements OnInit {
   protected readonly searchQuery = signal('');
 
   protected readonly navLinks = [
-    { label: 'Accueil', path: '/' },
-    { label: 'Catalogue', path: '/catalogue' },
+    { label: 'Accueil', path: '/', exact: true },
+    { label: 'Catalogue', path: '/catalogue', exact: false },
   ] as const;
 
   ngOnInit(): void {
     this.syncSearchFromUrl(this.router.url);
+    this.ensureClientProfile();
 
     this.router.events
       .pipe(
@@ -75,6 +78,22 @@ export class SiteHeaderComponent implements OnInit {
   @HostListener('document:keydown.escape')
   protected onEscape(): void {
     this.closeMobileMenu();
+  }
+
+  private ensureClientProfile(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    if (!this.authState.hasClientSession() || this.authState.clientProfile()) {
+      return;
+    }
+
+    this.authApi.refreshClientProfile().subscribe({
+      error: () => {
+        /* Profil optionnel pour l’affichage des initiales ; ignorer l’échec. */
+      },
+    });
   }
 
   private submitSearch(): void {

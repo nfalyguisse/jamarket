@@ -4,6 +4,7 @@ export const AUTH_ACCESS_TOKEN_KEY = 'jamarket_access_token';
 export const AUTH_REFRESH_TOKEN_KEY = 'jamarket_refresh_token';
 export const AUTH_SCOPE_KEY = 'jamarket_auth_scope';
 export const AUTH_ADMIN_PROFILE_KEY = 'jamarket_admin_profile';
+export const AUTH_CLIENT_PROFILE_KEY = 'jamarket_client_profile';
 
 export type AuthScope = 'client' | 'admin';
 

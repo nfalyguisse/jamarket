@@ -18,6 +18,7 @@ import {
 import type { AdDetail, AdSpecItem } from '@core/models/ad-detail.model';
 import { FavoritesStateService } from '@core/services/favorites-state.service';
 import { AUTH_SCOPE_KEY } from '@core/constants/auth.constants';
+import { AuthPromptService } from '@core/services/auth-prompt.service';
 import { AuthStateService } from '@core/services/auth-state.service';
 import { ChatApiService } from '@core/services/chat-api.service';
 import { logHttpError } from '@core/utils/http-error.util';
@@ -57,6 +58,7 @@ export class AdDetailPageComponent implements OnInit {
   protected readonly favoritesState = inject(FavoritesStateService);
   private readonly chatApi = inject(ChatApiService);
   private readonly authState = inject(AuthStateService);
+  private readonly authPrompt = inject(AuthPromptService);
   private readonly platformId = inject(PLATFORM_ID);
 
   protected readonly ad = signal<AdDetail | null>(null);
@@ -145,19 +147,10 @@ export class AdDetailPageComponent implements OnInit {
 
     const isAdminScope = localStorage.getItem(AUTH_SCOPE_KEY) === 'admin';
     if (!this.authState.isLoggedIn() || isAdminScope) {
-      const result = await Swal.fire({
-        icon: 'info',
-        title: 'Connexion requise',
+      await this.authPrompt.promptLogin({
         text: 'Connectez-vous avec votre compte client pour contacter le vendeur à propos de ce véhicule.',
-        confirmButtonText: 'Se connecter',
-        showCancelButton: true,
-        cancelButtonText: 'Annuler',
+        returnUrl: `/annonces/${detail.id}`,
       });
-      if (result.isConfirmed) {
-        void this.router.navigate(['/connexion'], {
-          queryParams: { returnUrl: `/annonces/${detail.id}` },
-        });
-      }
       return;
     }
 
@@ -167,6 +160,7 @@ export class AdDetailPageComponent implements OnInit {
         title: 'Contact indisponible',
         text: 'Cette annonce n’a pas encore de vendeur associé.',
         confirmButtonText: 'Compris',
+        confirmButtonColor: '#006b5e',
       });
       return;
     }
@@ -186,6 +180,7 @@ export class AdDetailPageComponent implements OnInit {
             title: 'Impossible d’ouvrir la conversation',
             text: 'Réessayez dans un instant ou contactez le garage par e-mail.',
             confirmButtonText: 'OK',
+            confirmButtonColor: '#006b5e',
           });
           return EMPTY;
         }),

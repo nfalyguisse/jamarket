@@ -24,6 +24,7 @@ import type {
   ConversationDetail,
   ConversationSummary,
 } from '@core/models/chat.model';
+import { AuthPromptService } from '@core/services/auth-prompt.service';
 import { AuthStateService } from '@core/services/auth-state.service';
 import { ChatApiService } from '@core/services/chat-api.service';
 import { ChatSocketService } from '@core/services/chat-socket.service';
@@ -52,6 +53,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   private readonly chatApi = inject(ChatApiService);
   private readonly chatSocket = inject(ChatSocketService);
   private readonly authState = inject(AuthStateService);
+  private readonly authPrompt = inject(AuthPromptService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
@@ -82,7 +84,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     }
 
     if (!this.authState.isLoggedIn() || this.isAdminScope()) {
-      void this.router.navigateByUrl('/connexion');
+      void this.promptLoginForMessages();
       return;
     }
 
@@ -156,6 +158,20 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
       return false;
     }
     return localStorage.getItem(AUTH_SCOPE_KEY) === 'admin';
+  }
+
+  private async promptLoginForMessages(): Promise<void> {
+    this.isLoadingList.set(false);
+    const returnUrl = this.router.url.startsWith('/messages')
+      ? this.router.url
+      : '/messages';
+    const confirmed = await this.authPrompt.promptLogin({
+      text: 'Connectez-vous pour accéder à votre messagerie et échanger avec le garage.',
+      returnUrl,
+    });
+    if (!confirmed) {
+      void this.router.navigateByUrl('/');
+    }
   }
 
   private loadList(): void {
