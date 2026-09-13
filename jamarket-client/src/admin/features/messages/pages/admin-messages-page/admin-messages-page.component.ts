@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  HostListener,
   OnDestroy,
   OnInit,
   PLATFORM_ID,
@@ -13,7 +14,13 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { LucideFilter, LucideMessageSquare, LucideSend } from '@lucide/angular';
+import {
+  LucideChevronDown,
+  LucideFilter,
+  LucideMessageSquare,
+  LucideSearch,
+  LucideSend,
+} from '@lucide/angular';
 import { EMPTY, Subject, catchError, takeUntil } from 'rxjs';
 import type {
   ChatMessage,
@@ -28,7 +35,16 @@ import { resolveMediaUrl } from '@core/utils/media-url.util';
 
 @Component({
   selector: 'app-admin-messages-page',
-  imports: [RouterLink, FormsModule, DatePipe, LucideFilter, LucideMessageSquare, LucideSend],
+  imports: [
+    RouterLink,
+    FormsModule,
+    DatePipe,
+    LucideChevronDown,
+    LucideFilter,
+    LucideMessageSquare,
+    LucideSearch,
+    LucideSend,
+  ],
   templateUrl: './admin-messages-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -42,6 +58,8 @@ export class AdminMessagesPageComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   @ViewChild('messagesEnd') private messagesEnd?: ElementRef<HTMLElement>;
+  @ViewChild('adSearchInput') private adSearchInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('adFilterRoot') private adFilterRoot?: ElementRef<HTMLElement>;
 
   protected readonly conversations = signal<ConversationSummary[]>([]);
   protected readonly active = signal<ConversationDetail | null>(null);
@@ -52,6 +70,8 @@ export class AdminMessagesPageComponent implements OnInit, OnDestroy {
   protected readonly typingLabel = signal<string | null>(null);
   protected readonly adFilter = signal<number | 'all'>('all');
   protected readonly currentUserId = signal<number | null>(null);
+  protected readonly filterOpen = signal(false);
+  protected readonly adSearchQuery = signal('');
 
   protected readonly adOptions = computed(() => {
     const map = new Map<number, string>();
@@ -59,6 +79,15 @@ export class AdminMessagesPageComponent implements OnInit, OnDestroy {
       map.set(c.ad.id, c.ad.label);
     }
     return [...map.entries()].map(([id, label]) => ({ id, label }));
+  });
+
+  protected readonly filteredAdOptions = computed(() => {
+    const query = this.adSearchQuery().trim().toLocaleLowerCase('fr');
+    const options = this.adOptions();
+    if (!query) {
+      return options;
+    }
+    return options.filter((opt) => opt.label.toLocaleLowerCase('fr').includes(query));
   });
 
   protected readonly filteredConversations = computed(() => {
@@ -76,9 +105,12 @@ export class AdminMessagesPageComponent implements OnInit, OnDestroy {
     return `${thread.customer.name} ${thread.customer.lastName}`.trim();
   });
 
-  protected readonly filterSelectValue = computed(() => {
+  protected readonly selectedAdLabel = computed(() => {
     const filter = this.adFilter();
-    return filter === 'all' ? 'all' : String(filter);
+    if (filter === 'all') {
+      return 'Toutes les annonces';
+    }
+    return this.adOptions().find((opt) => opt.id === filter)?.label ?? 'Toutes les annonces';
   });
 
   ngOnInit(): void {
@@ -133,8 +165,27 @@ export class AdminMessagesPageComponent implements OnInit, OnDestroy {
     return resolveMediaUrl(url) || null;
   }
 
-  protected onFilterChange(value: string): void {
-    this.adFilter.set(value === 'all' ? 'all' : Number(value));
+  protected toggleAdFilter(): void {
+    const next = !this.filterOpen();
+    this.filterOpen.set(next);
+    if (next) {
+      this.adSearchQuery.set('');
+      queueMicrotask(() => this.adSearchInput?.nativeElement.focus());
+    }
+  }
+
+  protected closeAdFilter(): void {
+    this.filterOpen.set(false);
+    this.adSearchQuery.set('');
+  }
+
+  protected onAdSearchInput(event: Event): void {
+    this.adSearchQuery.set((event.target as HTMLInputElement).value);
+  }
+
+  protected selectAdFilter(value: number | 'all'): void {
+    this.adFilter.set(value);
+    this.closeAdFilter();
   }
 
   protected selectConversation(id: number): void {
@@ -158,6 +209,25 @@ export class AdminMessagesPageComponent implements OnInit, OnDestroy {
     this.chatSocket.sendMessage(thread.id, text);
     this.draft.set('');
     this.chatSocket.setTyping(thread.id, false);
+  }
+
+  @HostListener('document:click', ['$event'])
+  protected onDocumentClick(event: MouseEvent): void {
+    if (!this.filterOpen()) {
+      return;
+    }
+    const root = this.adFilterRoot?.nativeElement;
+    const target = event.target as Node | null;
+    if (root && target && !root.contains(target)) {
+      this.closeAdFilter();
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  protected onEscape(): void {
+    if (this.filterOpen()) {
+      this.closeAdFilter();
+    }
   }
 
   private loadList(): void {

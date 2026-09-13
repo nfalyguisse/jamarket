@@ -5,9 +5,7 @@ import Swal from 'sweetalert2';
 import {
   LucideCheck,
   LucideX,
-  LucideMessageSquare,
   LucideMegaphone,
-  LucideChevronDown,
   LucideLoader2,
 } from '@lucide/angular';
 import { AdminAdsApiService } from '@admin/data/admin-ads-api.service';
@@ -15,25 +13,6 @@ import type { AdminAd } from '@core/models/admin-ad.model';
 import { resolveMediaUrl } from '@core/utils/media-url.util';
 import { logHttpError, resolveUserFacingError } from '@core/utils/http-error.util';
 import { finalize } from 'rxjs';
-
-export interface StatCard {
-  label: string;
-  value: string;
-  badge: string;
-  badgePositive: boolean;
-}
-
-export interface RecentActivity {
-  type: 'ad' | 'user' | 'message';
-  title: string;
-  subtitle: string;
-  time: string;
-}
-
-export interface BarChartEntry {
-  day: string;
-  value: number;
-}
 
 @Component({
   selector: 'app-dashboard-page',
@@ -43,9 +22,7 @@ export interface BarChartEntry {
     RouterLink,
     LucideCheck,
     LucideX,
-    LucideMessageSquare,
     LucideMegaphone,
-    LucideChevronDown,
     LucideLoader2,
   ],
   templateUrl: './dashboard-page.component.html',
@@ -54,59 +31,9 @@ export interface BarChartEntry {
 export class DashboardPageComponent implements OnInit {
   private readonly adminAdsApi = inject(AdminAdsApiService);
 
-  protected readonly statCards: StatCard[] = [
-    {
-      label: 'Total Annonces',
-      value: '1 284',
-      badge: '+12%',
-      badgePositive: true,
-    },
-    {
-      label: 'Ventes du mois',
-      value: '42 850 €',
-      badge: '+8.4%',
-      badgePositive: true,
-    },
-    {
-      label: 'Nouveaux messages',
-      value: '156',
-      badge: '24 nouveaux',
-      badgePositive: true,
-    },
-  ];
-
-  protected readonly barChartData: BarChartEntry[] = [
-    { day: 'Lun', value: 65 },
-    { day: 'Mar', value: 48 },
-    { day: 'Mer', value: 82 },
-    { day: 'Jeu', value: 70 },
-    { day: 'Ven', value: 58 },
-    { day: 'Sam', value: 90 },
-    { day: 'Dim', value: 42 },
-  ];
-
-  protected readonly maxBarValue = Math.max(...this.barChartData.map((d) => d.value));
-
-  protected readonly recentActivities: RecentActivity[] = [
-    {
-      type: 'ad',
-      title: 'Nouvelle annonce ajoutée',
-      subtitle: 'Porsche 911 (992) Carrera S',
-      time: 'Il y a 14 minutes',
-    },
-    {
-      type: 'user',
-      title: 'Nouvel utilisateur inscrit',
-      subtitle: 'Jean Dupont (Client particulier)',
-      time: 'Il y a 1 heure',
-    },
-    {
-      type: 'message',
-      title: 'Nouveau message reçu',
-      subtitle: "Demande d'essai : Audi RS6",
-      time: 'Il y a 2 heures',
-    },
-  ];
+  protected readonly totalAds = signal<number | null>(null);
+  protected readonly isLoadingStats = signal(true);
+  protected readonly statsError = signal('');
 
   protected readonly pendingAds = signal<AdminAd[]>([]);
   protected readonly isLoadingPending = signal(true);
@@ -115,7 +42,12 @@ export class DashboardPageComponent implements OnInit {
   protected readonly isApprovingAll = signal(false);
 
   ngOnInit(): void {
+    this.loadStats();
     this.loadPendingAds();
+  }
+
+  protected formatCount(value: number): string {
+    return new Intl.NumberFormat('fr-FR').format(value);
   }
 
   protected vehicleTitle(ad: AdminAd): string {
@@ -196,6 +128,7 @@ export class DashboardPageComponent implements OnInit {
         .subscribe({
           next: () => {
             this.pendingAds.update((items) => items.filter((item) => item.id !== ad.id));
+            this.loadStats();
             void Swal.fire({
               icon: 'success',
               title: 'Annonce rejetée',
@@ -264,8 +197,24 @@ export class DashboardPageComponent implements OnInit {
     });
   }
 
-  protected getBarHeight(value: number): string {
-    return `${(value / this.maxBarValue) * 100}%`;
+  private loadStats(): void {
+    this.isLoadingStats.set(true);
+    this.statsError.set('');
+
+    this.adminAdsApi.getMyAds('all').subscribe({
+      next: (ads) => {
+        this.totalAds.set(ads.length);
+        this.isLoadingStats.set(false);
+      },
+      error: (error: unknown) => {
+        logHttpError(error, '[dashboard] chargement total annonces');
+        this.statsError.set(
+          resolveUserFacingError(error, 'generic', '[dashboard] total ads'),
+        );
+        this.totalAds.set(null);
+        this.isLoadingStats.set(false);
+      },
+    });
   }
 
   private loadPendingAds(): void {

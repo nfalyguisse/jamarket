@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  PLATFORM_ID,
+  inject,
+  signal,
+} from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import {
   LucideLayoutDashboard,
@@ -39,19 +48,27 @@ import { AdminAuthApiService } from '@admin/data/admin-auth-api.service';
   templateUrl: './admin-layout.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AdminLayoutComponent implements OnInit {
+export class AdminLayoutComponent implements OnInit, OnDestroy {
   protected readonly sidebarOpen = signal(false);
   protected readonly authState = inject(AuthStateService);
   private readonly adminAuth = inject(AdminAuthApiService);
   private readonly router = inject(Router);
+  private readonly document = inject(DOCUMENT);
+  private readonly platformId = inject(PLATFORM_ID);
 
   ngOnInit(): void {
+    this.lockDocumentScroll(true);
+
     this.adminAuth.refreshAdminProfile().subscribe({
       error: () => {
         this.adminAuth.logout();
         void this.router.navigateByUrl('/admin/connexion');
       },
     });
+  }
+
+  ngOnDestroy(): void {
+    this.lockDocumentScroll(false);
   }
 
   protected get adminInitials(): string {
@@ -87,5 +104,14 @@ export class AdminLayoutComponent implements OnInit {
 
   protected closeSidebar(): void {
     this.sidebarOpen.set(false);
+  }
+
+  /** Empêche le double scroll (body + main) sur le shell admin. */
+  private lockDocumentScroll(locked: boolean): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+    this.document.documentElement.style.overflow = locked ? 'hidden' : '';
+    this.document.body.style.overflow = locked ? 'hidden' : '';
   }
 }

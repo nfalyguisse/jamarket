@@ -10,6 +10,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { LucideHeart } from '@lucide/angular';
 import { EMPTY, catchError } from 'rxjs';
+import { AuthPromptService } from '@core/services/auth-prompt.service';
 import { AuthStateService } from '@core/services/auth-state.service';
 import { FavoritesStateService } from '@core/services/favorites-state.service';
 import { logHttpError } from '@core/utils/http-error.util';
@@ -35,6 +36,7 @@ export class FavoritesPageComponent implements OnInit {
   private readonly favoritesApi = inject(FavoritesApiService);
   private readonly favoritesState = inject(FavoritesStateService);
   private readonly authState = inject(AuthStateService);
+  private readonly authPrompt = inject(AuthPromptService);
   private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
 
@@ -47,10 +49,36 @@ export class FavoritesPageComponent implements OnInit {
     }
 
     if (!this.authState.isLoggedIn()) {
-      void this.router.navigateByUrl('/connexion');
+      void this.promptLoginForFavorites();
       return;
     }
 
+    this.loadFavorites();
+  }
+
+  protected isFavorite(vehicleId: string): boolean {
+    return this.favoritesState.isFavorite(vehicleId);
+  }
+
+  protected onFavoriteToggle(vehicleId: string): void {
+    this.favoritesState.toggle(vehicleId);
+    if (!this.favoritesState.isFavorite(vehicleId)) {
+      this.vehicles.update((list) => list.filter((v) => v.id !== vehicleId));
+    }
+  }
+
+  private async promptLoginForFavorites(): Promise<void> {
+    this.isLoading.set(false);
+    const confirmed = await this.authPrompt.promptLogin({
+      text: 'Connectez-vous pour consulter et gérer vos véhicules favoris.',
+      returnUrl: '/favoris',
+    });
+    if (!confirmed) {
+      void this.router.navigateByUrl('/');
+    }
+  }
+
+  private loadFavorites(): void {
     this.favoritesApi
       .list()
       .pipe(
@@ -65,16 +93,5 @@ export class FavoritesPageComponent implements OnInit {
         this.isLoading.set(false);
         this.favoritesState.refresh();
       });
-  }
-
-  protected isFavorite(vehicleId: string): boolean {
-    return this.favoritesState.isFavorite(vehicleId);
-  }
-
-  protected onFavoriteToggle(vehicleId: string): void {
-    this.favoritesState.toggle(vehicleId);
-    if (!this.favoritesState.isFavorite(vehicleId)) {
-      this.vehicles.update((list) => list.filter((v) => v.id !== vehicleId));
-    }
   }
 }
