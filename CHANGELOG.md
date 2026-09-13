@@ -3,6 +3,27 @@
 Toutes les versions notables de Jamarket sont documentées ici.
 Format des tags Git : `vMAJOR.MINOR.PATCH` (voir [`docs/processus-deploiement.md`](./docs/processus-deploiement.md)).
 
+## [0.3.2] — 2026-09-13
+
+Hotfixes front / UX depuis `v0.3.1`. Tag Git : `v0.3.2`.
+
+### Correctifs
+
+- Auth client : alignement padding login / inscription, initiales dans le header, popups connexion requise (favoris / messages)
+- Navigation : état actif Accueil vs Catalogue (`routerLinkActive` exact)
+- Dashboard admin : total d’annonces calculé via l’API ; retrait des stats mock ventes / messages
+- CORS : autorisation de `127.0.0.1` (navigateur intégré Cursor) en plus de `localhost`
+- Layout admin : suppression du double scroll / marge vide (shell `fixed` + previews images contraintes)
+- Fiche annonce : bouton « Prendre rendez-vous » masqué temporairement
+- Catalogue : correctif du filtre de date
+- Messagerie admin : barre de recherche dans le filtre par annonce
+
+### Documentation
+
+- Mise à jour des README
+
+---
+
 ## [0.3.1] — 2026-08-19
 
 Preuves correctif adblocker + monitoring client Sentry (Bloc 4 — C4.2.2 / C4.3.2). Tag Git : `v0.3.1`.
