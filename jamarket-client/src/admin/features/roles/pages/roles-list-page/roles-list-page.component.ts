@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnInit,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -39,6 +40,13 @@ export class RolesListPageComponent implements OnInit {
 
   protected readonly roles = signal<AdminRole[]>([]);
   protected readonly availableRights = signal<AvailableRight[]>([]);
+  /** CUSTOMER / ADMIN restent dans l’API : on les masque dans le formulaire pour éviter de casser les parcours. */
+  private static readonly HIDDEN_FORM_RIGHTS = new Set(['CUSTOMER', 'ADMIN']);
+  protected readonly selectableRights = computed(() =>
+    this.availableRights().filter(
+      (right) => !RolesListPageComponent.HIDDEN_FORM_RIGHTS.has(right.value),
+    ),
+  );
   protected readonly isLoading = signal(true);
   protected readonly isSaving = signal(false);
   protected readonly errorMessage = signal('');

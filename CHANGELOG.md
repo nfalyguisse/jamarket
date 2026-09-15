@@ -3,6 +3,18 @@
 Toutes les versions notables de Jamarket sont documentées ici.
 Format des tags Git : `vMAJOR.MINOR.PATCH` (voir [`docs/processus-deploiement.md`](./docs/processus-deploiement.md)).
 
+## [0.3.4] — 2026-09-15
+
+Hotfixes RBAC / back-office depuis `v0.3.3`. Tag Git : `v0.3.4`.
+
+### Correctifs
+
+- Archivage d’annonce : le droit `DELETE_AD` est désormais exigé (soft-delete `DELETE /api/annonces/:id`). Un compte avec seulement `CREATE_AD` ne peut plus archiver
+- Back-office : bouton archiver (liste d’annonces) et rejet dashboard masqués sans `DELETE_AD`
+- Création / édition de rôle : cases « Accès client » (`CUSTOMER`) et « Accès back-office » (`ADMIN`) masquées pour éviter de casser les parcours avant la démo
+
+---
+
 ## [0.3.3] — 2026-09-15
 
 Hotfixes front / métier depuis `v0.3.2`. Tag Git : `v0.3.3`.

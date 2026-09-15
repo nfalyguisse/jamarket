@@ -248,19 +248,21 @@
                     >
                       <svg lucideEdit class="h-4 w-4" aria-hidden="true"></svg>
                     </a>
-                    <button
-                      type="button"
-                      class="rounded-lg p-2 text-gray-500 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
-                      [disabled]="deletingId() === ad.id"
-                      [attr.aria-label]="'Supprimer ' + ad.label"
-                      (click)="confirmDelete(ad)"
-                    >
-                      @if (deletingId() === ad.id) {
-                        <svg lucideLoader2 class="h-4 w-4 animate-spin" aria-hidden="true"></svg>
-                      } @else {
-                        <svg lucideTrash2 class="h-4 w-4" aria-hidden="true"></svg>
-                      }
-                    </button>
+                    @if (canArchiveAds()) {
+                      <button
+                        type="button"
+                        class="rounded-lg p-2 text-gray-500 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                        [disabled]="deletingId() === ad.id"
+                        [attr.aria-label]="'Archiver ' + ad.label"
+                        (click)="confirmDelete(ad)"
+                      >
+                        @if (deletingId() === ad.id) {
+                          <svg lucideLoader2 class="h-4 w-4 animate-spin" aria-hidden="true"></svg>
+                        } @else {
+                          <svg lucideTrash2 class="h-4 w-4" aria-hidden="true"></svg>
+                        }
+                      </button>
+                    }
                   </div>
                 </td>
               </tr>

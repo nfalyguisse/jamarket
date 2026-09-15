@@ -57,7 +57,7 @@
         <fieldset>
           <legend class="mb-3 text-sm font-medium text-gray-700">Droits associés</legend>
           <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            @for (right of availableRights(); track right.value) {
+            @for (right of selectableRights(); track right.value) {
               <label
                 class="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-200 p-3 transition hover:border-emerald-300 hover:bg-emerald-50/50"
                 [class.border-emerald-400]="isRightSelected(right.value)"
