@@ -3,6 +3,22 @@
 Toutes les versions notables de Jamarket sont documentées ici.
 Format des tags Git : `vMAJOR.MINOR.PATCH` (voir [`docs/processus-deploiement.md`](./docs/processus-deploiement.md)).
 
+## [0.3.3] — 2026-09-15
+
+Hotfixes front / métier depuis `v0.3.2`. Tag Git : `v0.3.3`.
+
+### Correctifs
+
+- Layout front : espacement sous le header fixe (`pt-28` / `md:pt-32`) sur accueil, catalogue, fiche annonce, profil, favoris et messagerie
+- Annonces vendues : marquage « vendue » côté admin, badge catalogue / cartes, conversations en lecture seule (client + admin)
+- Messagerie : accessibilité des champs de saisie ; état lecture seule lorsque le véhicule est vendu
+
+### Seed / démo
+
+- Annonces de démo extraites dans `prisma/data/demo-ads.ts` (occasions sans photos, créées par le super-admin)
+
+---
+
 ## [0.3.2] — 2026-09-13
 
 Hotfixes front / UX depuis `v0.3.1`. Tag Git : `v0.3.2`.

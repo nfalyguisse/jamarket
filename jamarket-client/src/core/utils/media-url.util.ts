@@ -2,7 +2,7 @@ import { environment } from '../../environments/environment';
 
 const API_ORIGIN = environment.apiUrl.replace(/\/api\/?$/, '');
 
-/** Médias distants (Cloudinary, Unsplash seed) activés. */
+/** Médias distants (Cloudinary) activés. */
 export const DISABLE_REMOTE_MEDIA = false;
 
 export const VEHICLE_IMAGE_PLACEHOLDER = '/assets/images/vehicle-placeholder.svg';
