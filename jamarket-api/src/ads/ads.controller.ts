@@ -177,23 +177,24 @@ export class AdsController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RightsGuard)
+  @RequireRights(RightEnum.DELETE_AD, RightEnum.SUPER_ADMIN)
   @ApiBearerAuth('access-token')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
-    summary: 'Soft-delete d’une annonce',
+    summary: 'Archiver une annonce (soft-delete)',
     description:
-      'Marque l’annonce comme supprimée (soft-delete) sans effacer définitivement les données. ' +
-      'Elle disparaît du catalogue public mais reste traçable en base.',
+      'Retire l’annonce du catalogue (deletedAt + isArchived) sans suppression définitive. ' +
+      'Requiert le droit DELETE_AD (ou SUPER_ADMIN).',
   })
   @ApiParam({
     name: 'id',
     description: 'Identifiant de l’annonce',
     example: 12,
   })
-  @ApiResponse({ status: 204, description: 'Annonce soft-deleted' })
+  @ApiResponse({ status: 204, description: 'Annonce archivée (soft-delete)' })
   @ApiResponse({ status: 401, description: 'Non authentifié' })
-  @ApiResponse({ status: 403, description: 'Accès refusé' })
+  @ApiResponse({ status: 403, description: 'Droit DELETE_AD manquant' })
   @ApiResponse({ status: 404, description: 'Annonce introuvable' })
   remove(@Param('id', ParseIntPipe) id: number, @Request() req: AuthRequest) {
     return this.adsService.remove(id, req.user);

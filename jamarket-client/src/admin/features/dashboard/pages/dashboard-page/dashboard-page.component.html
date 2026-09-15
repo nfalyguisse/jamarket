@@ -148,15 +148,17 @@
                         <svg lucideCheck class="h-4 w-4" aria-hidden="true"></svg>
                       }
                     </button>
-                    <button
-                      type="button"
-                      (click)="rejectAd(ad)"
-                      [disabled]="actionAdId() === ad.id"
-                      class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-red-500 transition-colors hover:border-red-200 hover:bg-red-50 disabled:opacity-50"
-                      [attr.aria-label]="'Rejeter ' + vehicleTitle(ad)"
-                    >
-                      <svg lucideX class="h-4 w-4" aria-hidden="true"></svg>
-                    </button>
+                    @if (canArchiveAds()) {
+                      <button
+                        type="button"
+                        (click)="rejectAd(ad)"
+                        [disabled]="actionAdId() === ad.id"
+                        class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-red-500 transition-colors hover:border-red-200 hover:bg-red-50 disabled:opacity-50"
+                        [attr.aria-label]="'Rejeter ' + vehicleTitle(ad)"
+                      >
+                        <svg lucideX class="h-4 w-4" aria-hidden="true"></svg>
+                      </button>
+                    }
                     <a
                       [routerLink]="['/admin/annonces', ad.id, 'modifier']"
                       class="text-xs text-gray-500 underline-offset-2 hover:text-gray-700 hover:underline"

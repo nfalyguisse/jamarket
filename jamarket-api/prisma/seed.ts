@@ -3,6 +3,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 import { PrismaClient, RightEnum } from '../generated/prisma/client';
 import * as bcrypt from 'bcrypt';
+import { DEMO_ADS } from './data/demo-ads';
 
 function createPrismaClient() {
   const connectionString = process.env.DATABASE_URL;
@@ -107,7 +108,7 @@ async function seedSuperAdmin(adminRoleId: number) {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  await prisma.user.upsert({
+  const superAdmin = await prisma.user.upsert({
     where: { email },
     update: {
       name,
@@ -128,6 +129,7 @@ async function seedSuperAdmin(adminRoleId: number) {
   });
 
   console.log(`✅ Super admin : ${email}`);
+  return superAdmin;
 }
 
 async function seedCatalog() {
@@ -152,7 +154,7 @@ async function seedCatalog() {
     update: { label: 'Break' },
     create: { label: 'Break' },
   });
-  await prisma.vehiculeType.upsert({
+  const utilitaire = await prisma.vehiculeType.upsert({
     where: { id: 5 },
     update: { label: 'Utilitaire' },
     create: { label: 'Utilitaire' },
@@ -178,6 +180,8 @@ async function seedCatalog() {
         { id: 2, label: 'Mégane' },
         { id: 6, label: 'Captur' },
         { id: 7, label: 'Scenic' },
+        { id: 26, label: 'Twingo' },
+        { id: 27, label: 'Kangoo' },
       ],
     },
     {
@@ -187,6 +191,8 @@ async function seedCatalog() {
         { id: 3, label: '308' },
         { id: 8, label: '208' },
         { id: 9, label: '3008' },
+        { id: 28, label: '207' },
+        { id: 29, label: '2008' },
       ],
     },
     {
@@ -241,7 +247,38 @@ async function seedCatalog() {
         { id: 23, label: 'C3' },
         { id: 24, label: 'C4' },
         { id: 25, label: 'C5 Aircross' },
+        { id: 30, label: 'C1' },
+        { id: 31, label: 'Berlingo' },
       ],
+    },
+    {
+      id: 9,
+      label: 'Dacia',
+      models: [
+        { id: 32, label: 'Sandero' },
+        { id: 33, label: 'Duster' },
+      ],
+    },
+    {
+      id: 10,
+      label: 'Ford',
+      models: [
+        { id: 34, label: 'Fiesta' },
+        { id: 35, label: 'Focus' },
+      ],
+    },
+    {
+      id: 11,
+      label: 'Fiat',
+      models: [
+        { id: 36, label: 'Panda' },
+        { id: 37, label: '500' },
+      ],
+    },
+    {
+      id: 12,
+      label: 'Opel',
+      models: [{ id: 38, label: 'Corsa' }],
     },
   ];
 
@@ -267,14 +304,13 @@ async function seedCatalog() {
   console.log('✅ Types, marques & modèles classiques');
 
   return {
-    berline,
-    suv,
-    citadine,
-    clio: modelByKey['Renault:Clio'],
-    megane: modelByKey['Renault:Mégane'],
-    p308: modelByKey['Peugeot:308'],
-    serie3: modelByKey['BMW:Série 3'],
-    golf: modelByKey['Volkswagen:Golf'],
+    types: {
+      berline,
+      suv,
+      citadine,
+      utilitaire,
+    },
+    modelByKey,
   };
 }
 
@@ -283,7 +319,7 @@ async function seedDemoUsers(
   customerRoleId: number,
   hashedPassword: string,
 ) {
-  const employee1 = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: { email: 'jean.dupont@jamarket.fr' },
     update: {},
     create: {
@@ -320,242 +356,46 @@ async function seedDemoUsers(
   });
 
   console.log('✅ Users démo');
-  return employee1;
 }
 
 async function seedDemoAds(
   catalog: Awaited<ReturnType<typeof seedCatalog>>,
   sellerId: number,
 ) {
-  /** Photos Unsplash (voitures) — URLs absolues HTTPS, sans CDN Jamarket. */
-  const carPhotos: [string, string][] = [
-    [
-      'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&h=600&q=80',
-    ],
-    [
-      'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=800&h=600&q=80',
-    ],
-    [
-      'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=800&h=600&q=80',
-    ],
-    [
-      'https://images.unsplash.com/photo-1617531653332-bd46c24f2068?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&w=800&h=600&q=80',
-    ],
-    [
-      'https://images.unsplash.com/photo-1511919884226-fd3cad34687a?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=800&h=600&q=80',
-    ],
-    [
-      'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?auto=format&fit=crop&w=800&h=600&q=80',
-    ],
-    [
-      'https://images.unsplash.com/photo-1489824904134-891ab64532f1?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1502877338536-702d10cb0bc7?auto=format&fit=crop&w=800&h=600&q=80',
-    ],
-    [
-      'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=800&h=600&q=80',
-    ],
-    [
-      'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&h=600&q=80',
-    ],
-    [
-      'https://images.unsplash.com/photo-1549924231-f129b911e442?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1609521263047-f8f205293f24?auto=format&fit=crop&w=800&h=600&q=80',
-    ],
-  ];
-
   const existingAds = await prisma.ad.count();
   if (existingAds > 0) {
-    // Remplace les anciennes URLs picsum par des photos voiture (re-seed possible)
-    const placeholderImages = await prisma.image.findMany({
-      where: { url: { contains: 'picsum.photos' } },
-      orderBy: { id: 'asc' },
-    });
-
-    if (placeholderImages.length > 0) {
-      for (let i = 0; i < placeholderImages.length; i++) {
-        const pair = carPhotos[i % carPhotos.length];
-        const url = pair[i % 2];
-        await prisma.image.update({
-          where: { id: placeholderImages[i].id },
-          data: { url },
-        });
-      }
-      console.log(`✅ ${placeholderImages.length} image(s) picsum remplacée(s) par des photos voiture`);
-    }
-
     console.log(`⏭️  Annonces démo ignorées (${existingAds} annonce(s) déjà présentes)`);
     return;
   }
 
-  const { clio, megane, p308, serie3, golf, berline, citadine } = catalog;
-
-  const vehicleAds = [
-    {
-      model: clio,
-      km: 45000,
-      year: 2021,
-      doors: 5,
-      power: '90ch',
-      fuel: 'essence' as const,
-      color: 'Rouge',
-      vType: citadine,
-      price: 12500,
-      label: 'Renault Clio 5 - Excellent état',
-      desc: 'Voiture de ville parfaite, entretien régulier en concession, carnet à jour.',
-    },
-    {
-      model: clio,
-      km: 78000,
-      year: 2019,
-      doors: 5,
-      power: '75ch',
-      fuel: 'diesel' as const,
-      color: 'Blanc',
-      vType: citadine,
-      price: 9900,
-      label: 'Renault Clio Diesel - Idéale trajet domicile-travail',
-      desc: 'Faible consommation, pneus neufs, CT ok.',
-    },
-    {
-      model: megane,
-      km: 32000,
-      year: 2022,
-      doors: 5,
-      power: '140ch',
-      fuel: 'essence' as const,
-      color: 'Gris',
-      vType: berline,
-      price: 18500,
-      label: 'Renault Mégane 4 Phase 2 - Comme neuve',
-      desc: 'Options : caméra recul, navigation, sièges chauffants.',
-    },
-    {
-      model: p308,
-      km: 55000,
-      year: 2020,
-      doors: 5,
-      power: '130ch',
-      fuel: 'diesel' as const,
-      color: 'Bleu',
-      vType: berline,
-      price: 16800,
-      label: 'Peugeot 308 Active - Full options',
-      desc: 'Excellent rapport qualité/prix, entretien Peugeot.',
-    },
-    {
-      model: p308,
-      km: 12000,
-      year: 2023,
-      doors: 5,
-      power: '110ch',
-      fuel: 'electrique' as const,
-      color: 'Noir',
-      vType: berline,
-      price: 28900,
-      label: 'Peugeot 308 e-308 Électrique',
-      desc: 'Autonomie 400km, recharge rapide 100kW, garantie constructeur.',
-    },
-    {
-      model: serie3,
-      km: 28000,
-      year: 2022,
-      doors: 4,
-      power: '184ch',
-      fuel: 'hybride' as const,
-      color: 'Blanc',
-      vType: berline,
-      price: 39500,
-      label: 'BMW Série 3 Hybrid - Luxe & Performance',
-      desc: 'Pack M Sport, jantes 18", affichage tête haute.',
-    },
-    {
-      model: serie3,
-      km: 67000,
-      year: 2019,
-      doors: 4,
-      power: '190ch',
-      fuel: 'diesel' as const,
-      color: 'Gris',
-      vType: berline,
-      price: 24900,
-      label: 'BMW 320d - Sportive et économique',
-      desc: 'Régulateur adaptatif, park assist, toit ouvrant.',
-    },
-    {
-      model: golf,
-      km: 41000,
-      year: 2021,
-      doors: 5,
-      power: '130ch',
-      fuel: 'essence' as const,
-      color: 'Vert',
-      vType: berline,
-      price: 21500,
-      label: 'Volkswagen Golf 8 - Nouvelle génération',
-      desc: 'Équipement complet, écran tactile 10", digital cockpit.',
-    },
-    {
-      model: golf,
-      km: 5000,
-      year: 2024,
-      doors: 5,
-      power: '204ch',
-      fuel: 'electrique' as const,
-      color: 'Rouge',
-      vType: berline,
-      price: 34900,
-      label: 'VW Golf GTE Plug-in Hybrid',
-      desc: 'Quasi-neuve, mode 100% électrique 80km, chargeur inclus.',
-    },
-    {
-      model: megane,
-      km: 91000,
-      year: 2018,
-      doors: 5,
-      power: '115ch',
-      fuel: 'diesel' as const,
-      color: 'Marron',
-      vType: berline,
-      price: 8200,
-      label: 'Renault Mégane 4 - Première main',
-      desc: 'Rapport qualité/prix imbattable, révision faite à la vente.',
-    },
-  ];
-
-  for (let i = 0; i < vehicleAds.length; i++) {
-    const v = vehicleAds[i];
-    const [photoA, photoB] = carPhotos[i % carPhotos.length];
+  for (const ad of DEMO_ADS) {
+    const model = catalog.modelByKey[ad.modelKey];
+    const vehicleType = catalog.types[ad.vehicleType];
+    if (!model || !vehicleType) {
+      throw new Error(
+        `Seed: modèle ou type introuvable pour ${ad.modelKey} / ${ad.vehicleType}`,
+      );
+    }
 
     const vehicule = await prisma.vehicule.create({
       data: {
-        modelId: v.model.id,
-        kilometer: v.km,
-        year: v.year,
-        doorsNumber: v.doors,
-        power: v.power,
-        fuel: v.fuel,
-        color: v.color,
-        vehiculeYear: v.year,
-        vehiculeTypeId: v.vType.id,
-        images: {
-          create: [{ url: photoA }, { url: photoB }],
-        },
+        modelId: model.id,
+        kilometer: ad.kilometer,
+        year: ad.year,
+        doorsNumber: ad.doorsNumber,
+        power: ad.power,
+        fuel: ad.fuel,
+        color: ad.color,
+        vehiculeYear: ad.year,
+        vehiculeTypeId: vehicleType.id,
       },
     });
 
     await prisma.ad.create({
       data: {
-        label: v.label,
-        description: v.desc,
-        price: v.price,
+        label: ad.label,
+        description: ad.description,
+        price: ad.price,
         vehiculeId: vehicule.id,
         sellerId,
         isActive: true,
@@ -564,7 +404,9 @@ async function seedDemoAds(
     });
   }
 
-  console.log('✅ 10 annonces démo (photos voiture Unsplash)');
+  console.log(
+    `✅ ${DEMO_ADS.length} annonces démo (sans photos, vendeur = super-admin)`,
+  );
 }
 
 async function main() {
@@ -572,13 +414,13 @@ async function main() {
   console.log(`   NODE_ENV=${process.env.NODE_ENV ?? 'undefined'} | demo=${includeDemo}`);
 
   const { adminRole, employeeRole, customerRole } = await seedRoles();
-  await seedSuperAdmin(adminRole.id);
+  const superAdmin = await seedSuperAdmin(adminRole.id);
   const catalog = await seedCatalog();
 
   if (includeDemo) {
     const demoPassword = await bcrypt.hash('Password123!', 10);
-    const seller = await seedDemoUsers(employeeRole.id, customerRole.id, demoPassword);
-    await seedDemoAds(catalog, seller.id);
+    await seedDemoUsers(employeeRole.id, customerRole.id, demoPassword);
+    await seedDemoAds(catalog, superAdmin.id);
   } else {
     console.log('⏭️  Seed démo ignoré — SEED_INCLUDE_DEMO=false');
   }

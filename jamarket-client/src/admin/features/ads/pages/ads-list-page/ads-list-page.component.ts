@@ -14,6 +14,8 @@ import {
 } from '@lucide/angular';
 import { AdminAdsApiService } from '@admin/data/admin-ads-api.service';
 import type { AdminAd, AdminAdListScope } from '@core/models/admin-ad.model';
+import { hasDeleteAdRight } from '@core/constants/auth.constants';
+import { AuthStateService } from '@core/services/auth-state.service';
 import { resolveMediaUrl } from '@core/utils/media-url.util';
 import { logHttpError, resolveUserFacingError } from '@core/utils/http-error.util';
 import { finalize } from 'rxjs';
@@ -40,6 +42,7 @@ export type AdStatusFilter = 'available' | 'sold' | 'all';
 })
 export class AdsListPageComponent implements OnInit {
   private readonly adminAdsApi = inject(AdminAdsApiService);
+  private readonly authState = inject(AuthStateService);
 
   protected readonly ads = signal<AdminAd[]>([]);
   protected readonly listScope = signal<AdminAdListScope>('mine');
@@ -48,6 +51,11 @@ export class AdsListPageComponent implements OnInit {
   protected readonly errorMessage = signal('');
   protected readonly deletingId = signal<number | null>(null);
   protected readonly statusActionId = signal<number | null>(null);
+
+  protected readonly canArchiveAds = computed(() => {
+    const profile = this.authState.adminProfile();
+    return !!profile && hasDeleteAdRight(profile);
+  });
 
   protected readonly filteredAds = computed(() => {
     const filter = this.statusFilter();

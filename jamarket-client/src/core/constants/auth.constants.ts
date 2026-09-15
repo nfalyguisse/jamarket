@@ -25,6 +25,13 @@ export function hasCreateAdRight(profile: { role: { rights: string[] } }): boole
   return profile.role.rights.includes('CREATE_AD');
 }
 
+export function hasDeleteAdRight(profile: { role: { rights: string[] } }): boolean {
+  return (
+    profile.role.rights.includes('DELETE_AD') ||
+    profile.role.rights.includes('SUPER_ADMIN')
+  );
+}
+
 export function hasSuperAdminRight(profile: { role: { rights: string[] } }): boolean {
   return profile.role.rights.includes('SUPER_ADMIN');
 }

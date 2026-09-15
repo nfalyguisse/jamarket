@@ -149,7 +149,7 @@ export class AdsService {
     requestUser: { id: number; role: { rights: RightEnum[] } },
   ) {
     await this.findOne(id);
-    this.assertCanManageAd(requestUser);
+    this.assertCanDeleteAd(requestUser);
 
     return this.prisma.ad.update({
       where: { id },
@@ -239,6 +239,18 @@ export class AdsService {
     if (!canManageGarageAds && !isOwner && !isSuperAdmin) {
       throw new ForbiddenException(
         "Vous n'êtes pas autorisé à modifier cette annonce",
+      );
+    }
+  }
+
+  private assertCanDeleteAd(user: { role: { rights: RightEnum[] } }) {
+    const canArchive =
+      user.role.rights.includes(RightEnum.DELETE_AD) ||
+      user.role.rights.includes(RightEnum.SUPER_ADMIN);
+
+    if (!canArchive) {
+      throw new ForbiddenException(
+        "Vous n'êtes pas autorisé à archiver cette annonce",
       );
     }
   }
