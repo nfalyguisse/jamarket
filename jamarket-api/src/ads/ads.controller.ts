@@ -177,23 +177,24 @@ export class AdsController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RightsGuard)
+  @RequireRights(RightEnum.DELETE_AD, RightEnum.SUPER_ADMIN)
   @ApiBearerAuth('access-token')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
-    summary: 'Soft-delete d’une annonce',
+    summary: 'Archiver une annonce (soft-delete)',
     description:
-      'Marque l’annonce comme supprimée (soft-delete) sans effacer définitivement les données. ' +
-      'Elle disparaît du catalogue public mais reste traçable en base.',
+      'Retire l’annonce du catalogue (deletedAt + isArchived) sans suppression définitive. ' +
+      'Requiert le droit DELETE_AD (ou SUPER_ADMIN).',
   })
   @ApiParam({
     name: 'id',
     description: 'Identifiant de l’annonce',
     example: 12,
   })
-  @ApiResponse({ status: 204, description: 'Annonce soft-deleted' })
+  @ApiResponse({ status: 204, description: 'Annonce archivée (soft-delete)' })
   @ApiResponse({ status: 401, description: 'Non authentifié' })
-  @ApiResponse({ status: 403, description: 'Accès refusé' })
+  @ApiResponse({ status: 403, description: 'Droit DELETE_AD manquant' })
   @ApiResponse({ status: 404, description: 'Annonce introuvable' })
   remove(@Param('id', ParseIntPipe) id: number, @Request() req: AuthRequest) {
     return this.adsService.remove(id, req.user);
@@ -233,7 +234,7 @@ export class AdsController {
     summary: 'Marquer une annonce comme vendue',
     description:
       'Passe l’annonce en statut vendu pour le dashboard stock du garage. ' +
-      'L’annonce quitte typiquement le catalogue « Live ».',
+      'L’annonce quitte le catalogue public. Les conversations existantes passent en lecture seule.',
   })
   @ApiParam({
     name: 'id',
@@ -249,5 +250,29 @@ export class AdsController {
     @Request() req: AuthRequest,
   ) {
     return this.adsService.markAsSold(id, req.user);
+  }
+
+  @Patch(':id/available')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({
+    summary: 'Repasser une annonce en disponible',
+    description:
+      'Annule le statut vendu : l’annonce réapparaît au catalogue et le chat redevient actif.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Identifiant de l’annonce',
+    example: 12,
+  })
+  @ApiResponse({ status: 200, description: 'Annonce repassée disponible' })
+  @ApiResponse({ status: 401, description: 'Non authentifié' })
+  @ApiResponse({ status: 403, description: 'Accès refusé' })
+  @ApiResponse({ status: 404, description: 'Annonce introuvable' })
+  markAsAvailable(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: AuthRequest,
+  ) {
+    return this.adsService.markAsAvailable(id, req.user);
   }
 }

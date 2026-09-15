@@ -78,6 +78,10 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     return `${peer.name} ${peer.lastName}`.trim();
   });
 
+  protected readonly isThreadReadOnly = computed(
+    () => this.active()?.ad.isSold === true,
+  );
+
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) {
       return;
@@ -135,6 +139,9 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   }
 
   protected onDraftChange(value: string): void {
+    if (this.isThreadReadOnly()) {
+      return;
+    }
     this.draft.set(value);
     const thread = this.active();
     if (thread) {
@@ -145,7 +152,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   protected send(): void {
     const thread = this.active();
     const text = this.draft().trim();
-    if (!thread || !text) {
+    if (!thread || !text || this.isThreadReadOnly()) {
       return;
     }
     this.chatSocket.sendMessage(thread.id, text);

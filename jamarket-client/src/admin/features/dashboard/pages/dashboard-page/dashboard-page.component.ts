@@ -1,5 +1,5 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import Swal from 'sweetalert2';
 import {
@@ -10,6 +10,8 @@ import {
 } from '@lucide/angular';
 import { AdminAdsApiService } from '@admin/data/admin-ads-api.service';
 import type { AdminAd } from '@core/models/admin-ad.model';
+import { hasDeleteAdRight } from '@core/constants/auth.constants';
+import { AuthStateService } from '@core/services/auth-state.service';
 import { resolveMediaUrl } from '@core/utils/media-url.util';
 import { logHttpError, resolveUserFacingError } from '@core/utils/http-error.util';
 import { finalize } from 'rxjs';
@@ -30,6 +32,7 @@ import { finalize } from 'rxjs';
 })
 export class DashboardPageComponent implements OnInit {
   private readonly adminAdsApi = inject(AdminAdsApiService);
+  private readonly authState = inject(AuthStateService);
 
   protected readonly totalAds = signal<number | null>(null);
   protected readonly isLoadingStats = signal(true);
@@ -40,6 +43,11 @@ export class DashboardPageComponent implements OnInit {
   protected readonly pendingError = signal('');
   protected readonly actionAdId = signal<number | null>(null);
   protected readonly isApprovingAll = signal(false);
+
+  protected readonly canArchiveAds = computed(() => {
+    const profile = this.authState.adminProfile();
+    return !!profile && hasDeleteAdRight(profile);
+  });
 
   ngOnInit(): void {
     this.loadStats();

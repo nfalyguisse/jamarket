@@ -1,15 +1,29 @@
 <article
   class="group flex h-full flex-col overflow-hidden rounded-2xl border border-outline/10 bg-surface-container-lowest shadow-sm transition-shadow hover:shadow-md"
+  [class.opacity-75]="vehicle().isSold"
 >
   <div class="relative aspect-[4/3] overflow-hidden">
     <img
       [src]="imageSrc()"
       [alt]="vehicle().imageAlt"
       class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+      [class.grayscale]="vehicle().isSold"
       loading="lazy"
       width="640"
       height="480"
     />
+    @if (vehicle().isSold) {
+      <div
+        class="absolute inset-0 z-[5] flex items-center justify-center bg-black/45"
+        aria-hidden="true"
+      >
+        <span
+          class="rounded-full bg-white px-4 py-2 text-label-sm font-bold uppercase tracking-wide text-gray-900 shadow-sm"
+        >
+          Véhicule vendu
+        </span>
+      </div>
+    }
     <button
       type="button"
       class="absolute right-3 top-3 z-10 flex size-9 items-center justify-center rounded-full bg-white/90 shadow-sm transition hover:bg-white"

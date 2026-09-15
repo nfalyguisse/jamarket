@@ -11,4 +11,5 @@ export interface VehicleCard {
   imageUrl: string;
   imageAlt: string;
   badge?: string;
+  isSold?: boolean;
 }
