@@ -98,6 +98,7 @@ export class ChatService {
           id: dto.adId,
           deletedAt: null,
           isActive: true,
+          isSold: false,
           isArchived: false,
         },
       });
@@ -338,6 +339,11 @@ export class ChatService {
     const [conversation, user] = await Promise.all([
       this.prisma.conversation.findUnique({
         where: { id: conversationId },
+        include: {
+          ad: {
+            select: { id: true, isSold: true, deletedAt: true },
+          },
+        },
       }),
       this.prisma.user.findUnique({
         where: { id: userId },
@@ -351,6 +357,12 @@ export class ChatService {
 
     if (!user || !user.isActive || user.deletedAt) {
       throw new ForbiddenException('Compte inactif ou supprimé');
+    }
+
+    if (conversation.ad.isSold || conversation.ad.deletedAt) {
+      throw new ForbiddenException(
+        'Cette annonce a été vendue. La conversation est en lecture seule.',
+      );
     }
 
     const isSuperAdmin = user.role.rights.includes(RightEnum.SUPER_ADMIN);

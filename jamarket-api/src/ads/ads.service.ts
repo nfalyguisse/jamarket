@@ -178,12 +178,36 @@ export class AdsService {
     requestUser: { id: number; role: { rights: RightEnum[] } },
   ) {
     return this.runAdsMutation('sold', async () => {
-      await this.findOne(id);
-      this.assertCanManageAd(requestUser);
+      const ad = await this.findOne(id);
+      this.assertCanManageAd(requestUser, ad.sellerId);
+
+      if (ad.isSold) {
+        return ad;
+      }
 
       return this.prisma.ad.update({
         where: { id },
         data: { isSold: true, isActive: false },
+        include: AD_INCLUDE,
+      });
+    });
+  }
+
+  async markAsAvailable(
+    id: number,
+    requestUser: { id: number; role: { rights: RightEnum[] } },
+  ) {
+    return this.runAdsMutation('available', async () => {
+      const ad = await this.findOne(id);
+      this.assertCanManageAd(requestUser, ad.sellerId);
+
+      if (!ad.isSold) {
+        return ad;
+      }
+
+      return this.prisma.ad.update({
+        where: { id },
+        data: { isSold: false, isActive: true },
         include: AD_INCLUDE,
       });
     });
@@ -203,10 +227,16 @@ export class AdsService {
     }
   }
 
-  private assertCanManageAd(user: { role: { rights: RightEnum[] } }) {
+  private assertCanManageAd(
+    user: { id?: number; role: { rights: RightEnum[] } },
+    sellerId?: number | null,
+  ) {
     const canManageGarageAds = user.role.rights.includes(RightEnum.CREATE_AD);
+    const isOwner =
+      sellerId != null && user.id != null && sellerId === user.id;
+    const isSuperAdmin = user.role.rights.includes(RightEnum.SUPER_ADMIN);
 
-    if (!canManageGarageAds) {
+    if (!canManageGarageAds && !isOwner && !isSuperAdmin) {
       throw new ForbiddenException(
         "Vous n'êtes pas autorisé à modifier cette annonce",
       );

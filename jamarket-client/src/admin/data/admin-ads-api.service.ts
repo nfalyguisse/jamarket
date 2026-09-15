@@ -120,4 +120,18 @@ export class AdminAdsApiService {
       }),
     );
   }
+
+  markAsAvailable(id: number): Observable<AdminAd> {
+    return this.http
+      .patch<ApiAdResponse>(`${this.adsUrl}/${id}/available`, {})
+      .pipe(
+        map((ad) => {
+          const mapped = mapApiAdToAdminAd(ad);
+          if (!mapped) {
+            throw new Error('Annonce invalide');
+          }
+          return mapped;
+        }),
+      );
+  }
 }

@@ -91,6 +91,7 @@ export function mapAdToVehicleCard(ad: ApiAdResponse): VehicleCard {
     imageUrl:
       vehicule?.images?.[0]?.url ?? '/assets/images/vehicle-placeholder.svg',
     imageAlt: `Photo du véhicule ${title}`,
+    isSold: ad.isSold ?? false,
   };
 }
 
