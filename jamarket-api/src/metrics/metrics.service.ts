@@ -3,7 +3,7 @@ import { Counter, Gauge, Histogram, Registry } from 'prom-client';
 import { PrismaService } from '../prisma/prisma.service';
 
 export type AuthFailureFlow = 'login' | 'admin_login' | 'register';
-export type AdsMutationAction = 'create' | 'update' | 'sold';
+export type AdsMutationAction = 'create' | 'update' | 'sold' | 'available';
 export type MutationResult = 'success' | 'error';
 
 @Injectable()

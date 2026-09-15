@@ -1,5 +1,5 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import Swal from 'sweetalert2';
 import {
@@ -7,6 +7,7 @@ import {
   LucideLayoutGrid,
   LucideLoader2,
   LucidePlus,
+  LucideRotateCcw,
   LucideTag,
   LucideTrash2,
   LucideUser,
@@ -15,6 +16,9 @@ import { AdminAdsApiService } from '@admin/data/admin-ads-api.service';
 import type { AdminAd, AdminAdListScope } from '@core/models/admin-ad.model';
 import { resolveMediaUrl } from '@core/utils/media-url.util';
 import { logHttpError, resolveUserFacingError } from '@core/utils/http-error.util';
+import { finalize } from 'rxjs';
+
+export type AdStatusFilter = 'available' | 'sold' | 'all';
 
 @Component({
   selector: 'app-ads-list-page',
@@ -26,6 +30,7 @@ import { logHttpError, resolveUserFacingError } from '@core/utils/http-error.uti
     LucideLayoutGrid,
     LucideLoader2,
     LucidePlus,
+    LucideRotateCcw,
     LucideTag,
     LucideTrash2,
     LucideUser,
@@ -38,9 +43,23 @@ export class AdsListPageComponent implements OnInit {
 
   protected readonly ads = signal<AdminAd[]>([]);
   protected readonly listScope = signal<AdminAdListScope>('mine');
+  protected readonly statusFilter = signal<AdStatusFilter>('available');
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal('');
   protected readonly deletingId = signal<number | null>(null);
+  protected readonly statusActionId = signal<number | null>(null);
+
+  protected readonly filteredAds = computed(() => {
+    const filter = this.statusFilter();
+    const list = this.ads().filter((ad) => !ad.isArchived);
+    if (filter === 'all') {
+      return list;
+    }
+    if (filter === 'sold') {
+      return list.filter((ad) => ad.isSold);
+    }
+    return list.filter((ad) => !ad.isSold);
+  });
 
   ngOnInit(): void {
     this.loadAds();
@@ -52,6 +71,10 @@ export class AdsListPageComponent implements OnInit {
     }
     this.listScope.set(scope);
     this.loadAds();
+  }
+
+  protected switchStatusFilter(filter: AdStatusFilter): void {
+    this.statusFilter.set(filter);
   }
 
   protected sellerName(ad: AdminAd): string {
@@ -97,6 +120,40 @@ export class AdsListPageComponent implements OnInit {
     });
   }
 
+  protected confirmMarkSold(ad: AdminAd): void {
+    void Swal.fire({
+      icon: 'question',
+      title: 'Marquer comme vendue ?',
+      text: `"${ad.label}" quittera le catalogue. Les conversations existantes passeront en lecture seule.`,
+      showCancelButton: true,
+      confirmButtonColor: '#006b5e',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Marquer vendue',
+      cancelButtonText: 'Annuler',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.markSold(ad);
+      }
+    });
+  }
+
+  protected confirmMarkAvailable(ad: AdminAd): void {
+    void Swal.fire({
+      icon: 'question',
+      title: 'Repasser en disponible ?',
+      text: `"${ad.label}" réapparaîtra au catalogue et le chat redeviendra actif.`,
+      showCancelButton: true,
+      confirmButtonColor: '#006b5e',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Repasser disponible',
+      cancelButtonText: 'Annuler',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.markAvailable(ad);
+      }
+    });
+  }
+
   private loadAds(): void {
     this.isLoading.set(true);
     this.errorMessage.set('');
@@ -114,6 +171,62 @@ export class AdsListPageComponent implements OnInit {
         this.isLoading.set(false);
       },
     });
+  }
+
+  private markSold(ad: AdminAd): void {
+    this.statusActionId.set(ad.id);
+    this.adminAdsApi
+      .markAsSold(ad.id)
+      .pipe(finalize(() => this.statusActionId.set(null)))
+      .subscribe({
+        next: (updated) => {
+          this.ads.update((items) =>
+            items.map((item) => (item.id === updated.id ? updated : item)),
+          );
+          void Swal.fire({
+            icon: 'success',
+            title: 'Annonce marquée vendue',
+            timer: 2000,
+            showConfirmButton: false,
+          });
+        },
+        error: (error: unknown) => {
+          void Swal.fire({
+            icon: 'error',
+            title: 'Action impossible',
+            text: resolveUserFacingError(error, 'ad-form'),
+            confirmButtonColor: '#006b5e',
+          });
+        },
+      });
+  }
+
+  private markAvailable(ad: AdminAd): void {
+    this.statusActionId.set(ad.id);
+    this.adminAdsApi
+      .markAsAvailable(ad.id)
+      .pipe(finalize(() => this.statusActionId.set(null)))
+      .subscribe({
+        next: (updated) => {
+          this.ads.update((items) =>
+            items.map((item) => (item.id === updated.id ? updated : item)),
+          );
+          void Swal.fire({
+            icon: 'success',
+            title: 'Annonce repassée disponible',
+            timer: 2000,
+            showConfirmButton: false,
+          });
+        },
+        error: (error: unknown) => {
+          void Swal.fire({
+            icon: 'error',
+            title: 'Action impossible',
+            text: resolveUserFacingError(error, 'ad-form'),
+            confirmButtonColor: '#006b5e',
+          });
+        },
+      });
   }
 
   private deleteAd(id: number): void {

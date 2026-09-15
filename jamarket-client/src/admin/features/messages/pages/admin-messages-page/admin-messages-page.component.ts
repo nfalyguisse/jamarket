@@ -105,6 +105,10 @@ export class AdminMessagesPageComponent implements OnInit, OnDestroy {
     return `${thread.customer.name} ${thread.customer.lastName}`.trim();
   });
 
+  protected readonly isThreadReadOnly = computed(
+    () => this.active()?.ad.isSold === true,
+  );
+
   protected readonly selectedAdLabel = computed(() => {
     const filter = this.adFilter();
     if (filter === 'all') {
@@ -193,6 +197,9 @@ export class AdminMessagesPageComponent implements OnInit, OnDestroy {
   }
 
   protected onDraftChange(value: string): void {
+    if (this.isThreadReadOnly()) {
+      return;
+    }
     this.draft.set(value);
     const thread = this.active();
     if (thread) {
@@ -203,7 +210,7 @@ export class AdminMessagesPageComponent implements OnInit, OnDestroy {
   protected send(): void {
     const thread = this.active();
     const text = this.draft().trim();
-    if (!thread || !text) {
+    if (!thread || !text || this.isThreadReadOnly()) {
       return;
     }
     this.chatSocket.sendMessage(thread.id, text);

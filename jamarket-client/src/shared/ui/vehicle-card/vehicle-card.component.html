@@ -1,21 +1,38 @@
 <article
   class="group relative overflow-hidden rounded-3xl border border-outline/5 bg-surface-container-lowest shadow-sm transition-all hover:shadow-xl"
+  [class.opacity-75]="vehicle().isSold"
 >
   <a
     [routerLink]="['/annonces', vehicle().id]"
     class="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-    [attr.aria-label]="'Voir la fiche de ' + vehicle().title"
+    [attr.aria-label]="
+      vehicle().isSold
+        ? vehicle().title + ' — véhicule vendu'
+        : 'Voir la fiche de ' + vehicle().title
+    "
   >
     <div class="relative h-64 overflow-hidden">
       <img
         [src]="imageSrc()"
         [alt]="vehicle().imageAlt"
         class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+        [class.grayscale]="vehicle().isSold"
         loading="lazy"
         width="640"
         height="256"
       />
-      @if (vehicle().badge) {
+      @if (vehicle().isSold) {
+        <div
+          class="absolute inset-0 flex items-center justify-center bg-black/45"
+          aria-hidden="true"
+        >
+          <span
+            class="rounded-full bg-white px-4 py-2 text-label-sm font-bold uppercase tracking-wide text-gray-900 shadow-sm"
+          >
+            Véhicule vendu
+          </span>
+        </div>
+      } @else if (vehicle().badge) {
         <span
           class="absolute left-4 top-4 rounded-full bg-primary px-3 py-1 text-label-sm font-bold uppercase text-on-primary"
         >

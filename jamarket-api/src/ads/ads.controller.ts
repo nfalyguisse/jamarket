@@ -233,7 +233,7 @@ export class AdsController {
     summary: 'Marquer une annonce comme vendue',
     description:
       'Passe l’annonce en statut vendu pour le dashboard stock du garage. ' +
-      'L’annonce quitte typiquement le catalogue « Live ».',
+      'L’annonce quitte le catalogue public. Les conversations existantes passent en lecture seule.',
   })
   @ApiParam({
     name: 'id',
@@ -249,5 +249,29 @@ export class AdsController {
     @Request() req: AuthRequest,
   ) {
     return this.adsService.markAsSold(id, req.user);
+  }
+
+  @Patch(':id/available')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({
+    summary: 'Repasser une annonce en disponible',
+    description:
+      'Annule le statut vendu : l’annonce réapparaît au catalogue et le chat redevient actif.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Identifiant de l’annonce',
+    example: 12,
+  })
+  @ApiResponse({ status: 200, description: 'Annonce repassée disponible' })
+  @ApiResponse({ status: 401, description: 'Non authentifié' })
+  @ApiResponse({ status: 403, description: 'Accès refusé' })
+  @ApiResponse({ status: 404, description: 'Annonce introuvable' })
+  markAsAvailable(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: AuthRequest,
+  ) {
+    return this.adsService.markAsAvailable(id, req.user);
   }
 }
