@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { adminGuard } from './guards/admin.guard';
+import { manageUserGuard } from './guards/manage-user.guard';
 import { superAdminGuard } from './guards/super-admin.guard';
 
 export const adminRoutes: Routes = [
@@ -56,7 +57,7 @@ export const adminRoutes: Routes = [
       },
       {
         path: 'utilisateurs',
-        canActivate: [superAdminGuard],
+        canActivate: [manageUserGuard],
         loadComponent: () =>
           import('./features/users/pages/users-list-page/users-list-page.component').then(
             (m) => m.UsersListPageComponent,

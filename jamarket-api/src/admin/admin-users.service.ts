@@ -85,15 +85,18 @@ export class AdminUsersService {
     };
   }
 
-  getAssignableRoles() {
-    return this.adminRolesService.getAssignableRoles();
+  getAssignableRoles(requestUser: { role: { rights: RightEnum[] } }) {
+    this.assertCanManageUsers(requestUser);
+    return this.adminRolesService.getAssignableRoles(
+      requestUser.role.rights.includes(RightEnum.SUPER_ADMIN),
+    );
   }
 
   async create(
     dto: CreateUserDto,
     requestUser: { id: number; role: { rights: RightEnum[] } },
   ) {
-    this.assertIsSuperAdmin(requestUser);
+    this.assertCanManageUsers(requestUser);
 
     const email = dto.email.trim().toLowerCase();
     const existing = await this.prisma.user.findFirst({
@@ -120,6 +123,8 @@ export class AdminUsersService {
       );
     }
 
+    this.assertCannotGrantSuperAdmin(requestUser, role.rights);
+
     const temporaryPassword = this.generateTemporaryPassword();
     const hashedPassword = await bcrypt.hash(temporaryPassword, BCRYPT_ROUNDS);
 
@@ -143,7 +148,7 @@ export class AdminUsersService {
     dto: BanUserDto,
     requestUser: { id: number; role: { rights: RightEnum[] } },
   ) {
-    this.assertIsSuperAdmin(requestUser);
+    this.assertCanManageUsers(requestUser);
 
     if (targetId === requestUser.id) {
       throw new BadRequestException(
@@ -151,7 +156,8 @@ export class AdminUsersService {
       );
     }
 
-    await this.findActiveUser(targetId);
+    const target = await this.findActiveUser(targetId);
+    this.assertCannotTargetSuperAdmin(requestUser, target.role.rights);
 
     return this.prisma.user.update({
       where: { id: targetId },
@@ -165,7 +171,7 @@ export class AdminUsersService {
     dto: UpdateUserRoleDto,
     requestUser: { id: number; role: { rights: RightEnum[] } },
   ) {
-    this.assertIsSuperAdmin(requestUser);
+    this.assertCanManageUsers(requestUser);
 
     if (targetId === requestUser.id) {
       throw new BadRequestException(
@@ -175,6 +181,7 @@ export class AdminUsersService {
 
     const user = await this.findActiveUser(targetId);
     this.assertIsGarageStaff(user);
+    this.assertCannotTargetSuperAdmin(requestUser, user.role.rights);
 
     const role = await this.prisma.role.findFirst({
       where: { id: dto.roleId, deletedAt: null },
@@ -191,6 +198,8 @@ export class AdminUsersService {
       );
     }
 
+    this.assertCannotGrantSuperAdmin(requestUser, role.rights);
+
     return this.prisma.user.update({
       where: { id: targetId },
       data: { roleId: dto.roleId },
@@ -202,7 +211,7 @@ export class AdminUsersService {
     targetId: number,
     requestUser: { id: number; role: { rights: RightEnum[] } },
   ) {
-    this.assertIsSuperAdmin(requestUser);
+    this.assertCanManageUsers(requestUser);
 
     if (targetId === requestUser.id) {
       throw new BadRequestException(
@@ -212,6 +221,7 @@ export class AdminUsersService {
 
     const user = await this.findActiveUser(targetId);
     this.assertIsGarageStaff(user);
+    this.assertCannotTargetSuperAdmin(requestUser, user.role.rights);
 
     const temporaryPassword = this.generateTemporaryPassword();
     const hashedPassword = await bcrypt.hash(temporaryPassword, BCRYPT_ROUNDS);
@@ -238,10 +248,42 @@ export class AdminUsersService {
     return user;
   }
 
-  private assertIsSuperAdmin(requestUser: { role: { rights: RightEnum[] } }) {
-    if (!requestUser.role.rights.includes(RightEnum.SUPER_ADMIN)) {
+  private assertCanManageUsers(requestUser: { role: { rights: RightEnum[] } }) {
+    const canManage =
+      requestUser.role.rights.includes(RightEnum.MANAGE_USER) ||
+      requestUser.role.rights.includes(RightEnum.SUPER_ADMIN);
+
+    if (!canManage) {
       throw new ForbiddenException(
-        'Seul un super administrateur peut gérer les utilisateurs',
+        "Vous n'êtes pas autorisé à gérer les utilisateurs",
+      );
+    }
+  }
+
+  private assertCannotGrantSuperAdmin(
+    requestUser: { role: { rights: RightEnum[] } },
+    targetRights: RightEnum[],
+  ) {
+    if (
+      targetRights.includes(RightEnum.SUPER_ADMIN) &&
+      !requestUser.role.rights.includes(RightEnum.SUPER_ADMIN)
+    ) {
+      throw new ForbiddenException(
+        'Seul un super administrateur peut attribuer un rôle super-admin',
+      );
+    }
+  }
+
+  private assertCannotTargetSuperAdmin(
+    requestUser: { role: { rights: RightEnum[] } },
+    targetRights: RightEnum[],
+  ) {
+    if (
+      targetRights.includes(RightEnum.SUPER_ADMIN) &&
+      !requestUser.role.rights.includes(RightEnum.SUPER_ADMIN)
+    ) {
+      throw new ForbiddenException(
+        'Seul un super administrateur peut modifier un compte super-admin',
       );
     }
   }

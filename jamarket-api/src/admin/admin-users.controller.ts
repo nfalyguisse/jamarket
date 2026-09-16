@@ -37,7 +37,7 @@ interface AuthRequest {
 @ApiBearerAuth('access-token')
 @Controller('admin/users')
 @UseGuards(JwtAuthGuard, RightsGuard)
-@RequireRights(RightEnum.SUPER_ADMIN)
+@RequireRights(RightEnum.MANAGE_USER, RightEnum.SUPER_ADMIN)
 export class AdminUsersController {
   constructor(private readonly adminUsersService: AdminUsersService) {}
 
@@ -46,11 +46,11 @@ export class AdminUsersController {
     summary: 'Lister les utilisateurs',
     description:
       'Liste paginée et filtrable des comptes (recherche, rôle, garage, actif). ' +
-      'Réservé au SUPER_ADMIN pour la modération et le RBAC back-office.',
+      'Réservé aux comptes disposant de MANAGE_USER (ou SUPER_ADMIN).',
   })
   @ApiResponse({ status: 200, description: 'Liste paginée des utilisateurs' })
   @ApiResponse({ status: 401, description: 'Non authentifié' })
-  @ApiResponse({ status: 403, description: 'Droit SUPER_ADMIN manquant' })
+  @ApiResponse({ status: 403, description: 'Droit MANAGE_USER manquant' })
   findAll(@Query() filters: FilterUsersDto) {
     return this.adminUsersService.findAll(filters);
   }
@@ -64,9 +64,9 @@ export class AdminUsersController {
   })
   @ApiResponse({ status: 200, description: 'Liste des rôles assignables' })
   @ApiResponse({ status: 401, description: 'Non authentifié' })
-  @ApiResponse({ status: 403, description: 'Droit SUPER_ADMIN manquant' })
-  getAssignableRoles() {
-    return this.adminUsersService.getAssignableRoles();
+  @ApiResponse({ status: 403, description: 'Droit MANAGE_USER manquant' })
+  getAssignableRoles(@Request() req: AuthRequest) {
+    return this.adminUsersService.getAssignableRoles(req.user);
   }
 
   @Post()
@@ -75,12 +75,12 @@ export class AdminUsersController {
     description:
       'Crée un compte (souvent professionnel) avec un rôle donné. ' +
       'Un mot de passe temporaire peut être généré côté service. ' +
-      'Réservé au SUPER_ADMIN.',
+      'Réservé aux comptes disposant de MANAGE_USER (ou SUPER_ADMIN).',
   })
   @ApiResponse({ status: 201, description: 'Utilisateur créé' })
   @ApiResponse({ status: 400, description: 'Données invalides' })
   @ApiResponse({ status: 401, description: 'Non authentifié' })
-  @ApiResponse({ status: 403, description: 'Droit SUPER_ADMIN manquant' })
+  @ApiResponse({ status: 403, description: 'Droit MANAGE_USER manquant' })
   @ApiResponse({ status: 409, description: 'Email déjà utilisé' })
   create(@Body() dto: CreateUserDto, @Request() req: AuthRequest) {
     return this.adminUsersService.create(dto, req.user);
@@ -96,7 +96,7 @@ export class AdminUsersController {
   @ApiParam({ name: 'id', description: 'Identifiant utilisateur', example: 8 })
   @ApiResponse({ status: 200, description: 'Mot de passe réinitialisé' })
   @ApiResponse({ status: 401, description: 'Non authentifié' })
-  @ApiResponse({ status: 403, description: 'Droit SUPER_ADMIN manquant' })
+  @ApiResponse({ status: 403, description: 'Droit MANAGE_USER manquant' })
   @ApiResponse({ status: 404, description: 'Utilisateur introuvable' })
   resetPassword(
     @Param('id', ParseIntPipe) id: number,
@@ -115,7 +115,7 @@ export class AdminUsersController {
   @ApiParam({ name: 'id', description: 'Identifiant utilisateur', example: 8 })
   @ApiResponse({ status: 200, description: 'Statut ban mis à jour' })
   @ApiResponse({ status: 401, description: 'Non authentifié' })
-  @ApiResponse({ status: 403, description: 'Droit SUPER_ADMIN manquant' })
+  @ApiResponse({ status: 403, description: 'Droit MANAGE_USER manquant' })
   @ApiResponse({ status: 404, description: 'Utilisateur introuvable' })
   banUser(
     @Param('id', ParseIntPipe) id: number,
@@ -136,7 +136,7 @@ export class AdminUsersController {
   @ApiResponse({ status: 200, description: 'Rôle mis à jour' })
   @ApiResponse({ status: 400, description: 'Données invalides' })
   @ApiResponse({ status: 401, description: 'Non authentifié' })
-  @ApiResponse({ status: 403, description: 'Droit SUPER_ADMIN manquant' })
+  @ApiResponse({ status: 403, description: 'Droit MANAGE_USER manquant' })
   @ApiResponse({ status: 404, description: 'Utilisateur ou rôle introuvable' })
   updateRole(
     @Param('id', ParseIntPipe) id: number,

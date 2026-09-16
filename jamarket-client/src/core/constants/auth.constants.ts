@@ -35,3 +35,10 @@ export function hasDeleteAdRight(profile: { role: { rights: string[] } }): boole
 export function hasSuperAdminRight(profile: { role: { rights: string[] } }): boolean {
   return profile.role.rights.includes('SUPER_ADMIN');
 }
+
+export function hasManageUserRight(profile: { role: { rights: string[] } }): boolean {
+  return (
+    profile.role.rights.includes('MANAGE_USER') ||
+    profile.role.rights.includes('SUPER_ADMIN')
+  );
+}

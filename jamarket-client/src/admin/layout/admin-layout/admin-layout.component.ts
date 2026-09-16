@@ -22,7 +22,7 @@ import {
   LucideX,
   LucideLogOut,
 } from '@lucide/angular';
-import { hasSuperAdminRight } from '@core/constants/auth.constants';
+import { hasManageUserRight, hasSuperAdminRight } from '@core/constants/auth.constants';
 import { AuthStateService } from '@core/services/auth-state.service';
 import { resolveMediaUrl } from '@core/utils/media-url.util';
 import { AdminAuthApiService } from '@admin/data/admin-auth-api.service';
@@ -89,6 +89,11 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   }
 
   protected get canManageUsers(): boolean {
+    const profile = this.authState.adminProfile();
+    return !!profile && hasManageUserRight(profile);
+  }
+
+  protected get canManageRoles(): boolean {
     const profile = this.authState.adminProfile();
     return !!profile && hasSuperAdminRight(profile);
   }
