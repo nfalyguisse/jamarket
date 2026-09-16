@@ -44,7 +44,7 @@ export class AdminRolesService {
     }));
   }
 
-  async getAssignableRoles() {
+  async getAssignableRoles(includeSuperAdminRoles = true) {
     const roles = await this.prisma.role.findMany({
       where: { deletedAt: null },
       select: { id: true, label: true, rights: true },
@@ -53,6 +53,10 @@ export class AdminRolesService {
 
     return roles
       .filter((role) => !isCustomerOnlyRole(role.rights))
+      .filter(
+        (role) =>
+          includeSuperAdminRoles || !role.rights.includes(RightEnum.SUPER_ADMIN),
+      )
       .map(({ id, label }) => ({ id, label }));
   }
 
